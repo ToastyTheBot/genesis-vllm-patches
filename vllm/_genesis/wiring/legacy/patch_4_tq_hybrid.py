@@ -49,6 +49,11 @@ This MUST be a text-patch because:
 The patcher is designed to FAIL SOFT — on anchor drift, it skips with a
 warning rather than crashing, letting prod stay on v5.14.1 monolith path.
 
+Ordering constraint: this MUST run BEFORE vllm imports arg_utils — invoke
+via `python3 -m vllm._genesis.patches.apply_all` as a pre-step to
+`vllm serve`. Idempotent and safe on container recreate (re-applies on a
+fresh image layer).
+
 Platform compatibility
 ----------------------
   NVIDIA CUDA (SM 8.0+): primary target (TurboQuant is CUDA-only upstream)

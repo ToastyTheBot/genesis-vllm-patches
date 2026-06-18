@@ -1,9 +1,18 @@
 """Wiring for PN40 — DFlash omnibus optimization.
 
+Rationale (lesson from PN37): don't compete with the FA2 attention
+forward — PyTorch SDPA already routes to FA2 well. PN40 instead reduces
+launch overhead in OTHER hot paths, e.g. the per-layer `ops.rms_norm`
+loop that fires L sequential CUDA kernel launches per draft step (L=5 on
+the 27B drafter, L=8 on the 35B drafter).
+
 v1 wires Sub-kernel A (fused per-layer K-norm) into
 `vllm/model_executor/models/qwen3_dflash.py` `precompute_and_store_context_kv`
-method, replacing the per-layer `ops.rms_norm` loop with a single fused
-Triton kernel call.
+method, replacing that per-layer `ops.rms_norm` loop with a single fused
+Triton kernel launch. Sub-kernels B (persistent buffer pool), C (adaptive
+N controller) and D (workload classifier) are also wired — all four
+sub-kernels are live (D via the dedicated `PN40-classifier` registry
+entry). Default OFF until A/B confirms a TPS gain in production.
 
 Anchor target (qwen3_dflash.py, validated against pin 0.20.2rc1.dev9+g01d4d1ad3):
 

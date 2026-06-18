@@ -88,6 +88,13 @@ _KNOWN_FIELDS = {
     # patch's env_flag was renamed to GENESIS_ENABLE_PR#####. Honored by
     # dispatcher.should_apply for back-compat.
     "env_flag_aliases",
+    # Function-collapse (2026-06) — the wiring module stem (e.g.
+    # `patch_pr41674_thinking_budget_inverted_bool`) that implements this
+    # patch. Present on text-patch/rebind patches whose apply step is the
+    # generic metadata-driven executor (apply_all._apply_wiring_entry);
+    # absent on outliers that keep a hand-written apply_patch_* function and
+    # on metadata-only diagnostic entries.
+    "wiring",
 }
 
 

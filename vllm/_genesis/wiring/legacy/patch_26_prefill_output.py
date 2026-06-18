@@ -22,7 +22,9 @@ Replace both with shared pool helpers:
 
 Both helpers are pointer-stable on re-call (CUDA-graph safe) and fall
 back to a fresh allocation if platform-incompatible or budget-exceeded
-(correctness-over-speed safety net).
+(correctness-over-speed safety net). The pools are reserved during
+`profile_run` (so the prealloc is visible to vLLM's memory profiler,
+unlike the per-call `torch.zeros` it replaces).
 
 Platform guard: shared with P22 (NVIDIA CUDA + SM ≥ 8.0). Non-NVIDIA
 reaches the fallback inside `acquire_*` and behaves identically to the

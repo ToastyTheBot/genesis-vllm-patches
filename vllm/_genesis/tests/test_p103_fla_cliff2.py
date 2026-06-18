@@ -34,9 +34,11 @@ def test_p103_wiring_module_imports():
 def test_p103_apply_register_in_apply_all():
     """P103 must have a wrapper function registered via @register_patch."""
     from vllm._genesis.patches import apply_all
-    assert hasattr(apply_all, "apply_patch_103_fla_cliff2_chunked")
-
-
+    # Collapsed to the metadata-driven executor: assert the registry seam,
+    # not a scaffolding function name. (apply_all import above bound apply_callable.)
+    from vllm._genesis.dispatcher import PATCH_REGISTRY
+    entry = PATCH_REGISTRY["P103"]
+    assert entry["wiring"] == "patch_103_fla_cliff2_chunked" and callable(entry.get("apply_callable"))
 def test_p103_should_apply_off_by_default(monkeypatch):
     """Without GENESIS_ENABLE_P103=1, should_apply() must return False."""
     from vllm._genesis.wiring.hybrid import patch_103_fla_cliff2_chunked as p103

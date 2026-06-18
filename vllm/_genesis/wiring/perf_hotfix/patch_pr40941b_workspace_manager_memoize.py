@@ -19,9 +19,9 @@ Root cause in WorkspaceManager.get_simultaneous (workspace.py:92-117):
 
 For 64 layers × MTP K=3 × decode this is ~256 Python evaluations per token.
 
-This patch adds a memoization cache keyed by `(shapes_and_dtypes_tuple,
-workspace_id)` to bypass all that work after the first call. Cache
-invalidates when workspace pointer changes (new allocation grew).
+This patch adds a memoization cache keyed by `(shapes_and_dtypes,
+ubatch_id, ws_data_ptr)` to bypass all that work after the first call.
+Cache invalidates when workspace pointer changes (new allocation grew).
 
 Trade-off:
 - Cache hit: 1 dict lookup + 1 list copy + identity check ≈ 5x faster

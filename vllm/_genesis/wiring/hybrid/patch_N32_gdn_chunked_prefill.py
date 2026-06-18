@@ -63,6 +63,9 @@ The two are COMPLEMENTARY, not redundant:
 - **PN32 alone**: reduces the OUTPUT buffer size per call
   (`core_attn_out_non_spec`: 8K × 64 × 128 × 2 = 131 MiB per chunk vs
   full-prompt 819 MiB at 50K). Reduces transient peak inside one layer.
+  Root cause of Cliff 2: that 819 MiB per layer × 30 layers ≈ 24 GiB
+  of persistent `core_attn_out` saturates the entire 24 GB card budget
+  before KV cache or activations are even sized.
 
 - **P103 alone**: reduces the INNER `h` tensor inside
   `chunk_gated_delta_rule_fwd` (the recurrent state buffer:

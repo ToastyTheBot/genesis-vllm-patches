@@ -27,6 +27,11 @@ Genesis stack inherits the same flaw — our PR34207 patches only
 config doesn't go through Inductor for this kernel. A future config
 or model could expose the leak.
 
+The trigger condition: on `custom_ops=["none"]` configs (the default V1
+`aot_compile_fullgraph` path) `SiluAndMul.__call__` dispatches to
+`forward_native`, which Inductor traces and lowers to `empty_strided_cuda`
+— entirely outside PR34207's `forward_cuda` hot path.
+
 ================================================================
 WHAT THIS PATCH DOES
 ================================================================

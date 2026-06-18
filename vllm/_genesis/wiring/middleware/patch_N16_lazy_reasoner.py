@@ -13,6 +13,16 @@ PN16 is purely additive and does NOT compete with P68/P69 for the same
 text region. Both can be enabled together, neither can be enabled, or
 either alone — all four combinations work.
 
+Policy (in `middleware/lazy_reasoner.py`): respect an explicit client
+`chat_template_kwargs.enable_thinking`; for short prompts (under the
+char threshold, no tools/schema/reasoning-signals) force
+`enable_thinking=False`; otherwise allow with an optional
+max-thinking-tokens cap. Goal: cut wasted reasoning tokens + TTFT on
+trivial prompts without retry-induced 2x latency.
+
+Status: opt-in via `GENESIS_ENABLE_PN16_LAZY_REASONER=1` (default OFF);
+short-prompt threshold via `GENESIS_PN16_THRESHOLD_CHARS` (default 300).
+
 Author: Sandermage (Sander) Barzov Aleksandr, Ukraine, Odessa.
 """
 from __future__ import annotations

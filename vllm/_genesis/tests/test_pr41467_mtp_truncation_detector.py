@@ -81,4 +81,8 @@ def test_registry_entry_complete():
 
 def test_apply_all_registers_p107():
     from vllm._genesis.patches import apply_all
-    assert hasattr(apply_all, "apply_patch_pr41467_mtp_truncation_detector")
+    # Collapsed to the metadata-driven executor: assert the registry seam,
+    # not a scaffolding function name. (apply_all import above bound apply_callable.)
+    from vllm._genesis.dispatcher import PATCH_REGISTRY
+    entry = PATCH_REGISTRY["PR41467"]
+    assert entry["wiring"] == "patch_pr41467_mtp_truncation_detector" and callable(entry.get("apply_callable"))

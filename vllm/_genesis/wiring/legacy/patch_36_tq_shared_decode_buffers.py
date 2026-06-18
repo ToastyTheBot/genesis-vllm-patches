@@ -57,7 +57,8 @@ Upstream drift detection
 ------------------------
 If the file already contains a shared-buffer implementation
 (`_tq_shared_mid_o_buf`, `_tq_decode_buffer_manager`, PR #40655 landed)
-we skip.
+we skip. Self-retires when upstream PR #40655 (or its alt PR #40748)
+merges, via `upstream_drift_markers`.
 
 Author: Sandermage(Sander)-Barzov Aleksandr, Ukraine, Odessa
 Reference: https://github.com/vllm-project/vllm/pull/40655 (@bhoomit)

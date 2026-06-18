@@ -21,7 +21,8 @@ Empirical isolation 2026-04-25 (blue/green tests on Genesis pin):
     spec=ngram + NO tools               5/5  CLEAN
 
 Bug requires both spec-decode AND structured-output (tools). All four
-PR40768/PR39055/cudagraph workarounds disproven empirically.
+PR40768/PR39055/cudagraph workarounds disproven empirically. Manifests as
+token-level corruption (`<<`, `parameter=parameter`, `<argname>`).
 
 What PR #40738 fixes
 --------------------

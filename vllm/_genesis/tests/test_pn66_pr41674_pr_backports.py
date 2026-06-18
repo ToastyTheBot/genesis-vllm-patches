@@ -46,5 +46,10 @@ class TestApplyAllWiring:
     """Verify the patch is wired into apply_all dispatcher."""
 
     def test_apply_patch_n67_function_exists(self):
-        from vllm._genesis.patches.apply_all import apply_patch_pr41674_thinking_budget_inverted_bool
-        assert callable(apply_patch_pr41674_thinking_budget_inverted_bool)
+        # PR41674 collapsed into the metadata-driven executor (2026-06): assert
+        # the registry seam, not a scaffolding function name.
+        import vllm._genesis.patches.apply_all  # noqa: F401  (triggers wiring-bind)
+        from vllm._genesis.dispatcher import PATCH_REGISTRY
+        entry = PATCH_REGISTRY["PR41674"]
+        assert entry["wiring"] == "patch_pr41674_thinking_budget_inverted_bool"
+        assert callable(entry.get("apply_callable"))

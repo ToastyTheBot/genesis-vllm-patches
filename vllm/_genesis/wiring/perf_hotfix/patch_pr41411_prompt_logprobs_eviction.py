@@ -3,8 +3,9 @@
 
 Backport of upstream PR vllm-project/vllm#41411 (MERGED 2026-05-04 18:46
 UTC by Joachim Studnia, Mistral). NOT in our pin (01d4d1ad3, ahead by 10
-commits). Bug-fix; default OFF until live PROD verifies prompt_logprobs
-+ chunked-prefill workload doesn't regress.
+commits). Bug-fix; opt-in via `GENESIS_ENABLE_PR41411=1`, default OFF
+until live PROD verifies prompt_logprobs + chunked-prefill workload
+doesn't regress.
 
 What this fixes
 ---------------

@@ -154,8 +154,11 @@ def test_registry_entry_complete():
 
 
 def test_apply_all_registers_pn51():
-    """apply_all must expose apply_patch_N51_qwen3_streaming_thinking_disabled."""
-    from vllm._genesis.patches import apply_all
-    assert hasattr(
-        apply_all, "apply_patch_N51_qwen3_streaming_thinking_disabled"
-    ), "PN51 not registered in apply_all"
+    """PN51 must be wired in PATCH_REGISTRY (collapsed to metadata executor)."""
+    import vllm._genesis.patches.apply_all  # noqa: F401  (triggers wiring-bind)
+    from vllm._genesis.dispatcher import PATCH_REGISTRY
+    entry = PATCH_REGISTRY["PN51"]
+    assert entry["wiring"] == "patch_N51_qwen3_streaming_thinking_disabled", (
+        "PN51 not wired in PATCH_REGISTRY"
+    )
+    assert callable(entry.get("apply_callable")), "PN51 apply_callable not bound"

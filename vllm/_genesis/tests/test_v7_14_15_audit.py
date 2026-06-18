@@ -326,21 +326,22 @@ class TestDispatcherRegistry:
 
 class TestApplyAllConsistency:
     def test_v7_14_v7_15_register_decorators_present(self):
-        repo_root = Path(__file__).resolve().parents[3]
-        apply_all = (
-            repo_root / "vllm" / "_genesis" / "patches" / "apply_all.py"
-        )
-        content = apply_all.read_text()
-        # Each new patch must be registered
+        # These patches collapsed into the metadata-driven executor (2026-06):
+        # they no longer carry a hand-written apply_patch_* function. The
+        # invariant is now that each declares a `wiring` module in
+        # PATCH_REGISTRY and gets an apply_callable bound at apply_all import.
+        import vllm._genesis.patches.apply_all  # noqa: F401  (triggers wiring-bind)
+        from vllm._genesis.dispatcher import PATCH_REGISTRY
         for pid, fn_name_part in (
             ("PR39598", "qwen3coder_mtp_streaming"),
             ("P65", "turboquant_spec_cg_downgrade"),
-            ("P68/P69", "long_ctx_tool_adherence"),
+            ("P68", "long_ctx_tool_adherence"),
             ("P70", "auto_strict_ngram"),
         ):
-            assert f"@register_patch(\"{pid}" in content or (
-                f"@register_patch(\"{pid.split('/')[0]}" in content
-            ), f"{pid} missing @register_patch decorator in apply_all.py"
-            assert fn_name_part in content, (
-                f"apply_patch_*_{fn_name_part}* function missing"
+            entry = PATCH_REGISTRY[pid]
+            assert fn_name_part in entry.get("wiring", ""), (
+                f"{pid} not wired to a *{fn_name_part}* module in PATCH_REGISTRY"
+            )
+            assert callable(entry.get("apply_callable")), (
+                f"{pid} apply_callable not bound at apply_all import"
             )

@@ -110,6 +110,11 @@
       "type": "array",
       "items": {"type": "string"},
       "description": "Patch IDs that MUST NOT be applied at the same time. Validated by A3/D2 validator at boot."
+    },
+    "wiring": {
+      "type": "string",
+      "description": "Wiring module stem (e.g. 'patch_pr41674_thinking_budget_inverted_bool') implementing this patch. Present on text-patch/rebind patches dispatched by the generic apply_all._apply_wiring_entry executor; absent on hand-written outlier apply functions and metadata-only diagnostic entries.",
+      "pattern": "^patch_[A-Za-z0-9_]+$"
     }
   },
   "allOf": [

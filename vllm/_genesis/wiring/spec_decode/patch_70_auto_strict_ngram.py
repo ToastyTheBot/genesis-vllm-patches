@@ -19,7 +19,9 @@ default min=5).
 
 P70 hooks `SpeculativeConfig.__post_init__` to AUTO-FORCE
 prompt_lookup_min>=8 if env flag set. Operator can disable to keep
-explicit lower min for non-tool workloads.
+explicit lower min for non-tool workloads. This affects engine startup
+only — a per-request override is not architecturally possible because
+`speculative_config` is engine-level, not request-level.
 
 Status: opt-in via `GENESIS_ENABLE_P70_AUTO_STRICT_NGRAM=1`.
 

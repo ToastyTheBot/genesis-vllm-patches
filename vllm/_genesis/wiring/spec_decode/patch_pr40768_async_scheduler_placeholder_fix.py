@@ -68,6 +68,11 @@ Three coordinated changes:
 
 Status: opt-in (`GENESIS_ENABLE_PR40768=1`).
 
+This is the ROOT-CAUSE fix; the earlier P56 (routing-layer workaround,
+deprecated) and P57 v2 (buffer-shape workaround) become redundant once
+PR40768 is enabled — they treated downstream symptoms of the same
+placeholder leakage.
+
 Compatibility:
   - Idempotent (marker check).
   - Anchor-drift safe (each sub-patch independently anchored; required

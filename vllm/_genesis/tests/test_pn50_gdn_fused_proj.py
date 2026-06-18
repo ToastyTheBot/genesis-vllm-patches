@@ -15,7 +15,7 @@ Wiring:
   4. Idempotency on synthetic file.
   5. Env-flag gating (default OFF).
   6. PATCH_REGISTRY entry complete.
-  7. apply_all registers `apply_patch_N50_gdn_fused_proj`.
+  7. PATCH_REGISTRY["PN50"] is wired to `patch_N50_gdn_fused_proj` + apply_callable bound.
 """
 from __future__ import annotations
 
@@ -224,4 +224,8 @@ def test_registry_entry_complete():
 
 def test_apply_all_registers_pn50():
     from vllm._genesis.patches import apply_all
-    assert hasattr(apply_all, "apply_patch_N50_gdn_fused_proj")
+    # Collapsed to the metadata-driven executor: assert the registry seam,
+    # not a scaffolding function name. (apply_all import above bound apply_callable.)
+    from vllm._genesis.dispatcher import PATCH_REGISTRY
+    entry = PATCH_REGISTRY["PN50"]
+    assert entry["wiring"] == "patch_N50_gdn_fused_proj" and callable(entry.get("apply_callable"))

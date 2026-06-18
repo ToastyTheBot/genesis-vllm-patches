@@ -19,6 +19,9 @@ the buggy bypass / slow per-request continuation loop.
 For all other shapes (true first-chunk prefill, pure decode, non-spec-decode
 continuation) the existing upstream logic runs unchanged.
 
+The kernel is cross-arch (pure tl.dot fp16, no FA3/Hopper intrinsics):
+validated on Ampere SM 8.6 (A5000), expected to work on SM >= 7.5.
+
 ================================================================
 SAFETY / FALLBACK
 

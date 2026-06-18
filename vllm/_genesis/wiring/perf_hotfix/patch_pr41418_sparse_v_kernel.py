@@ -40,6 +40,11 @@ When env-disabled, this is a single Python function call indirection on
 the upstream path — negligible overhead. When env-enabled + ctx ≥ min_ctx,
 we route to our forked kernel.
 
+Opt-in via `GENESIS_ENABLE_PR41422=1` (default OFF). Threshold via
+`GENESIS_PR41418_SPARSE_V_THRESHOLD` (fixed) OR
+`GENESIS_PR41418_SPARSE_V_SCALE_FACTOR` (BLASST λ=a/L adaptive); minimum
+context to engage via `GENESIS_PR41418_SPARSE_V_MIN_CTX` (default 8192).
+
 NVIDIA validation strategy
 --------------------------
 This is **first** known sparse-V kernel for SM86 (Ampere consumer) in any

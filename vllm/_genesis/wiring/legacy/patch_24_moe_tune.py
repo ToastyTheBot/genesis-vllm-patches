@@ -37,6 +37,11 @@ Platform compatibility:
 Upstream drift detection: if `num_warps = _genesis_override` or
 `_genesis_num_warps_override` appears, skip.
 
+Env knobs (resolved by the Genesis helpers before per-SM auto-select):
+  - VLLM_MARLIN_MOE_NUM_WARPS  ∈ {2, 4, 8}
+  - VLLM_MARLIN_MOE_NUM_STAGES ∈ {1..8}
+  Unset → per-SM auto-select (Ampere A5000 SM 8.6 → warps=4, stages=3).
+
 Author: Sandermage(Sander)-Barzov Aleksandr, Ukraine, Odessa
 """
 from __future__ import annotations

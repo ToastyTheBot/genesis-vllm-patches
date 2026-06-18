@@ -39,7 +39,9 @@ issue: #41418's tables become stale if the solver changes.
 **OFF by default**, gated by `GENESIS_ENABLE_PR41422=1` sub-flag.
 Author validated on AMD MI300X only — NVIDIA Ampere correctness needs
 empirical confirmation before promoting to default-on. Scaffolded so it's
-ready to flip when validation passes.
+ready to flip when validation passes. The sub-flag acknowledges operator
+opt-in, but the actual kernel wiring is deferred to a later iteration after
+the NVIDIA Ampere correctness baseline — enabling it today is a no-op.
 
 **Dropped from #41414** — head_dim power-of-2 padding. Qwen3.6 head_dim
 is 128 (already pow-2). Adds `needs_padding` runtime branch overhead

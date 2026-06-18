@@ -35,7 +35,9 @@ Risk acknowledged
 -----------------
 1. **Triton signature change invalidates JIT cache.** Existing cached PTX
    for `_causal_conv1d_fwd_kernel` references the OLD signature. After
-   patch applied, first call recompiles (~5-10s, profiler-visible spike).
+   patch applied, first call recompiles (~5-10s, profiler-visible spike) —
+   apply() auto-clears the causal_conv1d JIT cache entries so the first
+   spec-decode call (not boot) absorbs the recompile.
    Mitigation: clear `/root/.triton/cache/` before boot if needed.
 
 2. **One additional positional kernel arg.** `_causal_conv1d_fwd_kernel`

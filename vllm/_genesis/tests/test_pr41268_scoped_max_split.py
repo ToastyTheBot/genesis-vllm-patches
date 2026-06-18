@@ -153,8 +153,11 @@ class TestPN19DispatcherIntegration:
 
     def test_pn19_in_apply_all(self):
         from vllm._genesis.patches import apply_all
-        assert hasattr(apply_all, "apply_patch_pr41268_scoped_max_split")
-
+        # Collapsed to the metadata-driven executor: assert the registry seam,
+        # not a scaffolding function name. (apply_all import above bound apply_callable.)
+        from vllm._genesis.dispatcher import PATCH_REGISTRY
+        entry = PATCH_REGISTRY["PR41268"]
+        assert entry["wiring"] == "patch_pr41268_scoped_max_split" and callable(entry.get("apply_callable"))
     def test_pn19_in_patches_md(self):
         from pathlib import Path
         repo_root = Path(__file__).resolve().parents[3]

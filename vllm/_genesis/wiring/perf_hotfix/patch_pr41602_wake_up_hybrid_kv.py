@@ -10,7 +10,8 @@ Affects: 27B Lorbus Qwen3.6 hybrid (GDN = MambaSpec). Crash trigger —
 любой `/sleep` + `/wake_up` через mgmt API. У нас в active scripts
 sleep не вызывается, но crash possible через external trigger.
 
-Default OFF — defensive backport; включить при необходимости sleep/wake.
+Default OFF (opt-in via GENESIS_ENABLE_PR41602=1) — defensive backport;
+включить при необходимости sleep/wake.
 
 Backport: Joachim Studnia / Mistral, vllm#41602 (OPEN as of 2026-05-04).
 Author: Sandermage backport.

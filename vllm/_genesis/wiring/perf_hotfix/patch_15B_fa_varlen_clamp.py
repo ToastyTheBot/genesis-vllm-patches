@@ -28,6 +28,10 @@ torch._ops:1269 → C extension allocates ~50 MiB workspace based on max_seqlen_
 torch.OutOfMemoryError
 ```
 
+Manifests only under tight VRAM (e.g. long-vision 140K context at 0.95
+mem-util on a 24 GB 3090), where the bloated ~50 MiB workspace tips a
+near-full allocator into OOM.
+
 ================================================================
 FIX DESIGN
 ================================================================

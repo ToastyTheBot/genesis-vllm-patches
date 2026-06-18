@@ -102,6 +102,7 @@ PATCH_REGISTRY: dict[str, dict[str, Any]] = {
         ),
     },
     "PR40768": {
+        "wiring": "patch_pr40768_async_scheduler_placeholder_fix",
         "title": "Async-scheduler -1 placeholder fix",
         "env_flag": "GENESIS_ENABLE_PR40768",
         "env_flag_aliases": ["GENESIS_ENABLE_P58_ASYNC_PLACEHOLDER_FIX"],
@@ -111,6 +112,7 @@ PATCH_REGISTRY: dict[str, dict[str, Any]] = {
         "upstream_pr": 40768,
     },
     "PR39055": {
+        "wiring": "patch_pr39055_qwen3_reasoning_tool_call_recovery",
         "title": "Qwen3 reasoning embedded tool_call recovery",
         "env_flag": "GENESIS_ENABLE_PR39055",
         "env_flag_aliases": ["GENESIS_ENABLE_P59_QWEN3_TOOL_RECOVERY"],
@@ -121,6 +123,7 @@ PATCH_REGISTRY: dict[str, dict[str, Any]] = {
         "applies_to": {"model_class": ["qwen3", "qwen3_5", "qwen3_moe", "qwen3_next"]},
     },
     "PR40738": {
+        "wiring": "patch_pr40738_gdn_ngram_state_recovery",
         "title": "GDN+ngram state recovery (Phase 1: SSM pre-copy)",
         "env_flag": "GENESIS_ENABLE_PR40738",
         "env_flag_aliases": ["GENESIS_ENABLE_P60_GDN_NGRAM_FIX"],
@@ -131,6 +134,7 @@ PATCH_REGISTRY: dict[str, dict[str, Any]] = {
         "applies_to": {"is_hybrid": [True]},
     },
     "PR40738b": {
+        "wiring": "patch_pr40738b_gdn_ngram_triton_kernel",
         "title": "GDN+ngram Triton kernel offset (Phase 2)",
         "env_flag": "GENESIS_ENABLE_PR40738B",
         "env_flag_aliases": ["GENESIS_ENABLE_P60B_TRITON_KERNEL"],
@@ -142,6 +146,7 @@ PATCH_REGISTRY: dict[str, dict[str, Any]] = {
         "requires_patches": ["PR40738"],
     },
     "PR36138": {
+        "wiring": "patch_pr36138_structured_output_spec_decode_timing",
         "title": "Structured-output spec-decode reasoning-end timing fix",
         "env_flag": "GENESIS_ENABLE_PR36138",
         "env_flag_aliases": ["GENESIS_ENABLE_P62_STRUCT_OUT_SPEC_TIMING"],
@@ -153,6 +158,7 @@ PATCH_REGISTRY: dict[str, dict[str, Any]] = {
         "conflicts_with": ["PR40962"],
     },
     "P63": {
+        "wiring": "patch_63_mtp_gdn_state_recovery",
         "title": "MTP/Eagle drafter GDN state recovery (deprecated — wrong layer)",
         "env_flag": "GENESIS_ENABLE_P63_MTP_GDN_STATE_RECOVERY",
         "default_on": False,
@@ -170,6 +176,7 @@ PATCH_REGISTRY: dict[str, dict[str, Any]] = {
         ),
     },
     "PR39598": {
+        "wiring": "patch_pr39598_qwen3coder_mtp_streaming",
         "title": "qwen3coder MTP streaming early-return fix",
         "env_flag": "GENESIS_ENABLE_PR39598",
         "env_flag_aliases": ["GENESIS_ENABLE_P64_QWEN3CODER_MTP_STREAMING"],
@@ -180,6 +187,7 @@ PATCH_REGISTRY: dict[str, dict[str, Any]] = {
         "applies_to": {"model_class": ["qwen3", "qwen3_5", "qwen3_moe", "qwen3_next"]},
     },
     "P65": {
+        "wiring": "patch_65_turboquant_spec_cg_downgrade",
         "title": "TurboQuant spec-decode cudagraph downgrade",
         "env_flag": "GENESIS_ENABLE_P65_TURBOQUANT_SPEC_CG_DOWNGRADE",
         "default_on": False,
@@ -190,6 +198,7 @@ PATCH_REGISTRY: dict[str, dict[str, Any]] = {
         "conflicts_with": ["P56", "P57", "P67", "P67b"],
     },
     "P68": {
+        "wiring": "patch_68_69_long_ctx_tool_adherence",
         "title": "Auto force tool_choice=required for long-context tool calls",
         "env_flag": "GENESIS_ENABLE_P68_AUTO_FORCE_TOOL",
         "default_on": False,
@@ -208,6 +217,7 @@ PATCH_REGISTRY: dict[str, dict[str, Any]] = {
         "applies_to": {"model_class": ["qwen3", "qwen3_5", "qwen3_moe", "qwen3_next"]},
     },
     "P70": {
+        "wiring": "patch_70_auto_strict_ngram",
         "title": "Auto-strict-ngram (force prompt_lookup_min>=8)",
         "env_flag": "GENESIS_ENABLE_P70_AUTO_STRICT_NGRAM",
         "default_on": False,
@@ -216,6 +226,7 @@ PATCH_REGISTRY: dict[str, dict[str, Any]] = {
         "upstream_pr": None,
     },
     "P67": {
+        "wiring": "patch_67_tq_multi_query_kernel",
         "title": "TurboQuant multi-query kernel for spec-decode K+1",
         "env_flag": "GENESIS_ENABLE_P67_TQ_MULTI_QUERY_KERNEL",
         "default_on": False,
@@ -228,6 +239,7 @@ PATCH_REGISTRY: dict[str, dict[str, Any]] = {
         "conflicts_with": ["P65"],
     },
     "P67b": {
+        "wiring": "patch_67b_spec_verify_routing",
         "title": "TurboQuant spec-verify forward() routing (FULL CG enable)",
         # P67b reuses P67's env flag intentionally — they're a coupled pair,
         # P67b is the forward() routing companion that bypasses
@@ -244,6 +256,7 @@ PATCH_REGISTRY: dict[str, dict[str, Any]] = {
         "conflicts_with": ["P65"],
     },
     "P72": {
+        "wiring": "patch_72_profile_run_cap",
         "title": "profile_run M cap (unblocks --max-num-batched-tokens>4096 on MoE)",
         "env_flag": "GENESIS_ENABLE_P72_PROFILE_RUN_CAP",
         "default_on": False,
@@ -252,6 +265,7 @@ PATCH_REGISTRY: dict[str, dict[str, Any]] = {
         "upstream_pr": None,
     },
     "PR40819": {
+        "wiring": "patch_pr40819_block_verify",
         "title": "Block-verify rejection sampler (Sun 2024 ICLR)",
         "env_flag": "GENESIS_ENABLE_PR40819",
         "env_flag_aliases": ["GENESIS_ENABLE_P71_BLOCK_VERIFY"],
@@ -261,6 +275,7 @@ PATCH_REGISTRY: dict[str, dict[str, Any]] = {
         "upstream_pr": 40819,
     },
     "P74": {
+        "wiring": "patch_74_chunk_clamp",
         "title": "Auto chunk-clamp via long_prefill_token_threshold (P72 companion)",
         "env_flag": "GENESIS_ENABLE_P74_CHUNK_CLAMP",
         "default_on": False,
@@ -271,6 +286,7 @@ PATCH_REGISTRY: dict[str, dict[str, Any]] = {
         "requires_patches": ["P72"],
     },
     "PR25784": {
+        "wiring": "patch_pr25784_suffix_decoding_enable",
         "title": "Auto-enable Suffix Decoding (Arctic Inference, vllm#25784)",
         "env_flag": "GENESIS_ENABLE_PR25784",
         "env_flag_aliases": ["GENESIS_ENABLE_P75_SUFFIX_DECODING"],
@@ -280,6 +296,7 @@ PATCH_REGISTRY: dict[str, dict[str, Any]] = {
         "upstream_pr": 25784,
     },
     "P77": {
+        "wiring": "patch_77_adaptive_ngram_k",
         "title": "Adaptive ngram K controller (EMA + hysteresis + auto-disable)",
         "env_flag": "GENESIS_ENABLE_P77_ADAPTIVE_NGRAM_K",
         "default_on": False,
@@ -288,6 +305,7 @@ PATCH_REGISTRY: dict[str, dict[str, Any]] = {
         "upstream_pr": None,
     },
     "P78": {
+        "wiring": "patch_78_tolist_capture_guard",
         "title": "TurboQuant .tolist() capture-guard (adapted from noonghunna)",
         "env_flag": "GENESIS_ENABLE_P78_TOLIST_CAPTURE_GUARD",
         "default_on": False,
@@ -300,6 +318,7 @@ PATCH_REGISTRY: dict[str, dict[str, Any]] = {
         },
     },
     "PR40610": {
+        "wiring": "patch_pr40610_async_proposer_sync",
         "title": "Async × spec-decode proposer-sync backport (vllm#40610)",
         "env_flag": "GENESIS_ENABLE_PR40610",
         "env_flag_aliases": ["GENESIS_ENABLE_P79B_ASYNC_PROPOSER_SYNC"],
@@ -309,6 +328,7 @@ PATCH_REGISTRY: dict[str, dict[str, Any]] = {
         "upstream_pr": 40610,
     },
     "PR37629": {
+        "wiring": "patch_pr37629_stale_spec_token_cleanup",
         "title": "Stale spec_token_ids cleanup for unscheduled requests (vllm#37629)",
         "env_flag": "GENESIS_ENABLE_PR37629",
         "env_flag_aliases": ["GENESIS_ENABLE_P79C_STALE_SPEC_TOKEN_CLEANUP"],
@@ -318,6 +338,7 @@ PATCH_REGISTRY: dict[str, dict[str, Any]] = {
         "upstream_pr": 37629,
     },
     "PR40925": {
+        "wiring": "patch_pr40925_fp8_block_scaled_m_le_8",
         "title": "fp8 block-scaled MM low-M decode tuning (vllm#40925)",
         "env_flag": "GENESIS_ENABLE_PR40925",
         "env_flag_aliases": ["GENESIS_ENABLE_P81_FP8_BLOCK_SCALED_M_LE_8"],
@@ -330,6 +351,7 @@ PATCH_REGISTRY: dict[str, dict[str, Any]] = {
         },
     },
     "P82": {
+        "wiring": "patch_82_sglang_acceptance_threshold",
         "title": "SGLang threshold_single OR-clause acceptance (BIASED — opt-in research)",
         "env_flag": "GENESIS_ENABLE_P82",
         "default_on": False,
@@ -338,6 +360,7 @@ PATCH_REGISTRY: dict[str, dict[str, Any]] = {
         "upstream_pr": None,
     },
     "P83": {
+        "wiring": "patch_83_mtp_keep_last_cached_block",
         "title": "MTP keep-last-cached-block (vllm#38182 downstream symptom — P84 is real fix)",
         "env_flag": "GENESIS_ENABLE_P83",
         "default_on": False,
@@ -347,6 +370,7 @@ PATCH_REGISTRY: dict[str, dict[str, Any]] = {
         "applies_to": {"is_hybrid": [True]},
     },
     "P84": {
+        "wiring": "patch_84_hash_block_size_override",
         "title": "hash_block_size override (vllm#38182 actual root cause)",
         "env_flag": "GENESIS_ENABLE_P84",
         "default_on": False,
@@ -356,6 +380,7 @@ PATCH_REGISTRY: dict[str, dict[str, Any]] = {
         "applies_to": {"is_hybrid": [True]},
     },
     "P85": {
+        "wiring": "patch_85_hybrid_fine_shadow_prefix_cache",
         "title": "Hybrid fine-shadow prefix cache (vllm#38182 followup, MambaManager fix)",
         "env_flag": "GENESIS_ENABLE_P85",
         "default_on": False,
@@ -366,6 +391,7 @@ PATCH_REGISTRY: dict[str, dict[str, Any]] = {
         "requires_patches": ["P84"],
     },
     "PR40849": {
+        "wiring": "patch_pr40849_mtp_draft_online_quant_propagation",
         "title": "MTP/draft online-quant propagation (vllm#40849)",
         "env_flag": "GENESIS_ENABLE_PR40849",
         "env_flag_aliases": ["GENESIS_ENABLE_PN8_MTP_DRAFT_ONLINE_QUANT"],
@@ -393,6 +419,7 @@ PATCH_REGISTRY: dict[str, dict[str, Any]] = {
         },
     },
     "PR39930": {
+        "wiring": "patch_pr39930_independent_drafter_attn_backend",
         "title": "Independent drafter attention backend (vllm#39930)",
         "env_flag": "GENESIS_ENABLE_PR39930",
         "env_flag_aliases": ["GENESIS_ENABLE_PN9_INDEPENDENT_DRAFTER_ATTN"],
@@ -422,6 +449,7 @@ PATCH_REGISTRY: dict[str, dict[str, Any]] = {
         },
     },
     "PR40425": {
+        "wiring": "patch_pr40425_dflash_quant_drafter",
         "title": "DFlash drafter quantization support (PR #40425 backport)",
         "env_flag": "GENESIS_ENABLE_PR40425",
         "env_flag_aliases": ["GENESIS_ENABLE_PN38_DFLASH_QUANT_DRAFTER"],
@@ -473,6 +501,7 @@ PATCH_REGISTRY: dict[str, dict[str, Any]] = {
         },
     },
     "PN40": {
+        "wiring": "patch_N40_dflash_omnibus",
         "title": "Spec-decode omnibus (A DFlash K-norm + B pool + C adaptive K + D sentinel)",
         "env_flag": "GENESIS_ENABLE_PN40_DFLASH_OMNIBUS",
         "default_on": False,
@@ -521,6 +550,7 @@ PATCH_REGISTRY: dict[str, dict[str, Any]] = {
     # the rename refactor) and backport PR #40962 separately for the
     # post-reasoning-boundary spec-decode case.
     "PN50": {
+        "wiring": "patch_N50_gdn_fused_proj",
         "title": "GDN proj fusion (SGLang#21019 backport — Qwen3.5/3.6 contiguous-projection Triton kernel)",
         "env_flag": "GENESIS_ENABLE_PN50_GDN_FUSED_PROJ",
         "default_on": False,
@@ -550,6 +580,7 @@ PATCH_REGISTRY: dict[str, dict[str, Any]] = {
         },
     },
     "PN59": {
+        "wiring": "patch_N59_streaming_gdn",
         "title": "Streaming-GDN orchestrator (Variant D Phase 2) — true Cliff 2b OOM fix",
         "env_flag": "GENESIS_ENABLE_PN59_STREAMING_GDN",
         "default_on": False,
@@ -577,6 +608,7 @@ PATCH_REGISTRY: dict[str, dict[str, Any]] = {
         "conflicts_with": [],
     },
     "PR40962": {
+        "wiring": "patch_pr40962_spec_reasoning_boundary",
         "title": "Spec-decode reasoning boundary validation — narrower alt to PR36138 (vllm#40962)",
         "env_flag": "GENESIS_ENABLE_PR40962",
         "env_flag_aliases": ["GENESIS_ENABLE_PN58_SPEC_REASONING_BOUNDARY"],
@@ -605,6 +637,7 @@ PATCH_REGISTRY: dict[str, dict[str, Any]] = {
         "conflicts_with": ["PR36138"],
     },
     "PR41467": {
+        "wiring": "patch_pr41467_mtp_truncation_detector",
         "title": "MTP truncation detector at reasoning→tool_call boundary (vllm#41467)",
         "env_flag": "GENESIS_ENABLE_PR41467",
         "env_flag_aliases": ["GENESIS_ENABLE_P107_MTP_TRUNCATION_DETECTOR"],
@@ -627,6 +660,7 @@ PATCH_REGISTRY: dict[str, dict[str, Any]] = {
         "applies_to": {},
     },
     "PR41418b": {
+        "wiring": "patch_pr41418b_tq_centroids_disk_cache",
         "title": "TurboQuant centroids disk-persistent cache (vllm#41418-inspired)",
         "env_flag": "GENESIS_ENABLE_PR41418B",
         "env_flag_aliases": ["GENESIS_ENABLE_PN57_TQ_CENTROIDS_DISK_CACHE"],
@@ -649,6 +683,7 @@ PATCH_REGISTRY: dict[str, dict[str, Any]] = {
         "applies_to": {},
     },
     "PR41602": {
+        "wiring": "patch_pr41602_wake_up_hybrid_kv",
         "title": "wake_up crash fix on hybrid (Mamba/DeltaNet) models — vllm#41602 backport",
         "env_flag": "GENESIS_ENABLE_PR41602",
         "env_flag_aliases": ["GENESIS_ENABLE_PN55_WAKE_UP_HYBRID_KV"],
@@ -671,6 +706,7 @@ PATCH_REGISTRY: dict[str, dict[str, Any]] = {
         "applies_to": {},
     },
     "PN54": {
+        "wiring": "patch_N54_gdn_contiguous_dedup",
         "title": "GDN contiguous-call deduplication (P0.7 Cliff 2b OOM mitigation)",
         "env_flag": "GENESIS_ENABLE_PN54_GDN_CONTIGUOUS_DEDUP",
         "default_on": False,
@@ -699,6 +735,7 @@ PATCH_REGISTRY: dict[str, dict[str, Any]] = {
         },
     },
     "PR41411": {
+        "wiring": "patch_pr41411_prompt_logprobs_eviction",
         "title": "prompt_logprobs eviction fix during chunked prefill (vllm#41411 backport)",
         "env_flag": "GENESIS_ENABLE_PR41411",
         "env_flag_aliases": ["GENESIS_ENABLE_PN52_PROMPT_LOGPROBS_EVICTION"],
@@ -724,6 +761,7 @@ PATCH_REGISTRY: dict[str, dict[str, Any]] = {
         "applies_to": {},
     },
     "PN51": {
+        "wiring": "patch_N51_qwen3_streaming_thinking_disabled",
         "title": "Qwen3 streaming `enable_thinking=false` content routing (vllm#40816 backport)",
         "env_flag": "GENESIS_ENABLE_PN51_QWEN3_STREAMING_THINKING_DISABLED",
         "default_on": False,
@@ -747,6 +785,7 @@ PATCH_REGISTRY: dict[str, dict[str, Any]] = {
         "applies_to": {},
     },
     "PR35975": {
+        "wiring": "patch_pr35975_inputs_embeds_optional",
         "title": "Skip inputs_embeds buffer for text-only models (vllm#35975 backport)",
         "env_flag": "GENESIS_ENABLE_PR35975",
         "env_flag_aliases": ["GENESIS_ENABLE_PN35_INPUTS_EMBEDS_OPTIONAL"],
@@ -774,6 +813,7 @@ PATCH_REGISTRY: dict[str, dict[str, Any]] = {
         "upstream_pr": 35975,
     },
     "PR37521": {
+        "wiring": "patch_pr37521_spec_decode_warmup_k",
         "title": "Spec-decode warmup K-aware sizing (vllm#37521 extended to MTP/ngram)",
         "env_flag": "GENESIS_ENABLE_PR37521",
         "env_flag_aliases": ["GENESIS_ENABLE_PN33_SPEC_DECODE_WARMUP_K"],
@@ -805,6 +845,7 @@ PATCH_REGISTRY: dict[str, dict[str, Any]] = {
         },
     },
     "PN32": {
+        "wiring": "patch_N32_gdn_chunked_prefill",
         "title": "GDN _forward_core chunked-prefill v2 (Cliff 2 fix for single-24GB-GPU OOM)",
         "env_flag": "GENESIS_ENABLE_PN32_GDN_CHUNKED_PREFILL",
         "default_on": False,
@@ -851,6 +892,7 @@ PATCH_REGISTRY: dict[str, dict[str, Any]] = {
         "conflicts_with": ["P28"],
     },
     "PN31": {
+        "wiring": "patch_N31_fa_varlen_persistent_out",
         "title": "FA varlen persistent out buffer (issue #15, sister to P38)",
         "env_flag": "GENESIS_ENABLE_PN31_FA_VARLEN_PERSISTENT_OUT",
         "default_on": False,
@@ -873,6 +915,7 @@ PATCH_REGISTRY: dict[str, dict[str, Any]] = {
         "requires_patches": [],
     },
     "PN30": {
+        "wiring": "patch_N30_ds_layout_spec_decode_align",
         "title": "DS conv state layout + spec-decode AL>1 fix (issue #17)",
         "env_flag": "GENESIS_ENABLE_PN30_DS_LAYOUT_SPEC_DECODE",
         "default_on": False,
@@ -900,6 +943,7 @@ PATCH_REGISTRY: dict[str, dict[str, Any]] = {
         "requires_patches": [],
     },
     "P67c": {
+        "wiring": "patch_67c_sparse_v",
         "title": "Per-row vote sparse-V integration into P67 split-M kernel",
         "env_flag": "GENESIS_ENABLE_P67_SPARSE_V",
         "default_on": False,
@@ -922,6 +966,7 @@ PATCH_REGISTRY: dict[str, dict[str, Any]] = {
         "conflicts_with": [],
     },
     "PR41446": {
+        "wiring": "patch_pr41446_gdn_chunk_o_scale_fold",
         "title": "GDN chunk_o scale-fold (vllm#41446 pattern (c))",
         "env_flag": "GENESIS_ENABLE_PR41446",
         "env_flag_aliases": ["GENESIS_ENABLE_PN29_GDN_SCALE_FOLD"],
@@ -948,6 +993,7 @@ PATCH_REGISTRY: dict[str, dict[str, Any]] = {
         },
     },
     "PR41142": {
+        "wiring": "patch_pr41142_gdn_a_b_contiguous",
         "title": "GDN a/b contiguity in fix_query_key_value_ordering (vllm#41142)",
         "env_flag": "GENESIS_ENABLE_PR41142",
         "env_flag_aliases": ["GENESIS_ENABLE_PN11_GDN_AB_CONTIGUOUS"],
@@ -973,6 +1019,7 @@ PATCH_REGISTRY: dict[str, dict[str, Any]] = {
         },
     },
     "PR34207": {
+        "wiring": "patch_pr34207_ffn_intermediate_pool",
         "title": "FFN intermediate scratch pool — Cliff 1 fix on TQ3 path",
         "env_flag": "GENESIS_ENABLE_PR34207",
         "env_flag_aliases": ["GENESIS_ENABLE_PN12_FFN_INTERMEDIATE_POOL"],
@@ -1001,6 +1048,7 @@ PATCH_REGISTRY: dict[str, dict[str, Any]] = {
         },
     },
     "PR41268": {
+        "wiring": "patch_pr41268_scoped_max_split",
         "title": "Scoped max_split_size_mb during model load (vllm#41268)",
         "env_flag": "GENESIS_ENABLE_PR41268",
         "env_flag_aliases": ["GENESIS_ENABLE_PN19_SCOPED_MAX_SPLIT"],
@@ -1029,6 +1077,7 @@ PATCH_REGISTRY: dict[str, dict[str, Any]] = {
         },
     },
     "PR40898": {
+        "wiring": "patch_pr40898_dflash_swa_support",
         "title": "DFlash SWA support partial backport (vllm#40898)",
         "env_flag": "GENESIS_ENABLE_PR40898",
         "env_flag_aliases": ["GENESIS_ENABLE_PN21_DFLASH_SWA"],
@@ -1052,6 +1101,7 @@ PATCH_REGISTRY: dict[str, dict[str, Any]] = {
         "requires_patches": [],  # Pairs with PR40727 but does not strictly require it
     },
     "PR39419": {
+        "wiring": "patch_pr39419_local_argmax_tp",
         "title": "Local argmax for TP draft (vllm#39419 backport)",
         "env_flag": "GENESIS_ENABLE_PR39419",
         "env_flag_aliases": ["GENESIS_ENABLE_PN22_LOCAL_ARGMAX_TP"],
@@ -1073,6 +1123,7 @@ PATCH_REGISTRY: dict[str, dict[str, Any]] = {
         "requires_patches": [],
     },
     "PR40727": {
+        "wiring": "patch_pr40727_dflash_aux_layer_indexing",
         "title": "DFlash aux layer +1 indexing fix (vllm#40727)",
         "env_flag": "GENESIS_ENABLE_PR40727",
         "env_flag_aliases": ["GENESIS_ENABLE_PN24_DFLASH_AUX_LAYER_FIX"],
@@ -1091,6 +1142,7 @@ PATCH_REGISTRY: dict[str, dict[str, Any]] = {
         "requires_patches": [],
     },
     "PR39148": {
+        "wiring": "patch_pr39148_merge_attn_states_nan_guard",
         "title": "merge_attn_states NaN guard (vllm#39148 backport)",
         "env_flag": "GENESIS_ENABLE_PR39148",
         "env_flag_aliases": ["GENESIS_ENABLE_PN28_MERGE_ATTN_NAN_GUARD"],
@@ -1112,6 +1164,7 @@ PATCH_REGISTRY: dict[str, dict[str, Any]] = {
         "requires_patches": [],
     },
     "P15B": {
+        "wiring": "patch_15B_fa_varlen_clamp",
         "title": "FA varlen max_seqlen_k clamp on TQ path (Issue #15 fix)",
         "env_flag": "GENESIS_ENABLE_P15B_FA_VARLEN_CLAMP",
         "default_on": False,
@@ -1134,6 +1187,7 @@ PATCH_REGISTRY: dict[str, dict[str, Any]] = {
         "requires_patches": [],
     },
     "P38B": {
+        "wiring": "patch_38b_compile_safe_hook",
         "title": "P38 compile-safe in-source hook (Issue #14 fix)",
         "env_flag": "GENESIS_ENABLE_P38B_COMPILE_SAFE",
         "default_on": False,
@@ -1157,6 +1211,7 @@ PATCH_REGISTRY: dict[str, dict[str, Any]] = {
         "requires_patches": [],  # P38 install order: P38 first (provides impl), P38B second (installs hook)
     },
     "PR41422": {
+        "wiring": "patch_pr41418_sparse_v_kernel",
         "title": "Sparse-V tile-skip Genesis kernel (BLASST λ=a/L for SM86)",
         "env_flag": "GENESIS_ENABLE_PR41422",
         "env_flag_aliases": ["GENESIS_ENABLE_PN26_SPARSE_V"],
@@ -1185,6 +1240,7 @@ PATCH_REGISTRY: dict[str, dict[str, Any]] = {
         "requires_patches": [],
     },
     "PR41418": {
+        "wiring": "patch_pr41418_tq_unified_perf",
         "title": "TQ unified perf pack (centroids prebake + sparse V scaffold)",
         "env_flag": "GENESIS_ENABLE_PR41418",
         "env_flag_aliases": ["GENESIS_ENABLE_PN26_TQ_UNIFIED"],
@@ -1211,6 +1267,7 @@ PATCH_REGISTRY: dict[str, dict[str, Any]] = {
         "requires_patches": [],
     },
     "PN25": {
+        "wiring": "patch_N25_silu_inductor_safe_pool",
         "title": "SiluAndMul.forward_native opaque-op pool (Cliff 1 mech B compile path)",
         "env_flag": "GENESIS_ENABLE_PN25_SILU_INDUCTOR_SAFE",
         "default_on": False,
@@ -1235,6 +1292,7 @@ PATCH_REGISTRY: dict[str, dict[str, Any]] = {
         "requires_patches": [],  # complements PR34207 but does not require it
     },
     "PN17": {
+        "wiring": "patch_N17_fa2_softmax_lse_clamp",
         "title": "FA2 softmax_lse runtime clamp (Cliff 1 mechanism A, Issue #11)",
         "env_flag": "GENESIS_ENABLE_PN17_FA2_LSE_CLAMP",
         "default_on": False,
@@ -1266,6 +1324,7 @@ PATCH_REGISTRY: dict[str, dict[str, Any]] = {
         },
     },
     "PN16": {
+        "wiring": "patch_N16_lazy_reasoner",
         "title": "Lazy-reasoner request hook (per-request enable_thinking)",
         "env_flag": "GENESIS_ENABLE_PN16_LAZY_REASONER",
         "default_on": False,
@@ -1292,6 +1351,7 @@ PATCH_REGISTRY: dict[str, dict[str, Any]] = {
         "upstream_pr": None,
     },
     "PR40074": {
+        "wiring": "patch_pr40074_tq_decode_oob_clamp",
         "title": "TQ decode IOOB safe_page_idx clamp (vllm#40074)",
         "env_flag": "GENESIS_ENABLE_PR40074",
         "env_flag_aliases": ["GENESIS_ENABLE_PN14_TQ_DECODE_OOB_CLAMP"],
@@ -1324,6 +1384,7 @@ PATCH_REGISTRY: dict[str, dict[str, Any]] = {
     # See PR41235 entry near line 1289 for retirement metadata.
 
     "PR41043": {
+        "wiring": "patch_pr41043_spec_decode_zero_alloc",
         "title": "Spec-decode prepare_next_token_ids_padded zero-alloc (vllm#41043)",
         "env_flag": "GENESIS_ENABLE_PR41043",
         "env_flag_aliases": ["GENESIS_ENABLE_P94"],
@@ -1337,6 +1398,7 @@ PATCH_REGISTRY: dict[str, dict[str, Any]] = {
         },
     },
     "PR41127": {
+        "wiring": "patch_pr41127_flashinfer_full_cg_specdec",
         "title": "FlashInfer FULL CUDA graph for spec-decode (vllm#41127)",
         "env_flag": "GENESIS_ENABLE_PR41127",
         "env_flag_aliases": ["GENESIS_ENABLE_P100"],
@@ -1347,6 +1409,7 @@ PATCH_REGISTRY: dict[str, dict[str, Any]] = {
         "applies_to": {},  # FlashInfer auto-selected; gating via env_flag only
     },
     "P103": {
+        "wiring": "patch_103_fla_cliff2_chunked",
         "title": "FLA Cliff 2 chunked fwd_h+fwd_o orchestrator (qwen36-27b-single-3090#1)",
         "env_flag": "GENESIS_ENABLE_P103",
         "default_on": False,
@@ -1362,6 +1425,7 @@ PATCH_REGISTRY: dict[str, dict[str, Any]] = {
         },
     },
     "PR41123": {
+        "wiring": "patch_pr41123_tq_continuation_slicing",
         "title": "TQ continuation 64-token slicing (vllm#41123 SELECTIVE)",
         "env_flag": "GENESIS_ENABLE_PR41123",
         "env_flag_aliases": ["GENESIS_ENABLE_P101"],
@@ -1377,6 +1441,7 @@ PATCH_REGISTRY: dict[str, dict[str, Any]] = {
         },
     },
     "PR40941b": {
+        "wiring": "patch_pr40941b_workspace_manager_memoize",
         "title": "WorkspaceManager.get_simultaneous memoization (perf hotfix)",
         "env_flag": "GENESIS_ENABLE_PR40941B",
         "env_flag_aliases": ["GENESIS_ENABLE_P99"],
@@ -1387,6 +1452,7 @@ PATCH_REGISTRY: dict[str, dict[str, Any]] = {
         "applies_to": {},  # applies whenever WorkspaceManager is used
     },
     "PR40941": {
+        "wiring": "patch_pr40941_tq_workspace_revert",
         "title": "TQ WorkspaceManager revert (vllm#40941 perf hotfix)",
         "env_flag": "GENESIS_ENABLE_PR40941",
         "env_flag_aliases": ["GENESIS_ENABLE_P98"],
@@ -1402,6 +1468,7 @@ PATCH_REGISTRY: dict[str, dict[str, Any]] = {
         },
     },
     "PR40385": {
+        "wiring": "patch_pr40385_marlin_tp_cudagraph_cap",
         "title": "Marlin TP cudagraph cap on Ampere (vllm#40385)",
         "env_flag": "GENESIS_ENABLE_PR40385",
         "env_flag_aliases": ["GENESIS_ENABLE_P95"],
@@ -1440,6 +1507,7 @@ PATCH_REGISTRY: dict[str, dict[str, Any]] = {
         "credit": "Pre-dispatcher legacy patch. Wires Ampere SM86 to FP8 kernel paths so consumer 3090/A5000 can serve FP8-quantized models.",
     },
     "P3": {
+        "wiring": "patch_3_tq_bf16_cast",
         "title": "TurboQuant BF16→FP8 cast (Ampere fix)",
         "env_flag": "GENESIS_LEGACY_P3",
         "default_on": True,
@@ -1448,6 +1516,7 @@ PATCH_REGISTRY: dict[str, dict[str, Any]] = {
         "credit": "Pre-dispatcher legacy patch. Inserts BF16→FP8 cast on TQ ingress for SM86 where FP8 is software-emulated.",
     },
     "P4": {
+        "wiring": "patch_4_tq_hybrid",
         "title": "TurboQuant hybrid model support",
         "env_flag": "GENESIS_LEGACY_P4",
         "default_on": True,
@@ -1465,6 +1534,7 @@ PATCH_REGISTRY: dict[str, dict[str, Any]] = {
         "retire_after_pin": "0.20.2rc1+",
     },
     "P5": {
+        "wiring": "patch_5_page_size",
         "title": "KV cache page size unification",
         "env_flag": "GENESIS_LEGACY_P5",
         "default_on": True,
@@ -1483,6 +1553,7 @@ PATCH_REGISTRY: dict[str, dict[str, Any]] = {
         "credit": "Pre-dispatcher legacy patch. Opt-in companion to P5 — pads smaller pages up to max so all layers share one block-pool stride. Guarded by env (was always opt-in).",
     },
     "P6": {
+        "wiring": "patch_6_tq_block_size_align",
         "title": "TurboQuant-aware attention page size",
         "env_flag": "GENESIS_LEGACY_P6",
         "default_on": True,
@@ -1511,6 +1582,7 @@ PATCH_REGISTRY: dict[str, dict[str, Any]] = {
         "conflicts_with": ["P7"],
     },
     "PR41235": {
+        "wiring": "patch_pr41235_cuda_graph_lambda_arity",
         "title": "CUDAGraphWrapper lambda arity (vllm#41235 backport) — RETIRED 2026-05-04",
         "env_flag": "GENESIS_ENABLE_PR41235",
         "env_flag_aliases": ["GENESIS_ENABLE_PN13_CUDA_GRAPH_LAMBDA_ARITY"],
@@ -1553,6 +1625,7 @@ PATCH_REGISTRY: dict[str, dict[str, Any]] = {
         "credit": "Pre-dispatcher legacy patch. Reports KV capacity per-token (not per-block) for hybrid models so scheduler doesn't over-admit. RETIRED upstream natively fixes after vllm v0.20.2.",
     },
     "P12": {
+        "wiring": "patch_12_tool_call_reasoning",
         "title": "Qwen3 <tool_call> implicit reasoning end",
         "env_flag": "GENESIS_LEGACY_P12",
         "default_on": True,
@@ -1569,6 +1642,7 @@ PATCH_REGISTRY: dict[str, dict[str, Any]] = {
         "credit": "Pre-dispatcher legacy patch. Zero-fills block_table tail past valid sequences so out-of-bounds prefetch doesn't read stale page indices.",
     },
     "P15": {
+        "wiring": "patch_15_qwen3_none_null",
         "title": "Qwen3 None/null tool arg parser",
         "env_flag": "GENESIS_LEGACY_P15",
         "default_on": True,
@@ -1617,6 +1691,7 @@ PATCH_REGISTRY: dict[str, dict[str, Any]] = {
         "credit": "Pre-dispatcher legacy patch. Honors VLLM_MARLIN_FP32_REDUCE env to force FP32 reduction in Marlin matmul (numerical-stability hedge).",
     },
     "P24": {
+        "wiring": "patch_24_moe_tune",
         "title": "fused_moe num_warps/num_stages overlay",
         "env_flag": "GENESIS_LEGACY_P24",
         "default_on": True,
@@ -1625,6 +1700,7 @@ PATCH_REGISTRY: dict[str, dict[str, Any]] = {
         "credit": "Pre-dispatcher legacy patch. Overlays SM86-tuned num_warps/num_stages on fused_moe kernel selection.",
     },
     "P26": {
+        "wiring": "patch_26_prefill_output",
         "title": "TurboQuant prefill output prealloc",
         "env_flag": "GENESIS_LEGACY_P26",
         "default_on": True,
@@ -1633,6 +1709,7 @@ PATCH_REGISTRY: dict[str, dict[str, Any]] = {
         "credit": "Pre-dispatcher legacy patch. Preallocates TQ prefill output buffer to avoid per-step allocation churn.",
     },
     "P27": {
+        "wiring": "patch_27_reasoning_before_think",
         "title": "Qwen3 BEFORE-THINK fallback",
         "env_flag": "GENESIS_LEGACY_P27",
         "default_on": True,
@@ -1674,6 +1751,7 @@ PATCH_REGISTRY: dict[str, dict[str, Any]] = {
         "credit": "Pre-dispatcher legacy patch. Preallocates cu_2 and synth_seq_lens TQ scratch tensors as persistent buffers.",
     },
     "P34": {
+        "wiring": "patch_34_mamba_deadlock_guard",
         "title": "Mamba zero-collapse deadlock guard",
         "env_flag": "GENESIS_LEGACY_P34",
         "default_on": True,
@@ -1682,6 +1760,7 @@ PATCH_REGISTRY: dict[str, dict[str, Any]] = {
         "credit": "Pre-dispatcher legacy patch. Guards against Mamba state collapse-to-zero deadlock when delta is exactly zero on hybrid models.",
     },
     "P36": {
+        "wiring": "patch_36_tq_shared_decode_buffers",
         "title": "TurboQuant shared decode buffers",
         "env_flag": "GENESIS_LEGACY_P36",
         "default_on": True,
@@ -1690,6 +1769,7 @@ PATCH_REGISTRY: dict[str, dict[str, Any]] = {
         "credit": "Pre-dispatcher legacy patch. Shared decode-stage scratch buffers across TQ layers to amortize allocation.",
     },
     "P37": {
+        "wiring": "patch_37_moe_intermediate_cache",
         "title": "MoE intermediate cache pool (opt-in)",
         # Audit P1 fix 2026-05-05 (genesis_local_consistency_audit + runtime audit):
         # registry was `GENESIS_ENABLE_P37_MOE_INTER_CACHE` but wiring code,
@@ -1771,6 +1851,7 @@ PATCH_REGISTRY: dict[str, dict[str, Any]] = {
         "applies_to": {},
     },
     "PN61": {
+        "wiring": "patch_N61_qwen3_vl_keyerror_guard",
         "title": "qwen3_vl loader KeyError → text-only auto-fallback (vllm-loader guard)",
         "env_flag": "GENESIS_ENABLE_PN61",
         "default_on": False,
@@ -1780,6 +1861,7 @@ PATCH_REGISTRY: dict[str, dict[str, Any]] = {
         "applies_to": {"model_class": ["qwen3_vl"]},
     },
     "PN62": {
+        "wiring": "patch_N62_text_only_vit_skip",
         "title": "Text-only ViT scratch MARKER-ONLY (predicted 3-5 GiB; real hook pending)",
         "env_flag": "GENESIS_ENABLE_PN62",
         "default_on": False,
@@ -1806,6 +1888,7 @@ PATCH_REGISTRY: dict[str, dict[str, Any]] = {
         "applies_to": {},
     },
     "PN65": {
+        "wiring": "patch_N65_access_log",
         "title": "Genesis structured API access log middleware (operator UX)",
         "env_flag": "GENESIS_ENABLE_PN65",
         "default_on": False,
@@ -1815,6 +1898,7 @@ PATCH_REGISTRY: dict[str, dict[str, Any]] = {
         "applies_to": {},
     },
     "PR41674": {
+        "wiring": "patch_pr41674_thinking_budget_inverted_bool",
         "title": "thinking_token_budget inverted-bool fix (vllm#41674 backport, 1-line)",
         "env_flag": "GENESIS_ENABLE_PR41674",
         "env_flag_aliases": ["GENESIS_ENABLE_PN67"],
@@ -1825,6 +1909,7 @@ PATCH_REGISTRY: dict[str, dict[str, Any]] = {
         "applies_to": {},
     },
     "PN70": {
+        "wiring": "patch_N70_tool_schema_subset_filter",
         "title": "Tool schema subset filter (combined `anyOf` xgrammar-clean) — companion to P68 v7.72.1",
         "env_flag": "GENESIS_ENABLE_PN70_TOOL_SCHEMA_FILTER",
         "default_on": False,

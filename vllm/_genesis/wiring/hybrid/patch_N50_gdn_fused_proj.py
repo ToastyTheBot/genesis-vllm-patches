@@ -9,6 +9,10 @@ Affects only the `gqa_interleaved_layout=False` branch (Qwen3.5/3.6
 contiguous-loaded weights). Qwen3-Next (interleaved layout) and the LoRA
 path (`hasattr(in_proj_qkv)`) are unaffected.
 
+Pure data-copy — no numerical drift. The wrapper falls through to the
+PyTorch reference on any constraint violation (non-contiguous input,
+non-pow2 head_dim, kernel failure).
+
 Anchor stability
 ----------------
 Anchor is the entire 9-line `else:` block of the Qwen3.5 branch in

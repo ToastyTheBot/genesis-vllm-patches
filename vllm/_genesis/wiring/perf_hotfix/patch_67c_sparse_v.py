@@ -45,6 +45,15 @@ DCE'd at compile time. Triton produces SASS byte-equivalent to
 the pre-sparse-V P67 kernel.
 
 ================================================================
+Why integrate INTO P67 (not a separate kernel)
+================================================================
+
+Greenfield: no upstream engine has integrated per-row sparse-V into the
+spec-decode K+1 verify path. The PR41422 separate-kernel approach already
+failed (kernel-vs-kernel overhead), so P67c integrates directly into the
+P67 split-M kernel to leverage it rather than running alongside it.
+
+================================================================
 Why per-q_t (not per-tile uniform vote)
 ================================================================
 

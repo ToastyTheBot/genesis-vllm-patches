@@ -76,6 +76,11 @@ Composition with P38:
 - Both paths share the SAME `_genesis_continuation_prefill` implementation
   in `patch_38_tq_continuation_memory.py`.
 
+Timing constraint: `_genesis_p38_dispatch` is set on the class after
+import but BEFORE the worker compiles `forward`, so the dispatcher is
+available at compile time. Recommended pairing: enable P38 + P38B + P37
+together when running on TQ KV.
+
 ================================================================
 SAFETY MODEL
 ================================================================

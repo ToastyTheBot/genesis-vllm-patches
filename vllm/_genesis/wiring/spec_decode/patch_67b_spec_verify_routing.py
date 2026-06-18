@@ -21,6 +21,9 @@ This is the "minimal viable" version of Phase B path (b) per the research:
 - No supports_spec_as_decode flip (avoids reorder_batch_threshold change)
 - Just an extra branch at top of forward() that intercepts K+1 batches
 
+P67b has NO env flag of its own — it is meaningless without the P67 kernel,
+so it gates on P67's flag (GENESIS_ENABLE_P67_TQ_MULTI_QUERY_KERNEL=1).
+
 Author: Sandermage (Sander) Barzov Aleksandr, Ukraine, Odessa.
 """
 from __future__ import annotations

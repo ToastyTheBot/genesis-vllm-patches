@@ -96,6 +96,10 @@ Discovery: Genesis P83 DEBUG instrumentation 2026-04-27 — empirically
 confirmed num_hashes=0 for 1424-token requests on Qwen3.6-MoE prod.
 Related: vllm#38182 (which identified the WRONG root cause —
 the L457 pop is a downstream symptom; the upstream cause is hash_block_size).
+P83 (which attacks that downstream L457-pop symptom) is kept as an opt-in
+research artifact; P84 is the real fix. P83's DEBUG instrumentation is also
+what demonstrated `find_longest_cache_hit` is NEVER called for this hybrid
+workload (request_block_hasher returns zero hashes first).
 """
 from __future__ import annotations
 

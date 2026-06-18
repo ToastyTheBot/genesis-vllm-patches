@@ -65,7 +65,9 @@ prefill compute).
 ================================================================
 SAFETY MODEL
 ================================================================
-- Default OFF (opt-in via GENESIS_ENABLE_PN30_DS_LAYOUT_SPEC_DECODE=1)
+- Default OFF (opt-in via GENESIS_ENABLE_PN30_DS_LAYOUT_SPEC_DECODE=1) —
+  still needs cross-rig validation on noonghunna's stack, since Genesis
+  PROD doesn't trigger this path (no --structured-outputs-config)
 - Pure text-patch, idempotent via marker
 - Drift-aware: anchor includes the exact NotImplementedError raise
   block — if upstream fixes this differently, our anchor won't match

@@ -41,8 +41,9 @@ Models affected
   on prefill path. Sub-B no-op (no LoRA).
 - 35B (PROD, DFlash) — does NOT have GDN; patch fires neither sub.
 
-Default OFF until live A/B on Cliff 2b multi-turn reproducer (Genesis Issue
-#19) shows per-turn allocator delta drops below ~900 MiB.
+Opt-in via `GENESIS_ENABLE_PN54_GDN_CONTIGUOUS_DEDUP=1`. Default OFF until
+live A/B on Cliff 2b multi-turn reproducer (Genesis Issue #19) shows
+per-turn allocator delta drops below ~900 MiB.
 
 Author: Sandermage (Sander) Barzov Aleksandr.
 Inspiration: adurham (MLX-LM #1077) — slice-kept-alive class of bug.

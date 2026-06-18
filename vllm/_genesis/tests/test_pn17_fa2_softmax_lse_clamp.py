@@ -158,12 +158,15 @@ class TestPN17DispatcherIntegration:
         assert PATCH_REGISTRY["PN17"]["category"] == "memory_savings"
 
     def test_pn17_in_apply_all(self):
-        """`@register_patch` for PN17 must be hooked into apply_all so
-        the dry-run patcher walks it."""
-        from vllm._genesis.patches import apply_all
-        assert hasattr(apply_all, "apply_patch_N17_fa2_softmax_lse_clamp"), (
-            "PN17 must be registered in apply_all.py"
+        """PN17 must be wired in PATCH_REGISTRY so the dry-run patcher walks it
+        (collapsed to the metadata-driven executor)."""
+        import vllm._genesis.patches.apply_all  # noqa: F401  (triggers wiring-bind)
+        from vllm._genesis.dispatcher import PATCH_REGISTRY
+        entry = PATCH_REGISTRY["PN17"]
+        assert entry["wiring"] == "patch_N17_fa2_softmax_lse_clamp", (
+            "PN17 must be wired in PATCH_REGISTRY"
         )
+        assert callable(entry.get("apply_callable")), "PN17 apply_callable not bound"
 
     def test_pn17_in_patches_md(self):
         """PATCHES.md must list PN17 — the existing

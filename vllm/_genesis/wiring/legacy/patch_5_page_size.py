@@ -14,6 +14,11 @@ v2 (2026-04-24, this file): pad-smaller-to-max. The MAX page size layer
     both expose). This is mathematically optimal under the constraint
     "all layers must report the same page_size_bytes".
 
+Sequencing: P5 is the SECOND-HOP KV-cache-init blocker on the TQ+hybrid
+path — it only surfaces AFTER P4 fixes the TQ+hybrid validator (Phase 3
+integration test, 2026-04-24). Both are required to bring up
+TurboQuant + hybrid models.
+
 Math comparison on our integration log numbers
 ----------------------------------------------
 Observed:
