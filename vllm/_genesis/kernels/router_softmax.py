@@ -52,8 +52,14 @@ Author: Sandermage(Sander)-Barzov Aleksandr, Ukraine, Odessa
 """
 from __future__ import annotations
 
-import torch
-import torch.nn.functional as F
+try:
+    import torch
+except ModuleNotFoundError:  # torch is a runtime-only dep
+    torch = None  # type: ignore
+try:
+    import torch.nn.functional as F
+except ModuleNotFoundError:  # torch is a runtime-only dep
+    F = None  # type: ignore
 
 
 def router_softmax(

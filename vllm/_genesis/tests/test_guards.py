@@ -144,6 +144,8 @@ class TestDependencyVersions:
     """Group 3: External dependency version detection."""
 
     def test_get_torch_version_returns_tuple(self):
+        import pytest
+        pytest.importorskip("torch")  # version detection only meaningful with torch
         from vllm._genesis.guards import get_torch_version
         v = get_torch_version()
         assert v is not None  # torch is available (we imported it)

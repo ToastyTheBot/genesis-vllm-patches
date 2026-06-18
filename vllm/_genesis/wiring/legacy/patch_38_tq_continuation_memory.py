@@ -104,8 +104,14 @@ import math
 import os
 from typing import Any
 
-import torch
-import torch.nn.functional as F
+try:
+    import torch
+except ModuleNotFoundError:  # torch is a runtime-only dep
+    torch = None  # type: ignore
+try:
+    import torch.nn.functional as F
+except ModuleNotFoundError:  # torch is a runtime-only dep
+    F = None  # type: ignore
 
 from vllm._genesis.guards import is_nvidia_cuda, is_sm_at_least
 

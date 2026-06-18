@@ -12,6 +12,8 @@ TQ text-patches graceful-skip but the prealloc path (called from the
 from __future__ import annotations
 
 import pytest
+import pytest as _pytest
+_pytest.importorskip("torch")  # torch is a runtime-only dep; skip when absent
 import torch
 
 

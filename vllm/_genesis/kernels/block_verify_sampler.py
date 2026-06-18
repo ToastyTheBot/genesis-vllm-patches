@@ -64,7 +64,10 @@ Bug-fixes: gemini-code-assist review on vllm#40819 (cited in code).
 """
 from __future__ import annotations
 
-import torch
+try:
+    import torch
+except ModuleNotFoundError:  # torch is a runtime-only dep
+    torch = None  # type: ignore
 
 try:
     import triton

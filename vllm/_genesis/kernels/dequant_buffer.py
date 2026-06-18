@@ -62,7 +62,10 @@ import logging
 import os
 from typing import Optional
 
-import torch
+try:
+    import torch
+except ModuleNotFoundError:  # torch is a runtime-only dep
+    torch = None  # type: ignore
 
 log = logging.getLogger("genesis.dequant_buffer")
 

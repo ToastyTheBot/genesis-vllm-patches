@@ -60,7 +60,10 @@ import logging
 import os
 from typing import Any, Optional
 
-import torch
+try:
+    import torch
+except ModuleNotFoundError:  # torch is a runtime-only dep
+    torch = None  # type: ignore
 
 log = logging.getLogger("genesis.gdn_core_attn_manager")
 

@@ -186,6 +186,8 @@ def test_p103_self_install_returns_false_on_missing_deps(monkeypatch):
 def test_p103_self_install_succeeds_with_mock_chunk_globals(monkeypatch):
     """Full happy path: helper installs wrapper into a synthetic chunk.py
     globals dict that has all expected symbols."""
+    import pytest
+    pytest.importorskip("torch")  # install path exercises torch tensors
     monkeypatch.setenv("GENESIS_ENABLE_P103", "1")
     from vllm._genesis.wiring.hybrid import patch_103_fla_cliff2_chunked as p103
 

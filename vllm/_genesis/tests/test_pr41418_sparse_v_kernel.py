@@ -24,6 +24,8 @@ from __future__ import annotations
 
 import pytest
 
+pytest.importorskip("torch")  # sparse-V kernel test needs torch (runtime-only dep)
+
 
 # ─────────────────────────────────────────────────────────────────
 # Test infrastructure

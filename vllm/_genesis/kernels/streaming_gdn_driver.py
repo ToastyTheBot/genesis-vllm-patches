@@ -41,7 +41,10 @@ from __future__ import annotations
 import logging
 import os
 
-import torch
+try:
+    import torch
+except ModuleNotFoundError:  # torch is a runtime-only dep
+    torch = None  # type: ignore
 
 from vllm._genesis.kernels.gdn_scratch_pool import GdnScratchPool
 

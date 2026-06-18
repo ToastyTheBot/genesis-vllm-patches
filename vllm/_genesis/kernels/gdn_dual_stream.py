@@ -40,7 +40,10 @@ from __future__ import annotations
 import logging
 from typing import Callable, Any, Optional
 
-import torch
+try:
+    import torch
+except ModuleNotFoundError:  # torch is a runtime-only dep
+    torch = None  # type: ignore
 
 log = logging.getLogger("genesis.gdn_dual_stream")
 
