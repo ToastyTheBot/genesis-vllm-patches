@@ -79,6 +79,11 @@ _KNOWN_FIELDS = {
     # declare metadata. Value is either a callable or a "module:func"
     # string resolved at boot via importlib.
     "apply_callable",
+    # Single-registry collapse (2026-06) — attached at apply_all import time
+    # by `@register_patch`. `_display_name` is the boot-log label; `_apply_order`
+    # is the execution-order index. Underscore-prefixed = runtime-attached,
+    # not authored in the dict literal.
+    "_display_name", "_apply_order",
 }
 
 

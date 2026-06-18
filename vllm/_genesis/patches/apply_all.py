@@ -39,6 +39,7 @@ from __future__ import annotations
 
 import json
 import logging
+import re
 import sys
 from dataclasses import dataclass, field
 from typing import Any, Callable
@@ -178,14 +179,52 @@ class PatchStats:
 #                           PATCH REGISTRY
 # ═══════════════════════════════════════════════════════════════════════════
 
-# Each patch function returns a PatchResult describing the outcome.
-PATCH_REGISTRY: list[tuple[str, Callable[[], PatchResult]]] = []
+# SINGLE REGISTRY (refactor 2026-06): the one source of truth for patch
+# metadata AND execution is `dispatcher.PATCH_REGISTRY`. The `@register_patch`
+# decorator attaches each apply function onto its dispatcher entry via the
+# Phase 5c `apply_callable` field, plus a `_display_name` and `_apply_order`
+# index (boot order == decoration order). `apply_all` keeps NO independent
+# registry; the module-level `PATCH_REGISTRY` defined at the bottom of this
+# file is a DERIVED, ordered `[(display_name, callable), ...]` view of that
+# single registry (consumed by `run()` and a few back-compat importers).
+# This is why the apply_all↔dispatcher sync contract (formerly policed by
+# `test_apply_all_dispatcher_sync.py`) is gone: a callable can no longer
+# exist without a metadata entry, and metadata-only entries simply carry no
+# callable.
+from vllm._genesis.dispatcher import PATCH_REGISTRY as _META_REGISTRY
+
+_APPLY_PATCH_ID_RE = re.compile(r"^apply_patch_([NM]?\d+[a-zA-Z]?)(?:_|$)")
+_apply_order_counter = 0
 
 
 def register_patch(name: str):
-    """Decorator to register a patch function."""
+    """Attach a patch's apply function onto its dispatcher metadata entry.
+
+    The patch ID is parsed from the function name (``apply_patch_<id>_*`` →
+    ``P<id>``, matching the dispatcher key). The callable is stored on the
+    single registry as ``apply_callable`` together with ``_display_name`` and
+    ``_apply_order`` (boot order == decoration order). If no dispatcher entry
+    exists a minimal stub is created and an error logged, so a patch is never
+    silently dropped.
+    """
     def decorator(fn: Callable[[], PatchResult]) -> Callable[[], PatchResult]:
-        PATCH_REGISTRY.append((name, fn))
+        global _apply_order_counter
+        m = _APPLY_PATCH_ID_RE.match(fn.__name__)
+        pid = ("P" + m.group(1)) if m else fn.__name__
+        entry = _META_REGISTRY.get(pid)
+        if entry is None:
+            log.error(
+                "[Genesis] apply_patch %r (id=%s) has no dispatcher "
+                "PATCH_REGISTRY entry — creating a minimal stub so it still "
+                "runs; add metadata in dispatcher.py.", fn.__name__, pid,
+            )
+            entry = _META_REGISTRY.setdefault(
+                pid, {"title": name, "category": "uncategorized"}
+            )
+        entry["apply_callable"] = fn
+        entry["_display_name"] = name
+        entry["_apply_order"] = _apply_order_counter
+        _apply_order_counter += 1
         return fn
     return decorator
 
@@ -5116,6 +5155,45 @@ def main() -> int:
             exit_code = max(exit_code, 1)
 
     return exit_code
+
+
+def set_apply_mode(mode: bool) -> None:
+    """Set dry-run (False) vs apply (True) mode out-of-band.
+
+    Used by `compat.verify` B1 dry-run check before calling `run_apply_all()`.
+    """
+    global _APPLY_MODE
+    _APPLY_MODE = mode
+
+
+def run_apply_all(verbose: bool = True, apply: bool | None = None) -> PatchStats:
+    """Back-compat alias for :func:`run` (consumed by `compat.verify`).
+
+    When ``apply`` is None the current module ``_APPLY_MODE`` (set via
+    :func:`set_apply_mode`) is honored.
+    """
+    return run(verbose=verbose, apply=_APPLY_MODE if apply is None else apply)
+
+
+# ── Single-registry derived view ───────────────────────────────────
+# Built once, at import end, after every `@register_patch` has attached its
+# callable + order onto `dispatcher.PATCH_REGISTRY`. Read-only ordered
+# projection — NOT a second registry. `run()` iterates it; a few legacy tests
+# import it as `[(name, fn), ...]`. Metadata-only entries (no `apply_callable`)
+# are excluded by design.
+def _build_apply_view() -> list[tuple[str, Callable[[], PatchResult]]]:
+    executable = [
+        (m.get("_apply_order", 1_000_000),
+         m.get("_display_name", pid),
+         m["apply_callable"])
+        for pid, m in _META_REGISTRY.items()
+        if callable(m.get("apply_callable"))
+    ]
+    executable.sort(key=lambda t: t[0])
+    return [(name, fn) for _, name, fn in executable]
+
+
+PATCH_REGISTRY: list[tuple[str, Callable[[], PatchResult]]] = _build_apply_view()
 
 
 if __name__ == "__main__":
