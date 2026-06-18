@@ -367,7 +367,7 @@ def _build_kernel():
         DOT_FP16: tl.constexpr = 0,
         # ───── Genesis P67c sparse-V (v7.65, 2026-05-01) ─────
         # Per-q_t skip via uniform-scalar `if` (Triton 3.6 scf.if pattern,
-        # PN26b-proven). When SPARSE_V=0 (default constexpr), entire skip
+        # PR41422-proven). When SPARSE_V=0 (default constexpr), entire skip
         # block is DCE'd at compile time → byte-equivalent to pre-sparse v17.
         # Bit-exact contract: when SPARSE_V=1 AND threshold=0.0, skip never
         # fires (P_t = exp2(...) ≥ 0, so `max(P_t) < 0` is always False).

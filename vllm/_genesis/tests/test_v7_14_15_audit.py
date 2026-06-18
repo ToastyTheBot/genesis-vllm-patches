@@ -3,7 +3,7 @@
 
 Validates THREE properties:
 
-1. **Anchor presence**: Every new patch (P64, P65 v2, P66, P68/P69, P70)
+1. **Anchor presence**: Every new patch (PR39598, P65 v2, P66, P68/P69, P70)
    has its OLD anchor present in the pinned vLLM source. If upstream
    drifts, these tests fail loudly.
 
@@ -101,7 +101,7 @@ class TestNewPatchAnchors:
     """Each new patch's OLD anchor must be present in pinned vLLM source."""
 
     def test_p64_qwen3coder_anchors(self):
-        m = _load_wiring_module("patch_64_qwen3coder_mtp_streaming")
+        m = _load_wiring_module("patch_pr39598_qwen3coder_mtp_streaming")
         parser_path = _pinned_file("tool_parsers/qwen3coder_tool_parser.py")
         serving_path = _pinned_file(
             "entrypoints/openai/chat_completion/serving.py"
@@ -109,13 +109,13 @@ class TestNewPatchAnchors:
         parser_content = parser_path.read_text()
         serving_content = serving_path.read_text()
         assert m.QWEN3CODER_OLD in parser_content, (
-            "P64 sub-patch A anchor missing in qwen3coder_tool_parser.py"
+            "PR39598 sub-patch A anchor missing in qwen3coder_tool_parser.py"
         )
         assert m.QWEN3COD_FNEND_OLD in parser_content, (
-            "P64 sub-patch B anchor missing in qwen3coder_tool_parser.py"
+            "PR39598 sub-patch B anchor missing in qwen3coder_tool_parser.py"
         )
         assert m.SERVING_SHOULD_OLD in serving_content, (
-            "P64 sub-patch C anchor missing in serving.py"
+            "PR39598 sub-patch C anchor missing in serving.py"
         )
 
     def test_p65_v2_turboquant_anchor(self):
@@ -274,7 +274,7 @@ class TestDispatcherRegistry:
         spec.loader.exec_module(d)
         # All v7.14 + v7.15 patches must be present (P66 removed — upstream
         # closed vllm#23679; see PLAN.md Phase B)
-        for pid in ("P64", "P65", "P68", "P69", "P70"):
+        for pid in ("PR39598", "P65", "P68", "P69", "P70"):
             assert pid in d.PATCH_REGISTRY, (
                 f"{pid} missing from PATCH_REGISTRY"
             )
@@ -333,7 +333,7 @@ class TestApplyAllConsistency:
         content = apply_all.read_text()
         # Each new patch must be registered
         for pid, fn_name_part in (
-            ("P64", "qwen3coder_mtp_streaming"),
+            ("PR39598", "qwen3coder_mtp_streaming"),
             ("P65", "turboquant_spec_cg_downgrade"),
             ("P68/P69", "long_ctx_tool_adherence"),
             ("P70", "auto_strict_ngram"),

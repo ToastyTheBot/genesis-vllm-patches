@@ -54,7 +54,7 @@ class TestAblationCompare:
     def test_baseline_load_failure_returns_error(self, tmp_path):
         result = _make_result("cur", [100.0]*5, [10.0]*5, [120.0]*5)
         ab = gbs._ablation_compare(str(tmp_path / "nonexistent.json"),
-                                   result, "no-PN14")
+                                   result, "no-PR40074")
         assert "error" in ab
         assert "load failed" in ab["error"].lower()
 
@@ -63,7 +63,7 @@ class TestAblationCompare:
         baseline_path = tmp_path / "bad_baseline.json"
         baseline_path.write_text(json.dumps({"name": "broken"}))
         result = _make_result("cur", [100.0]*5, [10.0]*5, [120.0]*5)
-        ab = gbs._ablation_compare(str(baseline_path), result, "no-PN14")
+        ab = gbs._ablation_compare(str(baseline_path), result, "no-PR40074")
         assert "error" in ab
         assert "decode_bench missing" in ab["error"]
 
@@ -97,7 +97,7 @@ class TestAblationCompare:
         current = _make_result("cur",
                                [102.0, 102.5, 101.8, 102.2, 102.7, 101.9, 102.1, 102.6, 102.3, 102.0],
                                [9.8]*10, [125.0]*10)
-        ab = gbs._ablation_compare(str(baseline_path), current, "no-PN14")
+        ab = gbs._ablation_compare(str(baseline_path), current, "no-PR40074")
         wt = ab["metrics"]["wall_TPS"]
         assert wt["verdict"] == "SIGNIFICANT", wt
         assert wt["pct_change"] is not None
@@ -121,8 +121,8 @@ class TestAblationCompare:
         baseline_path = tmp_path / "baseline.json"
         baseline_path.write_text(json.dumps(baseline))
         current = _make_result("cur", [99.0]*5, [10.1]*5, [121.0]*5)
-        ab = gbs._ablation_compare(str(baseline_path), current, "no-PN14")
-        assert ab["ablate_tag"] == "no-PN14"
+        ab = gbs._ablation_compare(str(baseline_path), current, "no-PR40074")
+        assert ab["ablate_tag"] == "no-PR40074"
         assert ab["baseline"] == "base"
         assert ab["current"] == "cur"
 
@@ -166,10 +166,10 @@ class TestAblationTablePrint:
         baseline_path = tmp_path / "baseline.json"
         baseline_path.write_text(json.dumps(baseline))
         current = _make_result("cur", [102.0]*5, [9.8]*5, [119.0]*5)
-        ab = gbs._ablation_compare(str(baseline_path), current, "no-PN14")
+        ab = gbs._ablation_compare(str(baseline_path), current, "no-PR40074")
         gbs._print_ablation_table(ab)
         out = capsys.readouterr().out
-        assert "no-PN14" in out  # ablate_tag in header
+        assert "no-PR40074" in out  # ablate_tag in header
         assert "wall_TPS" in out
         assert "decode_TPOT_ms" in out
         assert "TTFT_ms" in out

@@ -15,14 +15,14 @@ Before doing anything else, classify your model:
 - No → some patches still apply (the generic ones — see below); model-specific patches will skip via `applies_to` filters and that's fine.
 
 **Generic patches (apply to most architectures):**
-- P58 (async-scheduler placeholder fix), P66 (cudagraph capture-sizes filter), P72 (profile_run cap), P74 (chunk-clamp), P94 (spec-decode prepare_next_token_ids zero-init), P99 (workspace memoize), PN13 (CUDAGraphWrapper gc lambda arity), PN14 (TQ decode IOOB clamp — opt-in), PN17 (FA2 lse runtime clamp), PN19 (scoped max_split_size_mb).
+- PR40768 (async-scheduler placeholder fix), P66 (cudagraph capture-sizes filter), P72 (profile_run cap), P74 (chunk-clamp), PR41043 (spec-decode prepare_next_token_ids zero-init), PR40941b (workspace memoize), PR41235 (CUDAGraphWrapper gc lambda arity), PR40074 (TQ decode IOOB clamp — opt-in), PN17 (FA2 lse runtime clamp), PR41268 (scoped max_split_size_mb).
 
 **Model-specific patches:**
-- P59-P69 family — Qwen3 reasoning parser, tool-call XML in `<think>`, MTP draft handling.
-- P60, P60b, PN11, P103 — Hybrid GDN models only (Qwen3.5, Qwen3-Next).
+- PR39055-P69 family — Qwen3 reasoning parser, tool-call XML in `<think>`, MTP draft handling.
+- PR40738, PR40738b, PR41142, P103 — Hybrid GDN models only (Qwen3.5, Qwen3-Next).
 - P87, P91 — AutoRound INT4 quantization with `group_size=128`.
-- P81 — FP8 (offline or online).
-- P67/P67b, P98, P101, PN8 — TurboQuant KV cache (`turboquant_k8v4`).
+- PR40925 — FP8 (offline or online).
+- P67/P67b, PR40941, PR41123, PR40849 — TurboQuant KV cache (`turboquant_k8v4`).
 
 If you don't recognize half of these, that's fine — the launch scripts pick the right set for you.
 
@@ -39,8 +39,8 @@ Collect, before you start editing anything:
   - AutoRound INT4 — check `quantization_config.quant_method == "auto-round"`. P87, P91 apply if `group_size=128` (Marlin path); they no-op if `group_size=-1` (AllSpark path).
   - GPTQ INT4 — Marlin path, similar coverage to AutoRound.
   - AWQ INT4 — partial coverage; some patches assume Marlin and skip on AWQ.
-  - FP8 offline (pre-quantized weights) — P81 applies.
-  - FP8 online (`--quantization fp8`) — P81 applies, PN8 saves ~1 GiB/GPU on Ampere.
+  - FP8 offline (pre-quantized weights) — PR40925 applies.
+  - FP8 online (`--quantization fp8`) — PR40925 applies, PR40849 saves ~1 GiB/GPU on Ampere.
 - **Hybrid attention?** `model_type` in config.json. `qwen3_5` and `qwen3_next` are hybrid (some layers GDN/Mamba, some standard attention). Pure-attention models (`qwen3_moe`, `llama`, `mistral`) are not.
 - **Spec-decode option.**
   - MTP module on the HF repo (look for `model.embed_tokens` + a `mtp_*` weight prefix) → MTP supported.
@@ -79,7 +79,7 @@ Pick the closest match to your config:
 - `start_*` = Docker container launch (uses `docker run`, mounts /models, applies patches inside container)
 - `bare_metal_*` = host shell launch (assumes vLLM already installed via `pip install`)
 - `_no_TQ_*` historical name for fp8_e5m2 KV cache (without TurboQuant) — file IS for fp8 KV
-- `_TQ_k8v4_*` = TurboQuant 8-bit-key 4-bit-value KV cache (5× pool, requires P4 + P67 + P98)
+- `_TQ_k8v4_*` = TurboQuant 8-bit-key 4-bit-value KV cache (5× pool, requires P4 + P67 + PR40941)
 - `_DFLASH_*` = DFlash speculator (coding-agent workload)
 - `_single_card` suffix = TP=1 variant; without suffix = TP=2
 
@@ -104,30 +104,30 @@ services:
     environment:
       GENESIS_ENABLE_P4: "1"
       GENESIS_ENABLE_P67_TQ_MULTI_QUERY_KERNEL: "1"
-      GENESIS_ENABLE_P98: "1"
+      GENESIS_ENABLE_PR40941: "1"
       GENESIS_ENABLE_P85: "1"
       GENESIS_ENABLE_P87: "1"
       GENESIS_ENABLE_P91: "1"
-      GENESIS_ENABLE_P99: "1"
-      GENESIS_ENABLE_P100: "1"
-      GENESIS_ENABLE_P101: "1"
-      GENESIS_ENABLE_P58_ASYNC_PLACEHOLDER_FIX: "1"
-      GENESIS_ENABLE_P60_GDN_NGRAM_FIX: "1"
-      GENESIS_ENABLE_P60B_TRITON_KERNEL: "1"
+      GENESIS_ENABLE_PR40941B: "1"
+      GENESIS_ENABLE_PR41127: "1"
+      GENESIS_ENABLE_PR41123: "1"
+      GENESIS_ENABLE_PR40768: "1"
+      GENESIS_ENABLE_PR40738: "1"
+      GENESIS_ENABLE_PR40738B: "1"
       GENESIS_ENABLE_P61_QWEN3_MULTI_TOOL: "1"
       GENESIS_ENABLE_P61B_STREAMING_OVERLAP: "1"
-      GENESIS_ENABLE_P62_STRUCT_OUT_SPEC_TIMING: "1"
-      GENESIS_ENABLE_P64_QWEN3CODER_MTP_STREAMING: "1"
+      GENESIS_ENABLE_PR36138: "1"
+      GENESIS_ENABLE_PR39598: "1"
       GENESIS_ENABLE_P66_CUDAGRAPH_SIZE_FILTER: "1"
       GENESIS_ENABLE_P68_AUTO_FORCE_TOOL: "1"
       GENESIS_ENABLE_P69_LONG_CTX_TOOL_REMINDER: "1"
       GENESIS_ENABLE_P72_PROFILE_RUN_CAP: "1"
       GENESIS_PROFILE_RUN_CAP_M: "4096"
       GENESIS_ENABLE_P74_CHUNK_CLAMP: "1"
-      GENESIS_ENABLE_PN8_MTP_DRAFT_ONLINE_QUANT: "1"
-      GENESIS_ENABLE_PN9_INDEPENDENT_DRAFTER_ATTN: "1"
-      GENESIS_ENABLE_PN11_GDN_AB_CONTIGUOUS: "1"
-      GENESIS_ENABLE_PN13_CUDA_GRAPH_LAMBDA_ARITY: "1"
+      GENESIS_ENABLE_PR40849: "1"
+      GENESIS_ENABLE_PR39930: "1"
+      GENESIS_ENABLE_PR41142: "1"
+      GENESIS_ENABLE_PR41235: "1"
       GENESIS_ENABLE_PN17_FA2_LSE_CLAMP: "1"
       GENESIS_PREALLOC_TOKEN_BUDGET: "4096"
       GENESIS_BUFFER_MODE: "shared"
@@ -170,30 +170,30 @@ Open the script and change these:
 # or for DFlash (REQUIRES separate z-lab drafter checkpoint download — see Step 1 §4):
 --speculative-config '{"method": "dflash", "model": "/path/to/dflash-draft", "num_speculative_tokens": 4}'
 # Note for DFlash on hybrid GDN models (Qwen3.6 family): vllm PR #40898 (DFlash SWA support)
-# is OPEN as of 2026-05-01. Genesis ships PN21 partial backport — full SWA enabler awaits
+# is OPEN as of 2026-05-01. Genesis ships PR40898 partial backport — full SWA enabler awaits
 # upstream merge. Without it, ~25% acceptance-length gap on long context with sliding-window
 # attention layers. Track at https://github.com/vllm-project/vllm/pull/40898.
 
 # KV cache dtype (pick one)
 --kv-cache-dtype auto             # default
 # --kv-cache-dtype fp8_e5m2       # 2× KV capacity, ~no quality loss
-# --kv-cache-dtype turboquant_k8v4  # 5× KV capacity, requires P67/P98
+# --kv-cache-dtype turboquant_k8v4  # 5× KV capacity, requires P67/PR40941
 ```
 
 ### Genesis env flags
 
 ```bash
 # Enable a baseline universal set:
-export GENESIS_ENABLE_P58_ASYNC_PLACEHOLDER_FIX=1
+export GENESIS_ENABLE_PR40768=1
 export GENESIS_ENABLE_P66_CUDAGRAPH_SIZE_FILTER=1
 export GENESIS_ENABLE_P72_PROFILE_RUN_CAP=1
 export GENESIS_ENABLE_P74_CHUNK_CLAMP=1
-export GENESIS_ENABLE_P94=1
-export GENESIS_ENABLE_P99=1
-export GENESIS_ENABLE_PN13_CUDA_GRAPH_LAMBDA_ARITY=1
-export GENESIS_ENABLE_PN14_TQ_DECODE_OOB_CLAMP=1
+export GENESIS_ENABLE_PR41043=1
+export GENESIS_ENABLE_PR40941B=1
+export GENESIS_ENABLE_PR41235=1
+export GENESIS_ENABLE_PR40074=1
 export GENESIS_ENABLE_PN17_FA2_LSE_CLAMP=1
-export GENESIS_ENABLE_PN19_SCOPED_MAX_SPLIT=1
+export GENESIS_ENABLE_PR41268=1
 ```
 
 Add the model-specific patches per step 4.
@@ -206,7 +206,7 @@ Refer to [../docs/PATCHES.md](../docs/PATCHES.md) for full descriptions. The buc
 
 ### Universal (recommended for almost everything)
 
-P58, P66, P72, P74, P94, P99, PN13, PN14, PN17, PN19.
+PR40768, P66, P72, P74, PR41043, PR40941b, PR41235, PR40074, PN17, PR41268.
 
 These fix bugs or add safety guards that don't depend on model architecture. Default them all on.
 
@@ -214,16 +214,16 @@ These fix bugs or add safety guards that don't depend on model architecture. Def
 
 If your model is Qwen3 / Qwen3.5 / Qwen3.6 / Qwen3-Next:
 
-- P59, P60, P60b — reasoning parser tool-call extraction (Qwen3 puts tool calls inside `<think>` blocks).
-- P61, P61b, P62 — multi-tool first-occurrence, streaming overlap guard, reasoning-aware grammar.
-- P64, P68, P69 — qwen3coder MTP streaming, long-ctx tool-call hardening.
+- PR39055, PR40738, PR40738b — reasoning parser tool-call extraction (Qwen3 puts tool calls inside `<think>` blocks).
+- P61, P61b, PR36138 — multi-tool first-occurrence, streaming overlap guard, reasoning-aware grammar.
+- PR39598, P68, P69 — qwen3coder MTP streaming, long-ctx tool-call hardening.
 
 ### Hybrid GDN models only
 
 Qwen3.5, Qwen3-Next:
 
-- P60, P60b — GDN conv + SSM state corruption with ngram spec decode.
-- PN11 — hybrid layer dispatch fix (a/b contiguity).
+- PR40738, PR40738b — GDN conv + SSM state corruption with ngram spec decode.
+- PR41142 — hybrid layer dispatch fix (a/b contiguity).
 - P103 — chunked GDN fwd_h+fwd_o orchestrator (saves ~600 MiB on long ctx).
 
 ### AutoRound INT4 (Marlin path only)
@@ -237,8 +237,8 @@ These are no-ops on `group_size=-1` AllSpark path.
 
 ### FP8
 
-- P81 — FP8 hotfixes (block-scaled MM low-M decode tuning).
-- PN8 — saves ~1 GiB/GPU on FP8 online quant on Ampere.
+- PR40925 — FP8 hotfixes (block-scaled MM low-M decode tuning).
+- PR40849 — saves ~1 GiB/GPU on FP8 online quant on Ampere.
 
 ### TurboQuant KV cache
 
@@ -246,9 +246,9 @@ If `--kv-cache-dtype turboquant_k8v4`:
 
 - P4 — required, removes hybrid TQ rejection.
 - P67, P67b — multi-query Triton kernel (replaces upstream which gives garbage tokens under FULL cudagraph).
-- P98 — required, TQ WorkspaceManager revert (else AssertionError on workspace lock).
-- P101 — TQ packed-slot layout opt.
-- PN8 — VRAM savings.
+- PR40941 — required, TQ WorkspaceManager revert (else AssertionError on workspace lock).
+- PR41123 — TQ packed-slot layout opt.
+- PR40849 — VRAM savings.
 
 **Copy-paste TQ k8v4 minimal env block:**
 
@@ -256,9 +256,9 @@ If `--kv-cache-dtype turboquant_k8v4`:
 # Required for TQ k8v4 — engine won't boot without these
 export GENESIS_ENABLE_P4=1                              # removes hybrid TQ rejection
 export GENESIS_ENABLE_P67_TQ_MULTI_QUERY_KERNEL=1       # Genesis multi-query kernel
-export GENESIS_ENABLE_P98=1                             # WorkspaceManager revert (vllm#40941 fix)
-export GENESIS_ENABLE_P101=1                            # TQ packed-slot layout
-export GENESIS_ENABLE_PN8_MTP_DRAFT_ONLINE_QUANT=1      # ~600 MiB VRAM savings on draft
+export GENESIS_ENABLE_PR40941=1                             # WorkspaceManager revert (vllm#40941 fix)
+export GENESIS_ENABLE_PR41123=1                            # TQ packed-slot layout
+export GENESIS_ENABLE_PR40849=1      # ~600 MiB VRAM savings on draft
 ```
 
 **Recommended additional patches for TQ k8v4 PROD (per `start_27b_int4_TQ_k8v4.sh`):**
@@ -268,26 +268,26 @@ export GENESIS_ENABLE_PN8_MTP_DRAFT_ONLINE_QUANT=1      # ~600 MiB VRAM savings 
 export GENESIS_ENABLE_P85=1                             # hybrid fine-shadow prefix cache
 export GENESIS_ENABLE_P87=1                             # ~+24% on AutoRound INT4 path (Marlin)
 export GENESIS_ENABLE_P91=1                             # AutoRound row-parallel scales fix
-export GENESIS_ENABLE_P99=1                             # WorkspaceManager memoize
-export GENESIS_ENABLE_P100=1                            # FlashInfer FULL cudagraph spec-decode
+export GENESIS_ENABLE_PR40941B=1                             # WorkspaceManager memoize
+export GENESIS_ENABLE_PR41127=1                            # FlashInfer FULL cudagraph spec-decode
 
 # Recommended quality patches
-export GENESIS_ENABLE_P58_ASYNC_PLACEHOLDER_FIX=1
-export GENESIS_ENABLE_P60_GDN_NGRAM_FIX=1
-export GENESIS_ENABLE_P60B_TRITON_KERNEL=1
+export GENESIS_ENABLE_PR40768=1
+export GENESIS_ENABLE_PR40738=1
+export GENESIS_ENABLE_PR40738B=1
 export GENESIS_ENABLE_P61_QWEN3_MULTI_TOOL=1
 export GENESIS_ENABLE_P61B_STREAMING_OVERLAP=1
-export GENESIS_ENABLE_P62_STRUCT_OUT_SPEC_TIMING=1
-export GENESIS_ENABLE_P64_QWEN3CODER_MTP_STREAMING=1
+export GENESIS_ENABLE_PR36138=1
+export GENESIS_ENABLE_PR39598=1
 export GENESIS_ENABLE_P66_CUDAGRAPH_SIZE_FILTER=1
 export GENESIS_ENABLE_P68_AUTO_FORCE_TOOL=1
 export GENESIS_ENABLE_P69_LONG_CTX_TOOL_REMINDER=1
 export GENESIS_ENABLE_P72_PROFILE_RUN_CAP=1
 export GENESIS_PROFILE_RUN_CAP_M=4096
 export GENESIS_ENABLE_P74_CHUNK_CLAMP=1
-export GENESIS_ENABLE_PN9_INDEPENDENT_DRAFTER_ATTN=1
-export GENESIS_ENABLE_PN11_GDN_AB_CONTIGUOUS=1
-export GENESIS_ENABLE_PN13_CUDA_GRAPH_LAMBDA_ARITY=1
+export GENESIS_ENABLE_PR39930=1
+export GENESIS_ENABLE_PR41142=1
+export GENESIS_ENABLE_PR41235=1
 export GENESIS_ENABLE_PN17_FA2_LSE_CLAMP=1
 export GENESIS_PREALLOC_TOKEN_BUDGET=4096
 export GENESIS_BUFFER_MODE=shared
@@ -300,7 +300,7 @@ export GENESIS_BUFFER_MODE=shared
 If you hit boot crashes related to torch.compile or cudagraph capture:
 
 - P65 — switch to PIECEWISE cudagraph (workaround for FULL capture issues on hybrid).
-- P99 — compile-cache safety.
+- PR40941b — compile-cache safety.
 
 See [docs/CLIFFS.md](CLIFFS.md) for the cliffs these patches address.
 
@@ -371,12 +371,12 @@ Common things to tweak after first boot:
 - Lower `--max-num-seqs` (cuts KV cache).
 - Lower `--gpu-memory-utilization` from 0.90 → 0.85.
 - Switch to `--kv-cache-dtype fp8_e5m2` (2× KV capacity).
-- Switch to `--kv-cache-dtype turboquant_k8v4` (5× KV capacity, needs P4 + P67 + P98).
+- Switch to `--kv-cache-dtype turboquant_k8v4` (5× KV capacity, needs P4 + P67 + PR40941).
 - Drop `--enable-prefix-caching` if your model is hybrid and on AutoRound INT4 — see Cliff 3.
 
 ### Tool-call breaks
 
-- Verify P59-P69 family is enabled.
+- Verify PR39055-P69 family is enabled.
 - Check the reasoning parser flag: `--reasoning-parser qwen3` (or `qwen3_5` for hybrid).
 - If using ngram spec-decode on prose, try `prompt_lookup_min=2,max=5` instead of strict mode (see Cliff 5).
 
@@ -444,19 +444,19 @@ Edits:
 Universal set only:
 
 ```bash
-export GENESIS_ENABLE_P58_ASYNC_PLACEHOLDER_FIX=1
+export GENESIS_ENABLE_PR40768=1
 export GENESIS_ENABLE_P66_CUDAGRAPH_SIZE_FILTER=1
 export GENESIS_ENABLE_P72_PROFILE_RUN_CAP=1
 export GENESIS_ENABLE_P74_CHUNK_CLAMP=1
-export GENESIS_ENABLE_P94=1
-export GENESIS_ENABLE_P99=1
-export GENESIS_ENABLE_PN13_CUDA_GRAPH_LAMBDA_ARITY=1
-export GENESIS_ENABLE_PN14_TQ_DECODE_OOB_CLAMP=1
+export GENESIS_ENABLE_PR41043=1
+export GENESIS_ENABLE_PR40941B=1
+export GENESIS_ENABLE_PR41235=1
+export GENESIS_ENABLE_PR40074=1
 export GENESIS_ENABLE_PN17_FA2_LSE_CLAMP=1
-export GENESIS_ENABLE_PN19_SCOPED_MAX_SPLIT=1
+export GENESIS_ENABLE_PR41268=1
 ```
 
-The Qwen3-specific patches (P59-P69 family) will SKIP automatically because `applies_to.model_archs` doesn't include `LlamaForCausalLM` — that's by design.
+The Qwen3-specific patches (PR39055-P69 family) will SKIP automatically because `applies_to.model_archs` doesn't include `LlamaForCausalLM` — that's by design.
 
 ### Boot, test, bench
 

@@ -243,7 +243,7 @@ class TextPatcher:
 #
 # Step 4 was duplicated across ~25 wiring modules with subtle drift —
 # some forgot to handle SKIPPED / IDEMPOTENT and silently reported
-# "applied" when the file was actually unchanged (caught by PN14 TDD
+# "applied" when the file was actually unchanged (caught by PR40074 TDD
 # 2026-04-29). This helper centralizes the mapping so future patches
 # (and the legacy ones as they migrate) can call it instead of
 # rolling their own if/elif/else.
@@ -299,9 +299,9 @@ class MultiFilePatchTransaction:
     """Two-phase commit for multi-file text-patches.
 
     Audit context (2026-05-05): TextPatcher is per-file atomic only.
-    Multi-file wiring patches (PN52, PN58) iterate over patchers — if file
+    Multi-file wiring patches (PR41411, PR40962) iterate over patchers — if file
     1 succeeds and file 2 fails, file 1 stays modified, leaving system in
-    partial state. PN52 docstring even falsely promised rollback.
+    partial state. PR41411 docstring even falsely promised rollback.
 
     This class implements proper validate-all-then-write-all transaction:
 
@@ -313,7 +313,7 @@ class MultiFilePatchTransaction:
         file modified between dry-run and commit), best-effort rollback
         via marker-based reverse search on already-modified files.
 
-    Usage in PN52 / PN58:
+    Usage in PR41411 / PR40962:
         def apply():
             txn = MultiFilePatchTransaction([
                 _make_envs_patcher(),
@@ -325,9 +325,9 @@ class MultiFilePatchTransaction:
             return txn.apply_or_skip()
 
     Returns:
-      ("applied", "PN52 5/5 sub-patchers committed") — full success
-      ("skipped", "PN52 dry-run failed: file 3 anchor not found ...") — atomic skip
-      ("failed", "PN52 partial commit: file 2 wrote, file 3 race; rollback ...") — degraded
+      ("applied", "PR41411 5/5 sub-patchers committed") — full success
+      ("skipped", "PR41411 dry-run failed: file 3 anchor not found ...") — atomic skip
+      ("failed", "PR41411 partial commit: file 2 wrote, file 3 race; rollback ...") — degraded
     """
 
     def __init__(self, patchers: list["TextPatcher"], name: str = "multi-file"):

@@ -71,7 +71,7 @@ def audit_prefix_cache_patches() -> list[CachePathFinding]:
     # Patches we know touch prefix-cache code paths
     PREFIX_CACHE_PATCHES = (
         "P83", "P84", "P85",
-        "PN35",  # inputs_embeds buffer (related, kv_cache pool sizing)
+        "PR35975",  # inputs_embeds buffer (related, kv_cache pool sizing)
         "PN54",  # GDN contiguous dedup (related, allocator)
     )
 
@@ -98,7 +98,7 @@ def audit_prefix_cache_patches() -> list[CachePathFinding]:
                 patch_id=pid,
                 file_path="<wiring file>",
                 missing_guards=tuple(missing),
-                severity="WARN" if pid in ("PN35", "PN54") else "INFO",
+                severity="WARN" if pid in ("PR35975", "PN54") else "INFO",
                 # Only WARN for patches that don't structurally need
                 # these guards. Real ERRORS would be for prefix-cache
                 # core patches (P83/84/85), but those need manual

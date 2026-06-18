@@ -193,24 +193,34 @@ class PatchStats:
 # callable.
 from vllm._genesis.dispatcher import PATCH_REGISTRY as _META_REGISTRY
 
-_APPLY_PATCH_ID_RE = re.compile(r"^apply_patch_([NM]?\d+[a-zA-Z]?)(?:_|$)")
+_APPLY_PATCH_ID_RE = re.compile(r"^apply_patch_(pr\d+[a-z]?|[NM]?\d+[a-zA-Z]?)(?:_|$)")
 _apply_order_counter = 0
 
 
-def register_patch(name: str):
+def register_patch(name: str, patch_id: str | None = None):
     """Attach a patch's apply function onto its dispatcher metadata entry.
 
-    The patch ID is parsed from the function name (``apply_patch_<id>_*`` →
-    ``P<id>``, matching the dispatcher key). The callable is stored on the
-    single registry as ``apply_callable`` together with ``_display_name`` and
-    ``_apply_order`` (boot order == decoration order). If no dispatcher entry
-    exists a minimal stub is created and an error logged, so a patch is never
-    silently dropped.
+    The patch ID is taken from the explicit ``patch_id`` argument when given
+    (used by ``PR#####``-named patches whose ID can't be derived from the
+    function name); otherwise it is parsed from the function name
+    (``apply_patch_<id>_*`` → ``P<id>``, matching the dispatcher key). The
+    callable is stored on the single registry as ``apply_callable`` together
+    with ``_display_name`` and ``_apply_order`` (boot order == decoration
+    order). If no dispatcher entry exists a minimal stub is created and an
+    error logged, so a patch is never silently dropped.
     """
     def decorator(fn: Callable[[], PatchResult]) -> Callable[[], PatchResult]:
         global _apply_order_counter
-        m = _APPLY_PATCH_ID_RE.match(fn.__name__)
-        pid = ("P" + m.group(1)) if m else fn.__name__
+        if patch_id is not None:
+            pid = patch_id
+        else:
+            m = _APPLY_PATCH_ID_RE.match(fn.__name__)
+            if m is None:
+                pid = fn.__name__
+            elif m.group(1).startswith("pr"):
+                pid = "PR" + m.group(1)[2:]        # apply_patch_pr40738b_* -> PR40738b
+            else:
+                pid = "P" + m.group(1)            # apply_patch_67_* -> P67 (legacy)
         entry = _META_REGISTRY.get(pid)
         if entry is None:
             log.error(
@@ -792,24 +802,24 @@ def apply_patch_N59_streaming_gdn() -> PatchResult:
     return _failed(name, reason)
 
 
-@register_patch("PN58 spec-decode reasoning boundary (vllm#40962, narrower alt to P62)")
-def apply_patch_N58_spec_reasoning_boundary() -> PatchResult:
-    """PN58: backport vllm#40962 — narrower alternative to P62.
+@register_patch("PR40962 spec-decode reasoning boundary (vllm#40962, narrower alt to PR36138)")
+def apply_patch_pr40962_spec_reasoning_boundary() -> PatchResult:
+    """PR40962: backport vllm#40962 — narrower alternative to PR36138.
 
-    MUTUALLY EXCLUSIVE with P62. Apply check enforces P62 OFF.
-    Status: opt-in via GENESIS_ENABLE_PN58_SPEC_REASONING_BOUNDARY=1.
+    MUTUALLY EXCLUSIVE with PR36138. Apply check enforces PR36138 OFF.
+    Status: opt-in via GENESIS_ENABLE_PR40962=1.
     Runtime requires VLLM_SPEC_REASONING_BOUNDARY_VALIDATION=1.
     """
-    name = "PN58 spec-decode reasoning boundary"
+    name = "PR40962 spec-decode reasoning boundary"
     if not _APPLY_MODE:
         return _applied(name, "dry-run: text-patch ready")
     try:
         from vllm._genesis.wiring.structured_output import (
-            patch_N58_spec_reasoning_boundary,
+            patch_pr40962_spec_reasoning_boundary,
         )
     except Exception as e:
         return _failed(name, f"wiring import failed: {e}")
-    status, reason = patch_N58_spec_reasoning_boundary.apply()
+    status, reason = patch_pr40962_spec_reasoning_boundary.apply()
     if status == "applied":
         return _applied(name, reason)
     if status == "skipped":
@@ -817,19 +827,19 @@ def apply_patch_N58_spec_reasoning_boundary() -> PatchResult:
     return _failed(name, reason)
 
 
-@register_patch("P107 MTP truncation detector (vllm#41467)")
-def apply_patch_107_mtp_truncation_detector() -> PatchResult:
-    """P107: defensive detector for MTP truncation at reasoning→tool boundary."""
-    name = "P107 MTP truncation detector"
+@register_patch("PR41467 MTP truncation detector (vllm#41467)")
+def apply_patch_pr41467_mtp_truncation_detector() -> PatchResult:
+    """PR41467: defensive detector for MTP truncation at reasoning→tool boundary."""
+    name = "PR41467 MTP truncation detector"
     if not _APPLY_MODE:
         return _applied(name, "dry-run: text-patch ready")
     try:
         from vllm._genesis.wiring.structured_output import (
-            patch_107_mtp_truncation_detector,
+            patch_pr41467_mtp_truncation_detector,
         )
     except Exception as e:
         return _failed(name, f"wiring import failed: {e}")
-    status, reason = patch_107_mtp_truncation_detector.apply()
+    status, reason = patch_pr41467_mtp_truncation_detector.apply()
     if status == "applied":
         return _applied(name, reason)
     if status == "skipped":
@@ -837,17 +847,17 @@ def apply_patch_107_mtp_truncation_detector() -> PatchResult:
     return _failed(name, reason)
 
 
-@register_patch("PN57 TQ centroids disk-persistent cache (vllm#41418-inspired)")
-def apply_patch_N57_tq_centroids_disk_cache() -> PatchResult:
-    """PN57: disk-persistent cache for TurboQuant Lloyd-Max centroids."""
-    name = "PN57 TQ centroids disk cache"
+@register_patch("PR41418b TQ centroids disk-persistent cache (vllm#41418-inspired)")
+def apply_patch_pr41418b_tq_centroids_disk_cache() -> PatchResult:
+    """PR41418b: disk-persistent cache for TurboQuant Lloyd-Max centroids."""
+    name = "PR41418b TQ centroids disk cache"
     if not _APPLY_MODE:
         return _applied(name, "dry-run: text-patch ready")
     try:
-        from vllm._genesis.wiring.perf_hotfix import patch_N57_tq_centroids_disk_cache
+        from vllm._genesis.wiring.perf_hotfix import patch_pr41418b_tq_centroids_disk_cache
     except Exception as e:
         return _failed(name, f"wiring import failed: {e}")
-    status, reason = patch_N57_tq_centroids_disk_cache.apply()
+    status, reason = patch_pr41418b_tq_centroids_disk_cache.apply()
     if status == "applied":
         return _applied(name, reason)
     if status == "skipped":
@@ -855,20 +865,20 @@ def apply_patch_N57_tq_centroids_disk_cache() -> PatchResult:
     return _failed(name, reason)
 
 
-@register_patch("PN55 wake_up hybrid KV crash fix (vllm#41602)")
-def apply_patch_N55_wake_up_hybrid_kv() -> PatchResult:
-    """PN55: backport of vllm#41602 — fixes /wake_up AttributeError on hybrid.
+@register_patch("PR41602 wake_up hybrid KV crash fix (vllm#41602)")
+def apply_patch_pr41602_wake_up_hybrid_kv() -> PatchResult:
+    """PR41602: backport of vllm#41602 — fixes /wake_up AttributeError on hybrid.
 
-    Status: opt-in via GENESIS_ENABLE_PN55_WAKE_UP_HYBRID_KV=1.
+    Status: opt-in via GENESIS_ENABLE_PR41602=1.
     """
-    name = "PN55 wake_up hybrid KV (vllm#41602)"
+    name = "PR41602 wake_up hybrid KV (vllm#41602)"
     if not _APPLY_MODE:
         return _applied(name, "dry-run: text-patch ready")
     try:
-        from vllm._genesis.wiring.perf_hotfix import patch_N55_wake_up_hybrid_kv
+        from vllm._genesis.wiring.perf_hotfix import patch_pr41602_wake_up_hybrid_kv
     except Exception as e:
         return _failed(name, f"wiring import failed: {e}")
-    status, reason = patch_N55_wake_up_hybrid_kv.apply()
+    status, reason = patch_pr41602_wake_up_hybrid_kv.apply()
     if status == "applied":
         return _applied(name, reason)
     if status == "skipped":
@@ -906,9 +916,9 @@ def apply_patch_N54_gdn_contiguous_dedup() -> PatchResult:
     return _failed(name, reason)
 
 
-@register_patch("PN52 prompt_logprobs eviction fix (vllm#41411)")
-def apply_patch_N52_prompt_logprobs_eviction() -> PatchResult:
-    """PN52: backport of vllm#41411 (MERGED 2026-05-04, NOT in our pin).
+@register_patch("PR41411 prompt_logprobs eviction fix (vllm#41411)")
+def apply_patch_pr41411_prompt_logprobs_eviction() -> PatchResult:
+    """PR41411: backport of vllm#41411 (MERGED 2026-05-04, NOT in our pin).
 
     Multi-file fix for prompt_logprobs broken under chunked prefill +
     request eviction. Two bugs:
@@ -918,20 +928,20 @@ def apply_patch_N52_prompt_logprobs_eviction() -> PatchResult:
 
     Affects all Genesis configs (chunked-prefill + spec-decode + prompt_logprobs).
 
-    Status: opt-in via GENESIS_ENABLE_PN52_PROMPT_LOGPROBS_EVICTION=1.
+    Status: opt-in via GENESIS_ENABLE_PR41411=1.
 
     Credit: Joachim Studnia (Mistral), vllm#41411.
     """
-    name = "PN52 prompt_logprobs eviction fix (vllm#41411)"
+    name = "PR41411 prompt_logprobs eviction fix (vllm#41411)"
     if not _APPLY_MODE:
         return _applied(name, "dry-run: text-patch ready")
     try:
         from vllm._genesis.wiring.perf_hotfix import (
-            patch_N52_prompt_logprobs_eviction,
+            patch_pr41411_prompt_logprobs_eviction,
         )
     except Exception as e:
         return _failed(name, f"wiring import failed: {e}")
-    status, reason = patch_N52_prompt_logprobs_eviction.apply()
+    status, reason = patch_pr41411_prompt_logprobs_eviction.apply()
     if status == "applied":
         return _applied(name, reason)
     if status == "skipped":
@@ -1004,33 +1014,33 @@ def apply_patch_N51_qwen3_streaming_thinking_disabled() -> PatchResult:
     return _failed(name, reason)
 
 
-@register_patch("P62 structured-output spec-decode timing fix")
-def apply_patch_62_struct_out_spec_timing() -> PatchResult:
+@register_patch("PR36138 structured-output spec-decode timing fix")
+def apply_patch_pr36138_struct_out_spec_timing() -> PatchResult:
     """Patch 62: backport of upstream PR vllm#36138 (sfbemerk).
 
     Fixes grammar bypass when `</think>` (or implicit reasoning-end via
     `<tool_call>`) arrives within a speculative-decode token batch. Likely
     candidate for closing residual 30-50% broken tool-call output that
-    P60+P60b+P61 doesn't fully resolve.
+    PR40738+PR40738b+P61 doesn't fully resolve.
 
     Mechanism: old `should_advance()` checks a derived delta that becomes
     empty when speculative tokens are involved → reasoning_end check fails →
     grammar bypass for all post-reasoning tokens → arbitrary XML emission.
 
-    Status: opt-in via GENESIS_ENABLE_P62_STRUCT_OUT_SPEC_TIMING=1.
+    Status: opt-in via GENESIS_ENABLE_PR36138=1.
 
     Credit:
       - Upstream fix: @sfbemerk (vllm#36138).
       - Original bug: @cicirori (vllm#34650).
     """
-    name = "P62 structured-output spec-decode timing fix"
+    name = "PR36138 structured-output spec-decode timing fix"
     if not _APPLY_MODE:
         return _applied(name, "dry-run: text-patch ready")
     try:
-        from vllm._genesis.wiring.structured_output import patch_62_structured_output_spec_decode_timing
+        from vllm._genesis.wiring.structured_output import patch_pr36138_structured_output_spec_decode_timing
     except Exception as e:
         return _failed(name, f"wiring import failed: {e}")
-    status, reason = patch_62_structured_output_spec_decode_timing.apply()
+    status, reason = patch_pr36138_structured_output_spec_decode_timing.apply()
     if status == "applied":
         return _applied(name, reason)
     if status == "skipped":
@@ -1038,12 +1048,12 @@ def apply_patch_62_struct_out_spec_timing() -> PatchResult:
     return _failed(name, reason)
 
 
-@register_patch("P60b GDN+ngram Triton kernel offset")
-def apply_patch_60b_gdn_ngram_triton_kernel() -> PatchResult:
-    """Patch 60b (P60 Phase 2): backport vllm#40738 Triton kernel portion.
+@register_patch("PR40738b GDN+ngram Triton kernel offset")
+def apply_patch_pr40738b_gdn_ngram_triton_kernel() -> PatchResult:
+    """Patch 60b (PR40738 Phase 2): backport vllm#40738 Triton kernel portion.
 
-    DEPENDS ON P60 (Phase 1). Apply P60 first; P60b adds the Triton kernel
-    offset arithmetic for conv state read/write. Without P60 Phase 1,
+    DEPENDS ON PR40738 (Phase 1). Apply PR40738 first; PR40738b adds the Triton kernel
+    offset arithmetic for conv state read/write. Without PR40738 Phase 1,
     Phase 2 alone won't help (SSM state must be pre-copied first).
 
     Modifies `_causal_conv1d_fwd_kernel` Triton kernel signature + body
@@ -1051,26 +1061,26 @@ def apply_patch_60b_gdn_ngram_triton_kernel() -> PatchResult:
     and STEP 2 write. Also updates `causal_conv1d_fn` Python wrapper +
     GDN call site to pass `num_accepted_tokens` parameter.
 
-    Status: opt-in via GENESIS_ENABLE_P60B_TRITON_KERNEL=1.
+    Status: opt-in via GENESIS_ENABLE_PR40738B=1.
 
     Risk: Triton signature change invalidates JIT cache. Auto-clears
     causal_conv1d cache entries on apply. First spec-decode call triggers
     ~5-10s kernel recompile (profiler-visible spike).
 
-    Combined with P60 Phase 1, expected to push 43% clean → 95%+ clean.
+    Combined with PR40738 Phase 1, expected to push 43% clean → 95%+ clean.
 
     Credit:
       - Upstream fix: @tdoublep (vllm core team, vllm#40738).
       - Empirical isolation on Genesis: 2026-04-25 blue/green test cycle.
     """
-    name = "P60b GDN+ngram Triton kernel offset"
+    name = "PR40738b GDN+ngram Triton kernel offset"
     if not _APPLY_MODE:
         return _applied(name, "dry-run: text-patch ready")
     try:
-        from vllm._genesis.wiring.spec_decode import patch_60b_gdn_ngram_triton_kernel
+        from vllm._genesis.wiring.spec_decode import patch_pr40738b_gdn_ngram_triton_kernel
     except Exception as e:
         return _failed(name, f"wiring import failed: {e}")
-    status, reason = patch_60b_gdn_ngram_triton_kernel.apply()
+    status, reason = patch_pr40738b_gdn_ngram_triton_kernel.apply()
     if status == "applied":
         return _applied(name, reason)
     if status == "skipped":
@@ -1078,12 +1088,12 @@ def apply_patch_60b_gdn_ngram_triton_kernel() -> PatchResult:
     return _failed(name, reason)
 
 
-@register_patch("P60 GDN+ngram state recovery")
-def apply_patch_60_gdn_ngram_state_recovery() -> PatchResult:
+@register_patch("PR40738 GDN+ngram state recovery")
+def apply_patch_pr40738_gdn_ngram_state_recovery() -> PatchResult:
     """Patch 60 Phase 1 (Python-only): backport vllm#40738 (Thomas Parnell).
 
     Top candidate root-cause fix for #40831 / our degenerate-output bug after
-    P58 (#40768) + P59 (#39055) + ngram_gpu (Path B) all empirically disproven
+    PR40768 (#40768) + PR39055 (#39055) + ngram_gpu (Path B) all empirically disproven
     2026-04-25 in blue/green tests.
 
     Bug: hybrid GDN models with ngram speculative decode read SSM state from
@@ -1092,28 +1102,28 @@ def apply_patch_60_gdn_ngram_state_recovery() -> PatchResult:
     that only appears when both spec-decode AND structured output (tools)
     are active.
 
-    P60 Phase 1: Python-only changes in 3 files (gdn_attn.py + gdn_linear_attn
+    PR40738 Phase 1: Python-only changes in 3 files (gdn_attn.py + gdn_linear_attn
     + gpu_model_runner.py). Adds `spec_decode_src_indices` metadata field +
     SSM state pre-copy + non-spec passthrough.
 
-    P60 Phase 2 (Triton kernel patch in causal_conv1d.py) DEFERRED — needed
+    PR40738 Phase 2 (Triton kernel patch in causal_conv1d.py) DEFERRED — needed
     for full conv-state correctness if Phase 1 doesn't fully fix.
 
-    Status: opt-in via GENESIS_ENABLE_P60_GDN_NGRAM_FIX=1.
+    Status: opt-in via GENESIS_ENABLE_PR40738=1.
 
     Credit:
       - Upstream fix: @tdoublep (vllm core team, vllm#40738).
       - Bug surface: @noonghunna (#40807, #40831).
       - Empirical isolation on Genesis: 2026-04-25 blue/green test cycle.
     """
-    name = "P60 GDN+ngram state recovery"
+    name = "PR40738 GDN+ngram state recovery"
     if not _APPLY_MODE:
         return _applied(name, "dry-run: text-patch ready")
     try:
-        from vllm._genesis.wiring.spec_decode import patch_60_gdn_ngram_state_recovery
+        from vllm._genesis.wiring.spec_decode import patch_pr40738_gdn_ngram_state_recovery
     except Exception as e:
         return _failed(name, f"wiring import failed: {e}")
-    status, reason = patch_60_gdn_ngram_state_recovery.apply()
+    status, reason = patch_pr40738_gdn_ngram_state_recovery.apply()
     if status == "applied":
         return _applied(name, reason)
     if status == "skipped":
@@ -1126,18 +1136,18 @@ def apply_patch_63_mtp_gdn_state_recovery() -> PatchResult:
     """Patch 63 (Genesis-original): MTP/Eagle drafter forward GDN state recovery.
 
     Bug class identified by Genesis investigation 2026-04-25 after @noonghunna's
-    Probe 9 showed P60+P60b close the ngram path but MTP n=3 still produces
+    Probe 9 showed PR40738+PR40738b close the ngram path but MTP n=3 still produces
     empty tool calls. Root cause: Eagle/MTP drafter forward goes through
     `build_for_drafting()` which defaults to `self.build()` WITHOUT
-    `num_accepted_tokens`, so P60's spec_decode_src_indices recovery never
+    `num_accepted_tokens`, so PR40738's spec_decode_src_indices recovery never
     fires for the drafter's GDN attention.
 
     Fix: override GDN's `build_for_drafting` to read cached num_accepted from
     the builder's own buffer (set by the spec branch of the most recent
-    main-step build) and pass it through to `build()`. Engages P60's recovery
+    main-step build) and pass it through to `build()`. Engages PR40738's recovery
     logic for the drafter forward path.
 
-    DEPENDS ON P60 being applied. Without P60's `spec_decode_src_indices`
+    DEPENDS ON PR40738 being applied. Without PR40738's `spec_decode_src_indices`
     field + non-spec branch recovery logic, P63 is a no-op.
 
     Status: opt-in via GENESIS_ENABLE_P63_MTP_GDN_STATE_RECOVERY=1.
@@ -1166,8 +1176,8 @@ def apply_patch_63_mtp_gdn_state_recovery() -> PatchResult:
     return _failed(name, reason)
 
 
-@register_patch("P64 qwen3coder MTP streaming early-return fix")
-def apply_patch_64_qwen3coder_mtp_streaming() -> PatchResult:
+@register_patch("PR39598 qwen3coder MTP streaming early-return fix")
+def apply_patch_pr39598_qwen3coder_mtp_streaming() -> PatchResult:
     """Patch 64: Backport of vllm-project/vllm#39598 (kotori-yan, OPEN).
 
     Streaming-only MTP/spec-decode tool-call edge case:
@@ -1183,7 +1193,7 @@ def apply_patch_64_qwen3coder_mtp_streaming() -> PatchResult:
 
     Fix scope: streaming code path only. Non-streaming tool calls unaffected.
 
-    Status: opt-in via GENESIS_ENABLE_P64_QWEN3CODER_MTP_STREAMING=1.
+    Status: opt-in via GENESIS_ENABLE_PR39598=1.
     Recommended for any setup using LibreChat / OpenWebUI / SSE clients
     against MTP-enabled vLLM.
 
@@ -1191,14 +1201,14 @@ def apply_patch_64_qwen3coder_mtp_streaming() -> PatchResult:
       - Upstream fix: @kotori-yan (vllm#39598).
       - Bug class identified by Genesis MTP test cycle 2026-04-25.
     """
-    name = "P64 qwen3coder MTP streaming early-return fix"
+    name = "PR39598 qwen3coder MTP streaming early-return fix"
     if not _APPLY_MODE:
         return _applied(name, "dry-run: text-patch ready")
     try:
-        from vllm._genesis.wiring.structured_output import patch_64_qwen3coder_mtp_streaming
+        from vllm._genesis.wiring.structured_output import patch_pr39598_qwen3coder_mtp_streaming
     except Exception as e:
         return _failed(name, f"wiring import failed: {e}")
-    status, reason = patch_64_qwen3coder_mtp_streaming.apply()
+    status, reason = patch_pr39598_qwen3coder_mtp_streaming.apply()
     if status == "applied":
         return _applied(name, reason)
     if status == "skipped":
@@ -1370,7 +1380,7 @@ def apply_patch_67_tq_multi_query_kernel() -> PatchResult:
     Once empirically validated end-to-end on Sander's prod rig:
       - Restore P65 to UNIFORM_BATCH (no longer need cudagraph downgrade)
       - Spec-decode batches regain FULL cudagraph speedup
-      - Net: P64 + P65v2 + P66 + P67 = correct + fast
+      - Net: PR39598 + P65v2 + P66 + P67 = correct + fast
 
     Credit:
       - Bug surface: @noonghunna (vllm#40880)
@@ -1393,8 +1403,8 @@ def apply_patch_67_tq_multi_query_kernel() -> PatchResult:
     return _failed(name, reason)
 
 
-@register_patch("P71 Block-verify rejection sampler (vllm#40819 + gemini bug-fixes)")
-def apply_patch_71_block_verify() -> PatchResult:
+@register_patch("PR40819 Block-verify rejection sampler (vllm#40819 + gemini bug-fixes)")
+def apply_patch_pr40819_block_verify() -> PatchResult:
     """Patch 71: opt-in backport of vllm-project/vllm#40819 (Z. Golpayegani,
     OPEN draft) implementing Sun et al. 2024 ICLR block verification rule
     (arXiv 2403.10444) for spec-decode rejection sampling.
@@ -1409,7 +1419,7 @@ def apply_patch_71_block_verify() -> PatchResult:
         drafts
 
     Activation gate (all must hold):
-      - GENESIS_ENABLE_P71_BLOCK_VERIFY=1
+      - GENESIS_ENABLE_PR40819=1
       - max_spec_len >= 3
       - draft_probs is not None (per-token probs available; ngram has none)
       - not synthetic_mode
@@ -1424,14 +1434,14 @@ def apply_patch_71_block_verify() -> PatchResult:
 
     Status: opt-in, default OFF. Not enabled in v7.42 prod env.
     """
-    name = "P71 Block-verify rejection sampler (vllm#40819 + gemini bug-fixes)"
+    name = "PR40819 Block-verify rejection sampler (vllm#40819 + gemini bug-fixes)"
     if not _APPLY_MODE:
         return _applied(name, "dry-run: text-patch ready")
     try:
-        from vllm._genesis.wiring.spec_decode import patch_71_block_verify
+        from vllm._genesis.wiring.spec_decode import patch_pr40819_block_verify
     except Exception as e:
         return _failed(name, f"wiring import failed: {e}")
-    status, reason = patch_71_block_verify.apply()
+    status, reason = patch_pr40819_block_verify.apply()
     if status == "applied":
         return _applied(name, reason)
     if status == "skipped":
@@ -1496,7 +1506,7 @@ def apply_patch_77_adaptive_ngram_k() -> PatchResult:
     Nightjar arXiv 2512.22420 auto-disable extension.
 
     Composition:
-      - With P75 (suffix): P75 routes to SuffixDecodingProposer instead, P77
+      - With PR25784 (suffix): PR25784 routes to SuffixDecodingProposer instead, P77
         wiring patch is harmless no-op (NgramProposer never instantiated).
       - With P70 (auto-strict-ngram): orthogonal — P70 sets prompt_lookup_min,
         P77 controls K. Stack cleanly.
@@ -1517,8 +1527,8 @@ def apply_patch_77_adaptive_ngram_k() -> PatchResult:
     return _failed(name, reason)
 
 
-@register_patch("P79b Async × spec-decode proposer-sync backport (vllm#40610)")
-def apply_patch_79b_async_proposer_sync() -> PatchResult:
+@register_patch("PR40610 Async × spec-decode proposer-sync backport (vllm#40610)")
+def apply_patch_pr40610_async_proposer_sync() -> PatchResult:
     """Patch 79b: backport of vllm#40610 (OPEN draft, tracked from #40608).
 
     Wraps GPUModelRunner.sample_tokens() to re-record
@@ -1536,16 +1546,16 @@ def apply_patch_79b_async_proposer_sync() -> PatchResult:
     Direct value for Genesis prod (sync ngram): NONE — async path
     not engaged. But protects users on async + spec-decode.
 
-    Status: opt-in via GENESIS_ENABLE_P79B_ASYNC_PROPOSER_SYNC=1.
+    Status: opt-in via GENESIS_ENABLE_PR40610=1.
     """
-    name = "P79b Async × spec-decode proposer-sync backport (vllm#40610)"
+    name = "PR40610 Async × spec-decode proposer-sync backport (vllm#40610)"
     if not _APPLY_MODE:
         return _applied(name, "dry-run: text-patch ready")
     try:
-        from vllm._genesis.wiring.spec_decode import patch_79b_async_proposer_sync
+        from vllm._genesis.wiring.spec_decode import patch_pr40610_async_proposer_sync
     except Exception as e:
         return _failed(name, f"wiring import failed: {e}")
-    status, reason = patch_79b_async_proposer_sync.apply()
+    status, reason = patch_pr40610_async_proposer_sync.apply()
     if status == "applied":
         return _applied(name, reason)
     if status == "skipped":
@@ -1553,8 +1563,8 @@ def apply_patch_79b_async_proposer_sync() -> PatchResult:
     return _failed(name, reason)
 
 
-@register_patch("P79c Stale spec_token_ids cleanup for unscheduled requests (vllm#37629)")
-def apply_patch_79c_stale_spec_token_cleanup() -> PatchResult:
+@register_patch("PR37629 Stale spec_token_ids cleanup for unscheduled requests (vllm#37629)")
+def apply_patch_pr37629_stale_spec_token_cleanup() -> PatchResult:
     """Patch 79c: backport of vllm#37629 (OPEN, fixes #36906).
 
     Adds a cleanup pass after the main scheduling loop in
@@ -1572,16 +1582,16 @@ def apply_patch_79c_stale_spec_token_cleanup() -> PatchResult:
     Single-user can't exhaust token budget. Useful only for high-concurrency
     multimodal users on async + EAGLE/MTP.
 
-    Status: opt-in via GENESIS_ENABLE_P79C_STALE_SPEC_TOKEN_CLEANUP=1.
+    Status: opt-in via GENESIS_ENABLE_PR37629=1.
     """
-    name = "P79c Stale spec_token_ids cleanup for unscheduled requests (vllm#37629)"
+    name = "PR37629 Stale spec_token_ids cleanup for unscheduled requests (vllm#37629)"
     if not _APPLY_MODE:
         return _applied(name, "dry-run: text-patch ready")
     try:
-        from vllm._genesis.wiring.spec_decode import patch_79c_stale_spec_token_cleanup
+        from vllm._genesis.wiring.spec_decode import patch_pr37629_stale_spec_token_cleanup
     except Exception as e:
         return _failed(name, f"wiring import failed: {e}")
-    status, reason = patch_79c_stale_spec_token_cleanup.apply()
+    status, reason = patch_pr37629_stale_spec_token_cleanup.apply()
     if status == "applied":
         return _applied(name, reason)
     if status == "skipped":
@@ -1616,25 +1626,25 @@ def apply_patch_N61_qwen3_vl_keyerror_guard() -> PatchResult:
     return _failed(name, reason)
 
 
-@register_patch("PN67 thinking_token_budget inverted bool fix (vllm#41674)")
-def apply_patch_N67_thinking_budget_inverted_bool() -> PatchResult:
-    """Patch PN67: 1-line trivial backport of vllm#41674 (JasonKeyiL, OPEN).
+@register_patch("PR41674 thinking_token_budget inverted bool fix (vllm#41674)")
+def apply_patch_pr41674_thinking_budget_inverted_bool() -> PatchResult:
+    """Patch PR41674: 1-line trivial backport of vllm#41674 (JasonKeyiL, OPEN).
 
     Removes `not` from inverted boolean in `gpu_input_batch.py:894` —
     thinking_token_budget was silently disabled for requests without
     penalty params. NULL on Genesis PROD (we don't enable the feature);
     defensive for operators who experiment with it.
 
-    Status: opt-in via GENESIS_ENABLE_PN67=1.
+    Status: opt-in via GENESIS_ENABLE_PR41674=1.
     """
-    name = "PN67 thinking_token_budget inverted bool fix (vllm#41674)"
+    name = "PR41674 thinking_token_budget inverted bool fix (vllm#41674)"
     if not _APPLY_MODE:
         return _applied(name, "dry-run: text-patch ready")
     try:
-        from vllm._genesis.wiring.perf_hotfix import patch_N67_thinking_budget_inverted_bool
+        from vllm._genesis.wiring.perf_hotfix import patch_pr41674_thinking_budget_inverted_bool
     except Exception as e:
         return _failed(name, f"wiring import failed: {e}")
-    status, reason = patch_N67_thinking_budget_inverted_bool.apply()
+    status, reason = patch_pr41674_thinking_budget_inverted_bool.apply()
     if status == "applied":
         return _applied(name, reason)
     if status == "skipped":
@@ -1711,7 +1721,7 @@ def apply_patch_N62_text_only_vit_skip() -> PatchResult:
     _dummy_run with a text-only-mode guard that signals the inner alloc
     helper to skip.
 
-    Sister to PN35 (text-only inputs_embeds skip — already merged
+    Sister to PR35975 (text-only inputs_embeds skip — already merged
     upstream as vllm#35975).
 
     Status: opt-in via GENESIS_ENABLE_PN62=1.
@@ -1731,8 +1741,8 @@ def apply_patch_N62_text_only_vit_skip() -> PatchResult:
     return _failed(name, reason)
 
 
-@register_patch("P81 fp8 block-scaled MM low-M decode tuning (vllm#40925)")
-def apply_patch_81_fp8_block_scaled_m_le_8() -> PatchResult:
+@register_patch("PR40925 fp8 block-scaled MM low-M decode tuning (vllm#40925)")
+def apply_patch_pr40925_fp8_block_scaled_m_le_8() -> PatchResult:
     """Patch 81: backport of vllm#40925 (tonyliu312, OPEN).
 
     Specializes `w8a8_triton_block_scaled_mm` default config for M<=8
@@ -1748,16 +1758,16 @@ def apply_patch_81_fp8_block_scaled_m_le_8() -> PatchResult:
     Empirical (per upstream PR on GB10 sm_121):
     +23% median decode TPS (5.45 -> 6.73 t/s).
 
-    Status: opt-in via GENESIS_ENABLE_P81_FP8_BLOCK_SCALED_M_LE_8=1.
+    Status: opt-in via GENESIS_ENABLE_PR40925=1.
     """
-    name = "P81 fp8 block-scaled MM low-M decode tuning (vllm#40925)"
+    name = "PR40925 fp8 block-scaled MM low-M decode tuning (vllm#40925)"
     if not _APPLY_MODE:
         return _applied(name, "dry-run: text-patch ready")
     try:
-        from vllm._genesis.wiring.kernels import patch_81_fp8_block_scaled_m_le_8
+        from vllm._genesis.wiring.kernels import patch_pr40925_fp8_block_scaled_m_le_8
     except Exception as e:
         return _failed(name, f"wiring import failed: {e}")
-    status, reason = patch_81_fp8_block_scaled_m_le_8.apply()
+    status, reason = patch_pr40925_fp8_block_scaled_m_le_8.apply()
     if status == "applied":
         return _applied(name, reason)
     if status == "skipped":
@@ -1885,9 +1895,9 @@ def apply_patch_84_hash_block_size_override() -> PatchResult:
 
 
 @register_patch(
-    "P100 FlashInfer FULL CUDA graph for spec-decode (vllm#41127 backport v7.62.17)"
+    "PR41127 FlashInfer FULL CUDA graph for spec-decode (vllm#41127 backport v7.62.17)"
 )
-def apply_patch_100_flashinfer_full_cg_specdec() -> PatchResult:
+def apply_patch_pr41127_flashinfer_full_cg_specdec() -> PatchResult:
     """Patch 100: backport of vllm#41127 (FlashInfer FULL CG for spec-decode).
 
     Per Sander 2026-04-28: 'не ждём, изучаем, импортируем'. 11 sub-patches
@@ -1897,16 +1907,16 @@ def apply_patch_100_flashinfer_full_cg_specdec() -> PatchResult:
     Expected: +5-10% TPS on Ampere SM 8.6.
     NO-OP for PROD (turboquant_attn backend).
 
-    Status: opt-in via GENESIS_ENABLE_P100=1.
+    Status: opt-in via GENESIS_ENABLE_PR41127=1.
     """
-    name = "P100 FlashInfer FULL CUDA graph for spec-decode (vllm#41127)"
+    name = "PR41127 FlashInfer FULL CUDA graph for spec-decode (vllm#41127)"
     if not _APPLY_MODE:
         return _applied(name, "dry-run: text-patch ready")
     try:
-        from vllm._genesis.wiring.perf_hotfix import patch_100_flashinfer_full_cg_specdec
+        from vllm._genesis.wiring.perf_hotfix import patch_pr41127_flashinfer_full_cg_specdec
     except Exception as e:
         return _failed(name, f"wiring import failed: {e}")
-    status, reason = patch_100_flashinfer_full_cg_specdec.apply()
+    status, reason = patch_pr41127_flashinfer_full_cg_specdec.apply()
     if status == "applied":
         return _applied(name, reason)
     if status == "skipped":
@@ -1946,9 +1956,9 @@ def apply_patch_103_fla_cliff2_chunked() -> PatchResult:
 
 
 @register_patch(
-    "P101 TQ continuation 64-token slicing (vllm#41123 selective v7.62.16)"
+    "PR41123 TQ continuation 64-token slicing (vllm#41123 selective v7.62.16)"
 )
-def apply_patch_101_tq_continuation_slicing() -> PatchResult:
+def apply_patch_pr41123_tq_continuation_slicing() -> PatchResult:
     """Patch 101: SELECTIVE backport of vllm#41123 TQ on hybrid models.
 
     TAKE: _CONTINUATION_DECODE_THRESHOLD 128→64, _CONTINUATION_DECODE_MAX_CACHED_LEN=32K,
@@ -1956,17 +1966,17 @@ def apply_patch_101_tq_continuation_slicing() -> PatchResult:
     SKIP: cudagraph_support downgrade (would hurt PROD), hybrid boundary-skip.
 
     Expected: +3-12% TPS on PROD long-context.
-    Composes with P98/P99 (non-overlapping anchors).
-    Status: opt-in via GENESIS_ENABLE_P101=1.
+    Composes with PR40941/PR40941b (non-overlapping anchors).
+    Status: opt-in via GENESIS_ENABLE_PR41123=1.
     """
-    name = "P101 TQ continuation 64-token slicing (vllm#41123 selective)"
+    name = "PR41123 TQ continuation 64-token slicing (vllm#41123 selective)"
     if not _APPLY_MODE:
         return _applied(name, "dry-run: text-patch ready")
     try:
-        from vllm._genesis.wiring.perf_hotfix import patch_101_tq_continuation_slicing
+        from vllm._genesis.wiring.perf_hotfix import patch_pr41123_tq_continuation_slicing
     except Exception as e:
         return _failed(name, f"wiring import failed: {e}")
-    status, reason = patch_101_tq_continuation_slicing.apply()
+    status, reason = patch_pr41123_tq_continuation_slicing.apply()
     if status == "applied":
         return _applied(name, reason)
     if status == "skipped":
@@ -1975,25 +1985,25 @@ def apply_patch_101_tq_continuation_slicing() -> PatchResult:
 
 
 @register_patch(
-    "P99 WorkspaceManager memoize get_simultaneous (perf hotfix v7.62.15)"
+    "PR40941b WorkspaceManager memoize get_simultaneous (perf hotfix v7.62.15)"
 )
-def apply_patch_99_workspace_manager_memoize() -> PatchResult:
+def apply_patch_pr40941b_workspace_manager_memoize() -> PatchResult:
     """Patch 99: memoize WorkspaceManager.get_simultaneous().
 
     Per Sander 2026-04-28 direct request 'if revert gives speedup, look at
-    kernel — maybe rewrite'. P99 keeps upstream design but adds memo cache
+    kernel — maybe rewrite'. PR40941b keeps upstream design but adds memo cache
     by (shapes_and_dtypes, ubatch_id, ws_data_ptr).
 
-    Status: opt-in via GENESIS_ENABLE_P99=1.
+    Status: opt-in via GENESIS_ENABLE_PR40941B=1.
     """
-    name = "P99 WorkspaceManager memoize get_simultaneous (perf hotfix)"
+    name = "PR40941b WorkspaceManager memoize get_simultaneous (perf hotfix)"
     if not _APPLY_MODE:
         return _applied(name, "dry-run: text-patch ready")
     try:
-        from vllm._genesis.wiring.perf_hotfix import patch_99_workspace_manager_memoize
+        from vllm._genesis.wiring.perf_hotfix import patch_pr40941b_workspace_manager_memoize
     except Exception as e:
         return _failed(name, f"wiring import failed: {e}")
-    status, reason = patch_99_workspace_manager_memoize.apply()
+    status, reason = patch_pr40941b_workspace_manager_memoize.apply()
     if status == "applied":
         return _applied(name, reason)
     if status == "skipped":
@@ -2002,9 +2012,9 @@ def apply_patch_99_workspace_manager_memoize() -> PatchResult:
 
 
 @register_patch(
-    "P98 TQ WorkspaceManager revert (vllm#40941 perf hotfix v7.62.14)"
+    "PR40941 TQ WorkspaceManager revert (vllm#40941 perf hotfix v7.62.14)"
 )
-def apply_patch_98_tq_workspace_revert() -> PatchResult:
+def apply_patch_pr40941_tq_workspace_revert() -> PatchResult:
     """Patch 98: revert WorkspaceManager indirection in turboquant_attn.py.
 
     Diagnosis 2026-04-28: NEW vllm caused 17% TPS regression on PROD
@@ -2014,16 +2024,16 @@ def apply_patch_98_tq_workspace_revert() -> PatchResult:
     Restores OLD per-layer cached buffer pattern (pre-vllm#40941). Memory
     cost: O(num_layers) extra dequant buffers (~1GB for 64-layer).
 
-    Status: opt-in via GENESIS_ENABLE_P98=1.
+    Status: opt-in via GENESIS_ENABLE_PR40941=1.
     """
-    name = "P98 TQ WorkspaceManager revert (vllm#40941 perf hotfix)"
+    name = "PR40941 TQ WorkspaceManager revert (vllm#40941 perf hotfix)"
     if not _APPLY_MODE:
         return _applied(name, "dry-run: text-patch ready")
     try:
-        from vllm._genesis.wiring.perf_hotfix import patch_98_tq_workspace_revert
+        from vllm._genesis.wiring.perf_hotfix import patch_pr40941_tq_workspace_revert
     except Exception as e:
         return _failed(name, f"wiring import failed: {e}")
-    status, reason = patch_98_tq_workspace_revert.apply()
+    status, reason = patch_pr40941_tq_workspace_revert.apply()
     if status == "applied":
         return _applied(name, reason)
     if status == "skipped":
@@ -2032,32 +2042,32 @@ def apply_patch_98_tq_workspace_revert() -> PatchResult:
 
 
 @register_patch(
-    "P94 Spec-decode prepare_next_token_ids_padded zero-alloc (vllm#41043 backport)"
+    "PR41043 Spec-decode prepare_next_token_ids_padded zero-alloc (vllm#41043 backport)"
 )
-def apply_patch_94_spec_decode_zero_alloc() -> PatchResult:
+def apply_patch_pr41043_spec_decode_zero_alloc() -> PatchResult:
     """Patch 94: backport of vllm#41043 (wangluochao902, OPEN).
 
     Replaces GPU->CPU .tolist() + list-comprehension + np.array allocation
     chain in `LLMBaseProposer.prepare_next_token_ids_padded` with an
     in-place loop. Algorithmic identity preserved.
 
-    PR author measured P99 TPOT -9.3% on Llama-3.1-8B + Eagle3 TP=4.
+    PR author measured PR40941b TPOT -9.3% on Llama-3.1-8B + Eagle3 TP=4.
     For our MTP K=3 single-stream: expected +2-4% wall TPS + tighter CV.
 
     Applies to ALL spec methods (Eagle, MTP, ngram, draft model).
-    Status: opt-in via GENESIS_ENABLE_P94=1, default OFF.
+    Status: opt-in via GENESIS_ENABLE_PR41043=1, default OFF.
     """
     name = (
-        "P94 Spec-decode prepare_next_token_ids_padded zero-alloc "
+        "PR41043 Spec-decode prepare_next_token_ids_padded zero-alloc "
         "(vllm#41043 backport)"
     )
     if not _APPLY_MODE:
         return _applied(name, "dry-run: text-patch ready")
     try:
-        from vllm._genesis.wiring.spec_decode import patch_94_spec_decode_zero_alloc
+        from vllm._genesis.wiring.spec_decode import patch_pr41043_spec_decode_zero_alloc
     except Exception as e:
         return _failed(name, f"wiring import failed: {e}")
-    status, reason = patch_94_spec_decode_zero_alloc.apply()
+    status, reason = patch_pr41043_spec_decode_zero_alloc.apply()
     if status == "applied":
         return _applied(name, reason)
     if status == "skipped":
@@ -2066,9 +2076,9 @@ def apply_patch_94_spec_decode_zero_alloc() -> PatchResult:
 
 
 @register_patch(
-    "P95 Marlin TP cudagraph cap on Ampere (vllm#40385 backport)"
+    "PR40385 Marlin TP cudagraph cap on Ampere (vllm#40385 backport)"
 )
-def apply_patch_95_marlin_tp_cudagraph_cap() -> PatchResult:
+def apply_patch_pr40385_marlin_tp_cudagraph_cap() -> PatchResult:
     """Patch 95: backport of vllm#40385 (OPEN as of 2026-04-28).
 
     Defensive cap of `max_cudagraph_capture_sizes` to avoid OOM on
@@ -2077,18 +2087,18 @@ def apply_patch_95_marlin_tp_cudagraph_cap() -> PatchResult:
     [Genesis production-readiness audit fix 2026-04-30]: this hook
     was missing from apply_all.py despite the wiring file existing
     and the PATCH_REGISTRY entry being live since 2026-04-29 — so
-    GENESIS_ENABLE_P95=1 silently did nothing. Now wired correctly.
+    GENESIS_ENABLE_PR40385=1 silently did nothing. Now wired correctly.
 
-    Status: opt-in via GENESIS_ENABLE_P95=1, default OFF.
+    Status: opt-in via GENESIS_ENABLE_PR40385=1, default OFF.
     """
     return _wiring_text_patch(
-        "P95 Marlin TP cudagraph cap on Ampere (vllm#40385 backport)",
-        "patch_95_marlin_tp_cudagraph_cap",
+        "PR40385 Marlin TP cudagraph cap on Ampere (vllm#40385 backport)",
+        "patch_pr40385_marlin_tp_cudagraph_cap",
     )
 
 
-@register_patch("PN8 MTP/draft online-quant propagation (vllm#40849 backport)")
-def apply_patch_N8_mtp_draft_online_quant_propagation() -> PatchResult:
+@register_patch("PR40849 MTP/draft online-quant propagation (vllm#40849 backport)")
+def apply_patch_pr40849_mtp_draft_online_quant_propagation() -> PatchResult:
     """Patch N8: backport of vllm#40849 (bhoomit) — propagate online
     quantization (e.g. fp8_per_tensor) from target model to spec-decode
     draft model in `get_draft_quant_config()`.
@@ -2108,19 +2118,19 @@ def apply_patch_N8_mtp_draft_online_quant_propagation() -> PatchResult:
     'qwen3_next_mtp', 'eagle', 'eagle3', 'medusa' AND main model has
     `OnlineQuantizationConfig`.
 
-    Status: opt-in via GENESIS_ENABLE_PN8_MTP_DRAFT_ONLINE_QUANT=1.
+    Status: opt-in via GENESIS_ENABLE_PR40849=1.
     Default OFF. NO-OP for current Genesis prod (Lorbus/Minachist 27B
     do not run online-quant + external draft); valuable when DFlash /
     Eagle3 / FP8 stacks roll out.
     """
-    name = "PN8 MTP/draft online-quant propagation (vllm#40849 backport)"
+    name = "PR40849 MTP/draft online-quant propagation (vllm#40849 backport)"
     if not _APPLY_MODE:
         return _applied(name, "dry-run: text-patch ready")
     try:
-        from vllm._genesis.wiring.spec_decode import patch_N8_mtp_draft_online_quant_propagation
+        from vllm._genesis.wiring.spec_decode import patch_pr40849_mtp_draft_online_quant_propagation
     except Exception as e:
         return _failed(name, f"wiring import failed: {e}")
-    status, reason = patch_N8_mtp_draft_online_quant_propagation.apply()
+    status, reason = patch_pr40849_mtp_draft_online_quant_propagation.apply()
     if status == "applied":
         return _applied(name, reason)
     if status == "skipped":
@@ -2128,8 +2138,8 @@ def apply_patch_N8_mtp_draft_online_quant_propagation() -> PatchResult:
     return _failed(name, reason)
 
 
-@register_patch("PN9 independent drafter attention backend (vllm#39930 backport)")
-def apply_patch_N9_independent_drafter_attn_backend() -> PatchResult:
+@register_patch("PR39930 independent drafter attention backend (vllm#39930 backport)")
+def apply_patch_pr39930_independent_drafter_attn_backend() -> PatchResult:
     """Patch N9: backport of vllm#39930 (MatthewBonanni, MERGED upstream) —
     allow the spec-decode drafter to use a different attention backend
     than the target model.
@@ -2145,7 +2155,7 @@ def apply_patch_N9_independent_drafter_attn_backend() -> PatchResult:
 
     Genesis backport is minimal — text-patches only the
     `_create_draft_vllm_config` body. Operator chooses the drafter
-    backend via env GENESIS_PN9_DRAFTER_BACKEND (e.g. "FLASH_ATTN",
+    backend via env GENESIS_PR39930_DRAFTER_BACKEND (e.g. "FLASH_ATTN",
     "FLASHINFER", "TRITON_ATTN"); unset/auto/none → drafter
     auto-selects. We do NOT add the new pydantic field on
     SpeculativeConfig (too invasive at runtime for a frozen dataclass +
@@ -2153,17 +2163,17 @@ def apply_patch_N9_independent_drafter_attn_backend() -> PatchResult:
 
     Predicates: spec_decode active. Patch is a no-op when not.
 
-    Status: opt-in via GENESIS_ENABLE_PN9_INDEPENDENT_DRAFTER_ATTN=1.
+    Status: opt-in via GENESIS_ENABLE_PR39930=1.
     Default OFF.
     """
-    name = "PN9 independent drafter attention backend (vllm#39930 backport)"
+    name = "PR39930 independent drafter attention backend (vllm#39930 backport)"
     if not _APPLY_MODE:
         return _applied(name, "dry-run: text-patch ready")
     try:
-        from vllm._genesis.wiring.spec_decode import patch_N9_independent_drafter_attn_backend
+        from vllm._genesis.wiring.spec_decode import patch_pr39930_independent_drafter_attn_backend
     except Exception as e:
         return _failed(name, f"wiring import failed: {e}")
-    status, reason = patch_N9_independent_drafter_attn_backend.apply()
+    status, reason = patch_pr39930_independent_drafter_attn_backend.apply()
     if status == "applied":
         return _applied(name, reason)
     if status == "skipped":
@@ -2171,8 +2181,8 @@ def apply_patch_N9_independent_drafter_attn_backend() -> PatchResult:
     return _failed(name, reason)
 
 
-@register_patch("PN11 GDN a/b contiguity in fix_query_key_value_ordering (vllm#41142 backport)")
-def apply_patch_N11_gdn_a_b_contiguous() -> PatchResult:
+@register_patch("PR41142 GDN a/b contiguity in fix_query_key_value_ordering (vllm#41142 backport)")
+def apply_patch_pr41142_gdn_a_b_contiguous() -> PatchResult:
     """Patch N11: backport of vllm#41142 (Yeuvoir, OPEN as of 2026-04-29) —
     force `.contiguous()` on `b` and `a` tensors after reshape inside
     `GatedDeltaNetAttention.fix_query_key_value_ordering`.
@@ -2188,17 +2198,17 @@ def apply_patch_N11_gdn_a_b_contiguous() -> PatchResult:
 
     Cost: zero. `.contiguous()` is no-op when tensor is already contiguous.
 
-    Status: opt-in via GENESIS_ENABLE_PN11_GDN_AB_CONTIGUOUS=1.
+    Status: opt-in via GENESIS_ENABLE_PR41142=1.
     Default OFF.
     """
-    name = "PN11 GDN a/b contiguity (vllm#41142 backport)"
+    name = "PR41142 GDN a/b contiguity (vllm#41142 backport)"
     if not _APPLY_MODE:
         return _applied(name, "dry-run: text-patch ready")
     try:
-        from vllm._genesis.wiring.hybrid import patch_N11_gdn_a_b_contiguous
+        from vllm._genesis.wiring.hybrid import patch_pr41142_gdn_a_b_contiguous
     except Exception as e:
         return _failed(name, f"wiring import failed: {e}")
-    status, reason = patch_N11_gdn_a_b_contiguous.apply()
+    status, reason = patch_pr41142_gdn_a_b_contiguous.apply()
     if status == "applied":
         return _applied(name, reason)
     if status == "skipped":
@@ -2224,7 +2234,7 @@ def apply_patch_67c_sparse_v() -> PatchResult:
     byte-equivalent to the no-skip path.
 
     Greenfield: no upstream engine has integrated per-row sparse-V into
-    spec-decode K+1 verify path. PN26b separate kernel approach already
+    spec-decode K+1 verify path. PR41422 separate kernel approach already
     failed (-8.2% on 27B due to kernel-vs-kernel overhead). P67c integrates
     INTO P67 to leverage its +32% kernel directly.
 
@@ -2251,9 +2261,9 @@ def apply_patch_67c_sparse_v() -> PatchResult:
 
 
 @register_patch(
-    "PN35 inputs_embeds optional for text-only (vllm#35975 backport)"
+    "PR35975 inputs_embeds optional for text-only (vllm#35975 backport)"
 )
-def apply_patch_N35_inputs_embeds_optional() -> PatchResult:
+def apply_patch_pr35975_inputs_embeds_optional() -> PatchResult:
     """Patch N35: skip inputs_embeds buffer for text-only models.
 
     Backport of vllm-project/vllm#35975 by AjAnubolu. Skips the
@@ -2284,16 +2294,16 @@ def apply_patch_N35_inputs_embeds_optional() -> PatchResult:
     Pattern credit: noonghunna club-3090 sidecar
                     `patch_inputs_embeds_optional.py` (2026-05-02).
     """
-    name = "PN35 inputs_embeds optional for text-only"
+    name = "PR35975 inputs_embeds optional for text-only"
     if not _APPLY_MODE:
         return _applied(name, "dry-run: text-patch ready")
     try:
         from vllm._genesis.wiring.perf_hotfix import (
-            patch_N35_inputs_embeds_optional,
+            patch_pr35975_inputs_embeds_optional,
         )
     except Exception as e:
         return _failed(name, f"wiring import failed: {e}")
-    status, reason = patch_N35_inputs_embeds_optional.apply()
+    status, reason = patch_pr35975_inputs_embeds_optional.apply()
     if status == "applied":
         return _applied(name, reason)
     if status == "skipped":
@@ -2333,9 +2343,9 @@ def apply_patch_N40_dflash_omnibus() -> PatchResult:
     2026-05-05: previous "land in follow-up commits" line was outdated).
 
     Composition (no conflicts):
-      - PN21 (DFlash SWA) — different file
+      - PR40898 (DFlash SWA) — different file
       - PN23 (combine_hidden_states cast) — different method, same file
-      - PN24 (aux layer +1) — different file
+      - PR40727 (aux layer +1) — different file
       - PN37 (research artifact, attention forward) — different code path
 
     Credit: Genesis-original 2026-05-04 (Sander).
@@ -2359,9 +2369,9 @@ def apply_patch_N40_dflash_omnibus() -> PatchResult:
 
 
 @register_patch(
-    "PN38 DFlash drafter quantization support (PR #40425 backport)"
+    "PR40425 DFlash drafter quantization support (PR #40425 backport)"
 )
-def apply_patch_N38_dflash_quant_drafter() -> PatchResult:
+def apply_patch_pr40425_dflash_quant_drafter() -> PatchResult:
     """Patch N38: backport of vllm#40425 — quantized DFlash drafter support.
 
     Per upstream PR title: CORRECTNESS/COMPATIBILITY fix, not throughput
@@ -2386,19 +2396,19 @@ def apply_patch_N38_dflash_quant_drafter() -> PatchResult:
     unchanged. Composes with PN40-A (different anchor surfaces).
 
     Default OFF until FP8/NVFP4 DFlash drafter checkpoint exists in the
-    deployment. Toggle: GENESIS_ENABLE_PN38_DFLASH_QUANT_DRAFTER=1.
+    deployment. Toggle: GENESIS_ENABLE_PR40425=1.
 
     Credit: vllm#40425 by infatoshi (UPSTREAM author, OPEN PR).
     Backport author: Sandermage (Sander) Barzov, 2026-05-04.
     """
-    name = "PN38 DFlash drafter quantization support (PR #40425 backport)"
+    name = "PR40425 DFlash drafter quantization support (PR #40425 backport)"
     if not _APPLY_MODE:
         return _applied(name, "dry-run: text-patch ready")
     try:
-        from vllm._genesis.wiring.spec_decode import patch_N38_dflash_quant_drafter
+        from vllm._genesis.wiring.spec_decode import patch_pr40425_dflash_quant_drafter
     except Exception as e:
         return _failed(name, f"wiring import failed: {e}")
-    status, reason = patch_N38_dflash_quant_drafter.apply()
+    status, reason = patch_pr40425_dflash_quant_drafter.apply()
     if status == "applied":
         return _applied(name, reason)
     if status == "skipped":
@@ -2414,9 +2424,9 @@ def apply_patch_N38_dflash_quant_drafter() -> PatchResult:
 
 
 @register_patch(
-    "PN33 spec-decode warmup K-aware sizing (vllm#37521 extended to MTP/ngram)"
+    "PR37521 spec-decode warmup K-aware sizing (vllm#37521 extended to MTP/ngram)"
 )
-def apply_patch_N33_spec_decode_warmup_k() -> PatchResult:
+def apply_patch_pr37521_spec_decode_warmup_k() -> PatchResult:
     """Patch N33: spec-decode warmup uses real num_speculative_tokens
     instead of dummy K=1, fixing root cause of TWO bugs:
 
@@ -2430,7 +2440,7 @@ def apply_patch_N33_spec_decode_warmup_k() -> PatchResult:
        reserved at warmup with K=1 sizing, locked, then real K-token
        run tries to grow → AssertionError.
 
-    Both share root cause: warmup undercounted. PN33 fixes the root
+    Both share root cause: warmup undercounted. PR37521 fixes the root
     instead of patching downstream symptoms (hence default ON).
 
     Backport credit: itailang (vllm-project/vllm#37521 OPEN). Genesis
@@ -2438,21 +2448,21 @@ def apply_patch_N33_spec_decode_warmup_k() -> PatchResult:
     methods uniformly (EAGLE + MTP + ngram + draft-model). Distinct
     dummy token IDs (list(range(K))) avoid sampler dedup under-count.
 
-    Disable via GENESIS_DISABLE_PN33_SPEC_DECODE_WARMUP_K=1 if K-sized
+    Disable via GENESIS_DISABLE_PR37521_SPEC_DECODE_WARMUP_K=1 if K-sized
     warmup itself OOMs on a tight rig.
 
     Status: default ON (real correctness fix, not experimental).
     """
-    name = "PN33 spec-decode warmup K-aware (vllm#37521 extended)"
+    name = "PR37521 spec-decode warmup K-aware (vllm#37521 extended)"
     if not _APPLY_MODE:
         return _applied(name, "dry-run: text-patch ready")
     try:
         from vllm._genesis.wiring.spec_decode import (
-            patch_N33_spec_decode_warmup_k,
+            patch_pr37521_spec_decode_warmup_k,
         )
     except Exception as e:
         return _failed(name, f"wiring import failed: {e}")
-    status, reason = patch_N33_spec_decode_warmup_k.apply()
+    status, reason = patch_pr37521_spec_decode_warmup_k.apply()
     if status == "applied":
         return _applied(name, reason)
     if status == "skipped":
@@ -2579,13 +2589,13 @@ def apply_patch_N30_ds_layout_spec_decode() -> PatchResult:
     return _failed(name, reason)
 
 
-@register_patch("PN29 GDN chunk_o scale-fold (vllm#41446 pattern (c) backport)")
-def apply_patch_N29_gdn_chunk_o_scale_fold() -> PatchResult:
+@register_patch("PR41446 GDN chunk_o scale-fold (vllm#41446 pattern (c) backport)")
+def apply_patch_pr41446_gdn_chunk_o_scale_fold() -> PatchResult:
     """Patch N29: backport of vllm#41446 pattern (c) (zobinHuang, OPEN
     as of 2026-05-01) — fold scale multiply in chunk_fwd_kernel_o.
 
     `chunk_fwd_kernel_o` currently does `b_o * scale + dot * scale` (two
-    fp32 multiplies). PN29 folds to `(b_o + dot) * scale` (one multiply).
+    fp32 multiplies). PR41446 folds to `(b_o + dot) * scale` (one multiply).
     Distributive on fp32; drift bounded by 1-2 ULP per element (verified
     by TDD `test_pn29_numerical_equivalence_*`).
 
@@ -2597,17 +2607,17 @@ def apply_patch_N29_gdn_chunk_o_scale_fold() -> PatchResult:
     Applies to hybrid GDN models (Qwen3.6-27B-int4-AutoRound, INT8
     Minachist). 35B Qwen3MoE has no GDN → no-op.
 
-    Status: opt-in via GENESIS_ENABLE_PN29_GDN_SCALE_FOLD=1. Default OFF.
+    Status: opt-in via GENESIS_ENABLE_PR41446=1. Default OFF.
     Expected gain: +1-2% on GDN-heavy workloads.
     """
-    name = "PN29 GDN chunk_o scale-fold (vllm#41446 pattern c)"
+    name = "PR41446 GDN chunk_o scale-fold (vllm#41446 pattern c)"
     if not _APPLY_MODE:
         return _applied(name, "dry-run: text-patch ready")
     try:
-        from vllm._genesis.wiring.hybrid import patch_N29_gdn_chunk_o_scale_fold
+        from vllm._genesis.wiring.hybrid import patch_pr41446_gdn_chunk_o_scale_fold
     except Exception as e:
         return _failed(name, f"wiring import failed: {e}")
-    status, reason = patch_N29_gdn_chunk_o_scale_fold.apply()
+    status, reason = patch_pr41446_gdn_chunk_o_scale_fold.apply()
     if status == "applied":
         return _applied(name, reason)
     if status == "skipped":
@@ -2615,12 +2625,12 @@ def apply_patch_N29_gdn_chunk_o_scale_fold() -> PatchResult:
     return _failed(name, reason)
 
 
-@register_patch("PN12 FFN intermediate scratch pool (Cliff 1 fix on TQ3)")
-def apply_patch_N12_ffn_intermediate_pool() -> PatchResult:
+@register_patch("PR34207 FFN intermediate scratch pool (Cliff 1 fix on TQ3)")
+def apply_patch_pr34207_ffn_intermediate_pool() -> PatchResult:
     """Patch N12: pool transient SiluAndMul output buffers across layers.
 
     Closes Cliff 1 OOM (138 MiB allocate failed at 122 MiB free) on TQ3
-    path that PN8 cannot address (different memory class — transient
+    path that PR40849 cannot address (different memory class — transient
     activation peak vs persistent draft footprint).
 
     Root cause: vllm/model_executor/layers/activation.py:146 SiluAndMul.
@@ -2629,17 +2639,17 @@ def apply_patch_N12_ffn_intermediate_pool() -> PatchResult:
     Lorbus 27B-int4. Pool single shared buffer per (intermediate_size,
     dtype, device) — pointer-stable, cudagraph-safe.
 
-    Status: opt-in via GENESIS_ENABLE_PN12_FFN_INTERMEDIATE_POOL=1.
+    Status: opt-in via GENESIS_ENABLE_PR34207=1.
     Default OFF.
     """
-    name = "PN12 FFN intermediate scratch pool (Cliff 1 fix)"
+    name = "PR34207 FFN intermediate scratch pool (Cliff 1 fix)"
     if not _APPLY_MODE:
         return _applied(name, "dry-run: text-patch ready")
     try:
-        from vllm._genesis.wiring.hybrid import patch_N12_ffn_intermediate_pool
+        from vllm._genesis.wiring.hybrid import patch_pr34207_ffn_intermediate_pool
     except Exception as e:
         return _failed(name, f"wiring import failed: {e}")
-    status, reason = patch_N12_ffn_intermediate_pool.apply()
+    status, reason = patch_pr34207_ffn_intermediate_pool.apply()
     if status == "applied":
         return _applied(name, reason)
     if status == "skipped":
@@ -2648,9 +2658,9 @@ def apply_patch_N12_ffn_intermediate_pool() -> PatchResult:
 
 
 @register_patch(
-    "PN28 merge_attn_states NaN guard (vllm#39148 backport)"
+    "PR39148 merge_attn_states NaN guard (vllm#39148 backport)"
 )
-def apply_patch_N28_merge_attn_states_nan_guard() -> PatchResult:
+def apply_patch_pr39148_merge_attn_states_nan_guard() -> PatchResult:
     """Patch N28: merge_attn_states NaN guard backport.
 
     Backport of vllm#39148 (jasonkim8652, OPEN 2026-05-01). Triton
@@ -2667,17 +2677,17 @@ def apply_patch_N28_merge_attn_states_nan_guard() -> PatchResult:
     of ~1 in 10K decode tokens on chunked prefill. One corrupted token
     breaks tool-call JSON parsing.
 
-    Status: opt-in via GENESIS_ENABLE_PN28_MERGE_ATTN_NAN_GUARD=1.
+    Status: opt-in via GENESIS_ENABLE_PR39148=1.
     Default OFF.
     """
-    name = "PN28 merge_attn_states NaN guard (vllm#39148 backport)"
+    name = "PR39148 merge_attn_states NaN guard (vllm#39148 backport)"
     if not _APPLY_MODE:
         return _applied(name, "dry-run: text-patch ready")
     try:
-        from vllm._genesis.wiring.perf_hotfix import patch_N28_merge_attn_states_nan_guard
+        from vllm._genesis.wiring.perf_hotfix import patch_pr39148_merge_attn_states_nan_guard
     except Exception as e:
         return _failed(name, f"wiring import failed: {e}")
-    status, reason = patch_N28_merge_attn_states_nan_guard.apply()
+    status, reason = patch_pr39148_merge_attn_states_nan_guard.apply()
     if status == "applied":
         return _applied(name, reason)
     if status == "skipped":
@@ -2761,14 +2771,14 @@ def apply_patch_38B_compile_safe_hook() -> PatchResult:
 
 
 @register_patch(
-    "PN26b sparse-V tile-skip Genesis kernel "
+    "PR41422 sparse-V tile-skip Genesis kernel "
     "(BLASST λ=a/L for SM86, first NVIDIA Ampere implementation)"
 )
-def apply_patch_N26b_sparse_v_kernel() -> PatchResult:
+def apply_patch_pr41422_sparse_v_kernel() -> PatchResult:
     """Patch N26b: Genesis-original sparse-V tile-skip kernel for TQ decode.
 
-    Sub-component of PN26 (TQ unified perf pack). The PN26 main applies
-    centroids prebake (drop-in safe). PN26b applies the sparse-V kernel
+    Sub-component of PR41418 (TQ unified perf pack). The PR41418 main applies
+    centroids prebake (drop-in safe). PR41422 applies the sparse-V kernel
     dispatcher — riskier, opt-in only after empirical NVIDIA validation
     on the operator's hardware.
 
@@ -2783,10 +2793,10 @@ def apply_patch_N26b_sparse_v_kernel() -> PatchResult:
     - Conflicts with our P67 multi-query kernel hot path on same file
     - Lets us add Genesis-specific features (sink protection, BLASST λ)
 
-    Status: opt-in via GENESIS_ENABLE_PN26_SPARSE_V=1. Default OFF.
-    Threshold via GENESIS_PN26_SPARSE_V_THRESHOLD (fixed) OR
-    GENESIS_PN26_SPARSE_V_SCALE_FACTOR (BLASST adaptive). Min context
-    via GENESIS_PN26_SPARSE_V_MIN_CTX (default 8192).
+    Status: opt-in via GENESIS_ENABLE_PR41422=1. Default OFF.
+    Threshold via GENESIS_PR41418_SPARSE_V_THRESHOLD (fixed) OR
+    GENESIS_PR41418_SPARSE_V_SCALE_FACTOR (BLASST adaptive). Min context
+    via GENESIS_PR41418_SPARSE_V_MIN_CTX (default 8192).
 
     Validation gates before flipping default ON:
     - Numeric equivalence at SPARSE_V=0 (bit-exact match to upstream)
@@ -2795,16 +2805,16 @@ def apply_patch_N26b_sparse_v_kernel() -> PatchResult:
     - CV ≤ 7% across 5-run bench
     """
     name = (
-        "PN26b sparse-V tile-skip Genesis kernel "
+        "PR41422 sparse-V tile-skip Genesis kernel "
         "(BLASST lambda=a/L for SM86)"
     )
     if not _APPLY_MODE:
         return _applied(name, "dry-run: kernel + dispatcher ready")
     try:
-        from vllm._genesis.wiring.perf_hotfix import patch_N26_sparse_v_kernel
+        from vllm._genesis.wiring.perf_hotfix import patch_pr41418_sparse_v_kernel
     except Exception as e:
         return _failed(name, f"wiring import failed: {e}")
-    status, reason = patch_N26_sparse_v_kernel.apply()
+    status, reason = patch_pr41418_sparse_v_kernel.apply()
     if status == "applied":
         return _applied(name, reason)
     if status == "skipped":
@@ -2813,9 +2823,9 @@ def apply_patch_N26b_sparse_v_kernel() -> PatchResult:
 
 
 @register_patch(
-    "PN26 TQ unified perf pack (centroids prebake + sparse V scaffold)"
+    "PR41418 TQ unified perf pack (centroids prebake + sparse V scaffold)"
 )
-def apply_patch_N26_tq_unified_perf() -> PatchResult:
+def apply_patch_pr41418_tq_unified_perf() -> PatchResult:
     """Patch N26: unified backport of three OPEN upstream PRs touching the
     TurboQuant code path (#41418 + #41422 + #41414).
 
@@ -2830,7 +2840,7 @@ def apply_patch_N26_tq_unified_perf() -> PatchResult:
     - **From #41422** (sparse V tile-skip): kernel modification to skip V
       load + dequant on tiles where softmax probability max is below a
       threshold. Author validated on AMD MI300X only — we ship as
-      OFF-by-default scaffold; sub-flag GENESIS_ENABLE_PN26_SPARSE_V=1
+      OFF-by-default scaffold; sub-flag GENESIS_ENABLE_PR41422=1
       acknowledges operator opt-in but actual kernel wiring is deferred
       to next iteration after NVIDIA Ampere correctness baseline.
 
@@ -2838,17 +2848,17 @@ def apply_patch_N26_tq_unified_perf() -> PatchResult:
       head_dim=128 is already a power of 2; the patch would add a
       runtime branch (`needs_padding`) that is dead code on our model.
 
-    Status: opt-in via GENESIS_ENABLE_PN26_TQ_UNIFIED=1. Default OFF.
-    Composes with P67/P98/PN8 — orthogonal code paths.
+    Status: opt-in via GENESIS_ENABLE_PR41418=1. Default OFF.
+    Composes with P67/PR40941/PR40849 — orthogonal code paths.
     """
-    name = "PN26 TQ unified perf pack (centroids prebake + sparse V scaffold)"
+    name = "PR41418 TQ unified perf pack (centroids prebake + sparse V scaffold)"
     if not _APPLY_MODE:
         return _applied(name, "dry-run: text-patch ready")
     try:
-        from vllm._genesis.wiring.perf_hotfix import patch_N26_tq_unified_perf
+        from vllm._genesis.wiring.perf_hotfix import patch_pr41418_tq_unified_perf
     except Exception as e:
         return _failed(name, f"wiring import failed: {e}")
-    status, reason = patch_N26_tq_unified_perf.apply()
+    status, reason = patch_pr41418_tq_unified_perf.apply()
     if status == "applied":
         return _applied(name, reason)
     if status == "skipped":
@@ -2858,32 +2868,32 @@ def apply_patch_N26_tq_unified_perf() -> PatchResult:
 
 @register_patch(
     "PN25 SiluAndMul.forward_native opaque-op pool "
-    "(Cliff 1 mech B compile-path companion to PN12)"
+    "(Cliff 1 mech B compile-path companion to PR34207)"
 )
 def apply_patch_N25_silu_inductor_safe_pool() -> PatchResult:
-    """Patch N25: sister-patch to PN12 covering the compile dispatch path.
+    """Patch N25: sister-patch to PR34207 covering the compile dispatch path.
 
-    PN12 patches `SiluAndMul.forward_cuda` (eager mode); PN25 patches
+    PR34207 patches `SiluAndMul.forward_cuda` (eager mode); PN25 patches
     `SiluAndMul.forward_native` via a `torch.library.custom_op` so
     torch.compile/Inductor cannot inline the FFN intermediate alloc and
-    bypass PN12's pool.
+    bypass PR34207's pool.
 
     Reported by noonghunna in club-3090#16 (VolandBerlioz Reddit + ampersandru
     confirmation): on `custom_ops=["none"]` configs (default V1
     aot_compile_fullgraph) `__call__` dispatches to `forward_native`,
     Inductor traces and lowers to `empty_strided_cuda(...)` at line
-    `inductor_cache/...py:1208` — completely outside PN12's hot path.
+    `inductor_cache/...py:1208` — completely outside PR34207's hot path.
 
     PN25 registers `genesis::silu_and_mul_pooled` (opaque to Inductor)
     and rewrites `forward_native` to dispatch through it. Inside the
-    opaque body, the same `FFNIntermediateCache` pool used by PN12
+    opaque body, the same `FFNIntermediateCache` pool used by PR34207
     serves the [M, intermediate_size] transient. Pool is shared — both
     paths converge on one buffer.
 
     Status: opt-in via GENESIS_ENABLE_PN25_SILU_INDUCTOR_SAFE=1.
-    Default OFF. Composes with PN12 (recommended pairing for any
+    Default OFF. Composes with PR34207 (recommended pairing for any
     inductor-heavy config). Standalone use covers compile-only paths;
-    PN12-only covers eager-only paths.
+    PR34207-only covers eager-only paths.
     """
     name = (
         "PN25 SiluAndMul.forward_native opaque-op pool "
@@ -2903,8 +2913,8 @@ def apply_patch_N25_silu_inductor_safe_pool() -> PatchResult:
     return _failed(name, reason)
 
 
-@register_patch("PN13 CUDAGraphWrapper lambda arity (vllm#41235 backport)")
-def apply_patch_N13_cuda_graph_lambda_arity() -> PatchResult:
+@register_patch("PR41235 CUDAGraphWrapper lambda arity (vllm#41235 backport)")
+def apply_patch_pr41235_cuda_graph_lambda_arity() -> PatchResult:
     """Patch N13: backport of vllm#41235 (roikoren755, OPEN as of 2026-04-29) —
     fix CUDAGraphWrapper gc.collect/empty_cache lambda arity.
 
@@ -2918,17 +2928,17 @@ def apply_patch_N13_cuda_graph_lambda_arity() -> PatchResult:
     Recommend ON for any future Blackwell deployment; intermittent on
     Ampere consumer.
 
-    Status: opt-in via GENESIS_ENABLE_PN13_CUDA_GRAPH_LAMBDA_ARITY=1.
+    Status: opt-in via GENESIS_ENABLE_PR41235=1.
     Default OFF.
     """
-    name = "PN13 CUDAGraphWrapper lambda arity (vllm#41235 backport)"
+    name = "PR41235 CUDAGraphWrapper lambda arity (vllm#41235 backport)"
     if not _APPLY_MODE:
         return _applied(name, "dry-run: text-patch ready")
     try:
-        from vllm._genesis.wiring.hybrid import patch_N13_cuda_graph_lambda_arity
+        from vllm._genesis.wiring.hybrid import patch_pr41235_cuda_graph_lambda_arity
     except Exception as e:
         return _failed(name, f"wiring import failed: {e}")
-    status, reason = patch_N13_cuda_graph_lambda_arity.apply()
+    status, reason = patch_pr41235_cuda_graph_lambda_arity.apply()
     if status == "applied":
         return _applied(name, reason)
     if status == "skipped":
@@ -2936,8 +2946,8 @@ def apply_patch_N13_cuda_graph_lambda_arity() -> PatchResult:
     return _failed(name, reason)
 
 
-@register_patch("PN14 TQ decode IOOB safe_page_idx clamp (vllm#40074 backport)")
-def apply_patch_N14_tq_decode_oob_clamp() -> PatchResult:
+@register_patch("PR40074 TQ decode IOOB safe_page_idx clamp (vllm#40074 backport)")
+def apply_patch_pr40074_tq_decode_oob_clamp() -> PatchResult:
     """Patch N14: backport of vllm#40074 (devarakondasrikanth, OPEN as of
     2026-04-29) — fix TurboQuant decode kernel index-out-of-bounds.
 
@@ -2954,17 +2964,17 @@ def apply_patch_N14_tq_decode_oob_clamp() -> PatchResult:
     benefits. Defensive backport — fires whenever P67 dispatch returns
     False or spec-decode is OFF/K=1.
 
-    Status: opt-in via GENESIS_ENABLE_PN14_TQ_DECODE_OOB_CLAMP=1.
+    Status: opt-in via GENESIS_ENABLE_PR40074=1.
     Default OFF. Self-retires via marker `safe_page_idx` when #40074 merges.
     """
-    name = "PN14 TQ decode IOOB safe_page_idx clamp (vllm#40074 backport)"
+    name = "PR40074 TQ decode IOOB safe_page_idx clamp (vllm#40074 backport)"
     if not _APPLY_MODE:
         return _applied(name, "dry-run: text-patch ready")
     try:
-        from vllm._genesis.wiring.kernels import patch_N14_tq_decode_oob_clamp
+        from vllm._genesis.wiring.kernels import patch_pr40074_tq_decode_oob_clamp
     except Exception as e:
         return _failed(name, f"wiring import failed: {e}")
-    status, reason = patch_N14_tq_decode_oob_clamp.apply()
+    status, reason = patch_pr40074_tq_decode_oob_clamp.apply()
     if status == "applied":
         return _applied(name, reason)
     if status == "skipped":
@@ -2972,8 +2982,8 @@ def apply_patch_N14_tq_decode_oob_clamp() -> PatchResult:
     return _failed(name, reason)
 
 
-@register_patch("PN19 Scoped max_split_size_mb during model load (vllm#41268)")
-def apply_patch_N19_scoped_max_split() -> PatchResult:
+@register_patch("PR41268 Scoped max_split_size_mb during model load (vllm#41268)")
+def apply_patch_pr41268_scoped_max_split() -> PatchResult:
     """Patch N19: backport of vllm#41268 (MatthewBonanni, OPEN
     2026-04-30) — temporarily set max_split_size_mb=20 (PyTorch
     minimum) for the duration of model load to mitigate PyTorch 2.10+
@@ -2984,19 +2994,19 @@ def apply_patch_N19_scoped_max_split() -> PatchResult:
     allocator). Self-detects torch lacking
     `_accelerator_setAllocatorSettings` and falls through unchanged.
 
-    Status: opt-in via GENESIS_ENABLE_PN19_SCOPED_MAX_SPLIT=1.
+    Status: opt-in via GENESIS_ENABLE_PR41268=1.
     Estimated win: 200-500 MiB on H100 (per PR author); unverified
     on Ampere — measure before relying on it.
     Default OFF.
     """
     return _wiring_text_patch(
-        "PN19 Scoped max_split_size_mb during model load (vllm#41268)",
-        "patch_N19_scoped_max_split",
+        "PR41268 Scoped max_split_size_mb during model load (vllm#41268)",
+        "patch_pr41268_scoped_max_split",
     )
 
 
-@register_patch("PN21 DFlash SWA support partial backport (vllm#40898 backport)")
-def apply_patch_N21_dflash_swa_support() -> PatchResult:
+@register_patch("PR40898 DFlash SWA support partial backport (vllm#40898 backport)")
+def apply_patch_pr40898_dflash_swa_support() -> PatchResult:
     """Patch N21: partial backport of vllm#40898 (jianc99, OPEN).
 
     Two-file partial: speculators/algos.py preserves SWA config keys
@@ -3009,19 +3019,19 @@ def apply_patch_N21_dflash_swa_support() -> PatchResult:
     manually. Genesis partial preserves config + metadata correctness
     so the upstream merge auto-activates cleanly.
 
-    Composes with PN24 (gpu_model_runner +1 shift). Both can coexist.
+    Composes with PR40727 (gpu_model_runner +1 shift). Both can coexist.
 
-    Status: opt-in via GENESIS_ENABLE_PN21_DFLASH_SWA=1.
+    Status: opt-in via GENESIS_ENABLE_PR40898=1.
     Default OFF. Auto-no-op on upstream merge (drift markers).
     """
     return _wiring_text_patch(
-        "PN21 DFlash SWA support partial backport (vllm#40898 backport)",
-        "patch_N21_dflash_swa_support",
+        "PR40898 DFlash SWA support partial backport (vllm#40898 backport)",
+        "patch_pr40898_dflash_swa_support",
     )
 
 
-@register_patch("PN22 Local argmax for TP draft (vllm#39419 backport)")
-def apply_patch_N22_local_argmax_tp() -> PatchResult:
+@register_patch("PR39419 Local argmax for TP draft (vllm#39419 backport)")
+def apply_patch_pr39419_local_argmax_tp() -> PatchResult:
     """Patch N22: backport of vllm#39419 (EanWang, OPEN).
 
     Adds get_top_tokens() plumbing to Qwen3 and Qwen3-DFlash model
@@ -3035,17 +3045,17 @@ def apply_patch_N22_local_argmax_tp() -> PatchResult:
     Llama and Eagle3 parts of upstream PR not backported — Genesis
     does not run those models.
 
-    Status: opt-in via GENESIS_ENABLE_PN22_LOCAL_ARGMAX_TP=1.
+    Status: opt-in via GENESIS_ENABLE_PR39419=1.
     Default OFF. Auto-no-op once vllm#39419 merges.
     """
     return _wiring_text_patch(
-        "PN22 Local argmax for TP draft (vllm#39419 backport)",
-        "patch_N22_local_argmax_tp",
+        "PR39419 Local argmax for TP draft (vllm#39419 backport)",
+        "patch_pr39419_local_argmax_tp",
     )
 
 
-@register_patch("PN24 DFlash aux layer +1 indexing fix (vllm#40727 backport)")
-def apply_patch_N24_dflash_aux_layer_indexing() -> PatchResult:
+@register_patch("PR40727 DFlash aux layer +1 indexing fix (vllm#40727 backport)")
+def apply_patch_pr40727_dflash_aux_layer_indexing() -> PatchResult:
     """Patch N24: backport of vllm#40727 (benchislett, OPEN).
 
     One-line semantic fix in `_get_eagle3_aux_layers_from_config` —
@@ -3055,12 +3065,12 @@ def apply_patch_N24_dflash_aux_layer_indexing() -> PatchResult:
 
     Empirical: AL gsm8k 6.18→6.42 per PR author measurement.
 
-    Status: opt-in via GENESIS_ENABLE_PN24_DFLASH_AUX_LAYER_FIX=1.
+    Status: opt-in via GENESIS_ENABLE_PR40727=1.
     Default OFF. Auto-no-op once vllm#40727 merges (drift marker).
     """
     return _wiring_text_patch(
-        "PN24 DFlash aux layer +1 indexing fix (vllm#40727 backport)",
-        "patch_N24_dflash_aux_layer_indexing",
+        "PR40727 DFlash aux layer +1 indexing fix (vllm#40727 backport)",
+        "patch_pr40727_dflash_aux_layer_indexing",
     )
 
 
@@ -3171,11 +3181,11 @@ def apply_patch_85_hybrid_fine_shadow_prefix_cache() -> PatchResult:
     return _failed(name, reason)
 
 
-@register_patch("P75 Auto-enable Suffix Decoding (vllm#25784 Arctic Inference)")
-def apply_patch_75_suffix_decoding_enable() -> PatchResult:
+@register_patch("PR25784 Auto-enable Suffix Decoding (vllm#25784 Arctic Inference)")
+def apply_patch_pr25784_suffix_decoding_enable() -> PatchResult:
     """Patch 75: operator-convenience auto-swap of speculative method from
     "ngram" to "suffix" (Arctic Inference Suffix Decoding) when
-    `GENESIS_ENABLE_P75_SUFFIX_DECODING=1`.
+    `GENESIS_ENABLE_PR25784=1`.
 
     Suffix Decoding (PR #25784, MERGED 2025-11-03, present in our pin) builds
     per-prompt suffix trees with branch-frequency stats and speculates a
@@ -3189,18 +3199,18 @@ def apply_patch_75_suffix_decoding_enable() -> PatchResult:
         short repeats that pure ngram misses with prompt_lookup_min=8)
 
     Dependency: `pip install arctic-inference` (added to test container
-    entrypoint). If missing, P75 logs warning and keeps method=ngram (safe).
+    entrypoint). If missing, PR25784 logs warning and keeps method=ngram (safe).
 
-    Status: opt-in via GENESIS_ENABLE_P75_SUFFIX_DECODING=1.
+    Status: opt-in via GENESIS_ENABLE_PR25784=1.
     """
-    name = "P75 Auto-enable Suffix Decoding (vllm#25784 Arctic Inference)"
+    name = "PR25784 Auto-enable Suffix Decoding (vllm#25784 Arctic Inference)"
     if not _APPLY_MODE:
         return _applied(name, "dry-run: text-patch ready")
     try:
-        from vllm._genesis.wiring.spec_decode import patch_75_suffix_decoding_enable
+        from vllm._genesis.wiring.spec_decode import patch_pr25784_suffix_decoding_enable
     except Exception as e:
         return _failed(name, f"wiring import failed: {e}")
-    status, reason = patch_75_suffix_decoding_enable.apply()
+    status, reason = patch_pr25784_suffix_decoding_enable.apply()
     if status == "applied":
         return _applied(name, reason)
     if status == "skipped":
@@ -3314,11 +3324,11 @@ def apply_patch_67b_spec_verify_routing() -> PatchResult:
     return _failed(name, reason)
 
 
-@register_patch("P59 Qwen3 reasoning embedded tool_call recovery")
-def apply_patch_59_qwen3_reasoning_tool_call_recovery() -> PatchResult:
+@register_patch("PR39055 Qwen3 reasoning embedded tool_call recovery")
+def apply_patch_pr39055_qwen3_reasoning_tool_call_recovery() -> PatchResult:
     """Patch 59: Backport of upstream PR vllm#39055 (ZenoAFfectionate, OPEN).
 
-    Empirical candidate for #40831 / our degenerate-output bug after P58
+    Empirical candidate for #40831 / our degenerate-output bug after PR40768
     (#40768 backport) was empirically disproven 2026-04-25 in blue/green test.
 
     Qwen3.5/3.6 models can emit XML tool_call blocks INSIDE <think>...</think>
@@ -3329,24 +3339,24 @@ def apply_patch_59_qwen3_reasoning_tool_call_recovery() -> PatchResult:
 
     Composes with our existing P12 (Qwen3 tool_call reasoning fix v2):
       - P12 handles the </think>-absent case via implicit tool_call end
-      - P59 handles the </think>-present case where tool_call is nested
+      - PR39055 handles the </think>-present case where tool_call is nested
         inside reasoning
 
-    Status: opt-in via GENESIS_ENABLE_P59_QWEN3_TOOL_RECOVERY=1.
+    Status: opt-in via GENESIS_ENABLE_PR39055=1.
 
     Credit:
       - Upstream fix: @ZenoAFfectionate (vllm#39055).
       - Bug surface in our family: @meitalbensinai (Qwen 3.6 30b),
         @epheien (27b + 397b streaming), @jogoossens.
     """
-    name = "P59 Qwen3 reasoning embedded tool_call recovery"
+    name = "PR39055 Qwen3 reasoning embedded tool_call recovery"
     if not _APPLY_MODE:
         return _applied(name, "dry-run: text-patch ready")
     try:
-        from vllm._genesis.wiring.structured_output import patch_59_qwen3_reasoning_tool_call_recovery
+        from vllm._genesis.wiring.structured_output import patch_pr39055_qwen3_reasoning_tool_call_recovery
     except Exception as e:
         return _failed(name, f"wiring import failed: {e}")
-    status, reason = patch_59_qwen3_reasoning_tool_call_recovery.apply()
+    status, reason = patch_pr39055_qwen3_reasoning_tool_call_recovery.apply()
     if status == "applied":
         return _applied(name, reason)
     if status == "skipped":
@@ -3354,8 +3364,8 @@ def apply_patch_59_qwen3_reasoning_tool_call_recovery() -> PatchResult:
     return _failed(name, reason)
 
 
-@register_patch("P58 async-scheduler -1 placeholder fix")
-def apply_patch_58_async_placeholder_fix() -> PatchResult:
+@register_patch("PR40768 async-scheduler -1 placeholder fix")
+def apply_patch_pr40768_async_placeholder_fix() -> PatchResult:
     """Patch 58: ROOT-CAUSE fix for vllm-project/vllm#40831 / #40807 / #40756 /
     #37159 — backport of upstream PR vllm#40768 (z1ying, OPEN at time of
     writing).
@@ -3374,10 +3384,10 @@ def apply_patch_58_async_placeholder_fix() -> PatchResult:
     scheduler.py). Idempotent + anchor-safe + auto-no-op once #40768 lands
     upstream.
 
-    Status: opt-in via GENESIS_ENABLE_P58_ASYNC_PLACEHOLDER_FIX=1. Independent
+    Status: opt-in via GENESIS_ENABLE_PR40768=1. Independent
     of TurboQuant — bug class affects ALL spec-decode workloads under async
     scheduling. P56 (deprecated routing-layer workaround) and P57 v2
-    (buffer-shape workaround) become redundant once P58 closes the actual
+    (buffer-shape workaround) become redundant once PR40768 closes the actual
     root cause.
 
     Credit:
@@ -3387,14 +3397,14 @@ def apply_patch_58_async_placeholder_fix() -> PatchResult:
       - Cross-rig confirmation: independent isolation by @noonghunna
         (Qwen3.6-27B + 3090) and Genesis (Qwen3-Next-35B + 2× A5000).
     """
-    name = "P58 async-scheduler -1 placeholder fix"
+    name = "PR40768 async-scheduler -1 placeholder fix"
     if not _APPLY_MODE:
         return _applied(name, "dry-run: text-patch ready")
     try:
-        from vllm._genesis.wiring.spec_decode import patch_58_async_scheduler_placeholder_fix
+        from vllm._genesis.wiring.spec_decode import patch_pr40768_async_scheduler_placeholder_fix
     except Exception as e:
         return _failed(name, f"wiring import failed: {e}")
-    status, reason = patch_58_async_scheduler_placeholder_fix.apply()
+    status, reason = patch_pr40768_async_scheduler_placeholder_fix.apply()
     if status == "applied":
         return _applied(name, reason)
     if status == "skipped":
@@ -4249,7 +4259,7 @@ def run(verbose: bool = True, apply: bool = False) -> PatchStats:
     _APPLY_MODE = apply
 
     # [Genesis T4.6] Compile-time watchdog — log total apply elapsed.
-    # Triton kernel pre-build (e.g. PN26b _build_kernel() at apply()) can
+    # Triton kernel pre-build (e.g. PR41422 _build_kernel() at apply()) can
     # take 30-90s on cold cache. >120s is a red flag (autotune regression
     # or stale cache mismatch) — investigate before user requests start.
     import time
@@ -4478,7 +4488,7 @@ def run(verbose: bool = True, apply: bool = False) -> PatchStats:
 
     # [Genesis v7.13] Emit Dispatcher v2 apply matrix as a single readable
     # block. Only matters for patches that route through dispatcher.should_apply
-    # (P56-P62 currently); other patches get only the per-line INFO above.
+    # (P56-PR36138 currently); other patches get only the per-line INFO above.
     try:
         from vllm._genesis.dispatcher import log_apply_matrix
         log_apply_matrix()

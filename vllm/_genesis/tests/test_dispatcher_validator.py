@@ -272,11 +272,11 @@ class TestRealRegistryRelationships:
     """
 
     def test_p60b_requires_p60(self):
-        """P60b (Phase 2 Triton kernel) requires P60 (Phase 1 SSM pre-copy)."""
-        meta = dispatcher.PATCH_REGISTRY.get("P60b")
+        """PR40738b (Phase 2 Triton kernel) requires PR40738 (Phase 1 SSM pre-copy)."""
+        meta = dispatcher.PATCH_REGISTRY.get("PR40738b")
         assert meta is not None
-        assert "P60" in meta.get("requires_patches", []), (
-            "P60b is Phase 2 of GDN+ngram fix; P60 (Phase 1) must apply first"
+        assert "PR40738" in meta.get("requires_patches", []), (
+            "PR40738b is Phase 2 of GDN+ngram fix; PR40738 (Phase 1) must apply first"
         )
 
     def test_p85_requires_p84(self):

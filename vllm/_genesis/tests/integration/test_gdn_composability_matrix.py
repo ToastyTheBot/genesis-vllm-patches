@@ -11,8 +11,8 @@ This catches silent regressions when a new GDN patch is added without
 updating the composability registry.
 
 PN59 (Variant D Phase 2) is the focus: must compose cleanly with PN50
-(proj input fusion), PN54 (ssm_state dedup), PN29 (chunk_o scale-fold),
-PN30 (DS conv), PN11 (interleaved branch).
+(proj input fusion), PN54 (ssm_state dedup), PR41446 (chunk_o scale-fold),
+PN30 (DS conv), PR41142 (interleaved branch).
 """
 from __future__ import annotations
 
@@ -57,9 +57,9 @@ def test_pn54_pn59_orthogonal():
 
 
 def test_pn29_pn59_orthogonal():
-    """PN29 (chunk_o kernel arithmetic) + PN59 (orchestrator) — different sites."""
-    assert not has_site_overlap("PN29", "PN59")
-    assert not is_explicit_conflict("PN29", "PN59")
+    """PR41446 (chunk_o kernel arithmetic) + PN59 (orchestrator) — different sites."""
+    assert not has_site_overlap("PR41446", "PN59")
+    assert not is_explicit_conflict("PR41446", "PN59")
 
 
 def test_pn30_pn59_orthogonal():
@@ -68,13 +68,13 @@ def test_pn30_pn59_orthogonal():
 
 
 def test_pn11_pn59_orthogonal():
-    """PN11 (interleaved branch only) + PN59 (non-interleaved) — disjoint."""
-    assert not has_site_overlap("PN11", "PN59")
+    """PR41142 (interleaved branch only) + PN59 (non-interleaved) — disjoint."""
+    assert not has_site_overlap("PR41142", "PN59")
 
 
 def test_pn26b_p67_not_gdn_at_all():
-    """PN26b sparse-V + P67 multi-query — non-GDN paths, empty sites."""
-    pn26b = get_profile("PN26b")
+    """PR41422 sparse-V + P67 multi-query — non-GDN paths, empty sites."""
+    pn26b = get_profile("PR41422")
     p67 = get_profile("P67")
     assert pn26b is not None and len(pn26b.sites) == 0
     assert p67 is not None and len(p67.sites) == 0
@@ -87,9 +87,9 @@ GENESIS_27B_TYPICAL_GDN_STACK = {
     "PN50",   # GDN proj fusion
     "PN54",   # contiguous dedup
     "PN59",   # streaming GDN (Variant D)
-    "PN29",   # chunk_o scale-fold
+    "PR41446",   # chunk_o scale-fold
     "PN30",   # DS conv
-    "PN11",   # AB contiguous
+    "PR41142",   # AB contiguous
     "PN32",   # GDN chunked-prefill
 }
 

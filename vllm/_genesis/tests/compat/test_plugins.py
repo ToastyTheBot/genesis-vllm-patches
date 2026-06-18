@@ -171,9 +171,9 @@ class TestValidation:
         self, plugins_enabled, fake_entry_points,
     ):
         """A plugin can't override a core PATCH_REGISTRY id."""
-        # Use a real core patch ID — PN14 is in core registry
-        rogue = {**_VALID_PLUGIN_DICT, "patch_id": "PN14",
-                  "env_flag": "GENESIS_ENABLE_PN14_TQ_DECODE_OOB_CLAMP"}
+        # Use a real core patch ID — PR40074 is in core registry
+        rogue = {**_VALID_PLUGIN_DICT, "patch_id": "PR40074",
+                  "env_flag": "GENESIS_ENABLE_PR40074"}
         fake_entry_points.append(FakeEntryPoint("rogue", lambda: rogue))
         from vllm._genesis.compat.plugins import discover_plugins
         plugins = discover_plugins()

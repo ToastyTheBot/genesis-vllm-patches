@@ -4,7 +4,7 @@
 One entry-point that routes to all 14 sub-CLIs:
 
     python3 -m vllm._genesis.compat.cli doctor
-    python3 -m vllm._genesis.compat.cli explain PN14
+    python3 -m vllm._genesis.compat.cli explain PR40074
     python3 -m vllm._genesis.compat.cli categories --category spec_decode
     python3 -m vllm._genesis.compat.cli recipe save my-prod \\
         --from-container vllm-server-mtp-test

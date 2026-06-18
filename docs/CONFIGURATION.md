@@ -66,13 +66,13 @@ unless explicitly engaged.
 | Env var | Patch | What it does |
 |---|---|---|
 | `GENESIS_ENABLE_P37=1` | P37 | MoE intermediate cache prealloc |
-| `GENESIS_ENABLE_P58_ASYNC_PLACEHOLDER_FIX=1` | P58 | Async-scheduler `[-1]` placeholder fix (root cause for vllm#40831) |
-| `GENESIS_ENABLE_P60_GDN_NGRAM_FIX=1` | P60 | GDN+ngram SSM state recovery (Phase 1, vllm#40738 backport) |
-| `GENESIS_ENABLE_P60B_TRITON_KERNEL=1` | P60b | GDN+ngram conv state Triton kernel offset (Phase 2) |
+| `GENESIS_ENABLE_PR40768=1` | PR40768 | Async-scheduler `[-1]` placeholder fix (root cause for vllm#40831) |
+| `GENESIS_ENABLE_PR40738=1` | PR40738 | GDN+ngram SSM state recovery (Phase 1, vllm#40738 backport) |
+| `GENESIS_ENABLE_PR40738B=1` | PR40738b | GDN+ngram conv state Triton kernel offset (Phase 2) |
 | `GENESIS_ENABLE_P61_QWEN3_MULTI_TOOL=1` | P61 | Qwen3 multi-tool first-occurrence (vs LAST in upstream) |
 | `GENESIS_ENABLE_P61B_STREAMING_OVERLAP=1` | P61b | Streaming partial-tag overlap guard (ExtReMLapin vllm#40783) |
-| `GENESIS_ENABLE_P62_STRUCT_OUT_SPEC_TIMING=1` | P62 | Reasoning-aware grammar acceptance + spec-token validation |
-| `GENESIS_ENABLE_P64_QWEN3CODER_MTP_STREAMING=1` | P64 | qwen3coder streaming early-return fix (kotori-yan vllm#39598 backport) |
+| `GENESIS_ENABLE_PR36138=1` | PR36138 | Reasoning-aware grammar acceptance + spec-token validation |
+| `GENESIS_ENABLE_PR39598=1` | PR39598 | qwen3coder streaming early-return fix (kotori-yan vllm#39598 backport) |
 | `GENESIS_ENABLE_P66_CUDAGRAPH_SIZE_FILTER=1` | P66 | cudagraph_capture_sizes spec-decode divisibility filter |
 | `GENESIS_ENABLE_P67_TQ_MULTI_QUERY_KERNEL=1` | P67 | TurboQuant multi-query Triton kernel for K+1 spec-verify (Genesis-original) |
 | `GENESIS_P67_USE_UPSTREAM=1` | P67 | route to upstream `triton_turboquant_decode` instead of our v7.22 (drift-free) |
@@ -83,7 +83,7 @@ unless explicitly engaged.
 | `GENESIS_ENABLE_P70_AUTO_STRICT_NGRAM=1` | P70 | Auto-strict-ngram (force prompt_lookup_min ≥ 8) |
 | `GENESIS_ENABLE_P72_PROFILE_RUN_CAP=1` | P72 | profile_run M cap (unblocks `--max-num-batched-tokens > 4096`) |
 | `GENESIS_ENABLE_P74_CHUNK_CLAMP=1` | P74 | Auto chunk-clamp via `long_prefill_token_threshold` (P72 companion) |
-| `GENESIS_ENABLE_P81_FP8_BLOCK_SCALED_M_LE_8=1` | P81 | fp8 block-scaled MM low-M decode tuning (vllm#40925 backport, +23% per upstream) |
+| `GENESIS_ENABLE_PR40925=1` | PR40925 | fp8 block-scaled MM low-M decode tuning (vllm#40925 backport, +23% per upstream) |
 
 ### Off by default (opt-in / experimental / deprecated)
 
@@ -91,15 +91,15 @@ unless explicitly engaged.
 |---|---|---|
 | `GENESIS_ENABLE_P56_SPEC_DECODE_GUARD` | P56 | Spec-decode safe-path guard. **Empirically deprecated**, kept for diagnostics only |
 | `GENESIS_ENABLE_P57_SPEC_DECODE_CAPTURE_SAFE` | P57 | Capture-safe buffer expansion (experimental, fixes vllm#40831 root) |
-| `GENESIS_ENABLE_P59_QWEN3_TOOL_RECOVERY` | P59 | Backport of vllm#39055. **Currently superseded by upstream PR #35687 in our pin — keep disabled** |
+| `GENESIS_ENABLE_PR39055` | PR39055 | Backport of vllm#39055. **Currently superseded by upstream PR #35687 in our pin — keep disabled** |
 | `GENESIS_ENABLE_P63_MTP_GDN_STATE_RECOVERY` | P63 | **DEPRECATED** — wrong layer, hypothesis disproven. Kept for archival diagnostics only |
 | `GENESIS_ENABLE_P65_TURBOQUANT_SPEC_CG_DOWNGRADE` | P65 | Cudagraph downgrade for spec-decode (workaround; replaced by P67/P67b) |
-| `GENESIS_ENABLE_P71_BLOCK_VERIFY` | P71 | Block-verify rejection sampler (Sun 2024 ICLR + 2 critical bug-fixes from gemini bot review of vllm#40819). MTP-only |
-| `GENESIS_ENABLE_P75_SUFFIX_DECODING` | P75 | Auto-enable Suffix Decoding (vllm#25784 Arctic Inference) |
+| `GENESIS_ENABLE_PR40819` | PR40819 | Block-verify rejection sampler (Sun 2024 ICLR + 2 critical bug-fixes from gemini bot review of vllm#40819). MTP-only |
+| `GENESIS_ENABLE_PR25784` | PR25784 | Auto-enable Suffix Decoding (vllm#25784 Arctic Inference) |
 | `GENESIS_ENABLE_P77_ADAPTIVE_NGRAM_K` | P77 | Adaptive ngram K controller (port of SGLang adaptive_spec_params.py + Nightjar arXiv 2512.22420 auto-disable) |
 | `GENESIS_ENABLE_P78_TOLIST_CAPTURE_GUARD` | P78 | TurboQuant `.tolist()` capture-guard (adapted from @noonghunna's `patch_tolist_cudagraph.py`, Apache-2.0 attribution) |
-| `GENESIS_ENABLE_P79B_ASYNC_PROPOSER_SYNC` | P79b | Async × spec-decode proposer-sync backport (vllm#40610, OPEN draft) |
-| `GENESIS_ENABLE_P79C_STALE_SPEC_TOKEN_CLEANUP` | P79c | Stale spec_token_ids cleanup for unscheduled requests (vllm#37629, OPEN). v7.49 improvement: only clears `-1` placeholders, preserves real draft tokens |
+| `GENESIS_ENABLE_PR40610` | PR40610 | Async × spec-decode proposer-sync backport (vllm#40610, OPEN draft) |
+| `GENESIS_ENABLE_PR37629` | PR37629 | Stale spec_token_ids cleanup for unscheduled requests (vllm#37629, OPEN). v7.49 improvement: only clears `-1` placeholders, preserves real draft tokens |
 | `GENESIS_ENABLE_P40` | P40 | TurboQuant grouped-decode Stage1 Triton kernel (vllm#40792 backport, +10-27% on Qwen3-32B GQA) |
 | `GENESIS_ENABLE_P5B` | P5B | Page-size padded prealloc kernel (P5 follow-up — see `kernels/page_size_padded.py` history block) |
 | `GENESIS_ENABLE_P7B` | P7B | GDN dual-stream `custom_op` variant (P7 follow-up — fuses two `in_proj_*` GEMMs) |
@@ -112,23 +112,23 @@ unless explicitly engaged.
 | `GENESIS_ENABLE_P86` | P86 | Ngram batch propose linear scan (faster batch ngram proposer) |
 | `GENESIS_ENABLE_P87` | P87 | Marlin sub-tile output-dim pad-on-load (vllm#40361 backport). v7.62.10 text-patch implementation |
 | `GENESIS_ENABLE_P91` | P91 | AutoRound row-group cdiv quant dispatcher fix |
-| `GENESIS_ENABLE_P94` | P94 | Spec-decode `prepare_next_token_ids_padded` zero-alloc (vllm#41043 backport, P99 TPOT -9.3% per author). MERGED upstream 2026-04-29 — superseded-on-pin-bump |
-| `GENESIS_ENABLE_P95` | P95 | Marlin TP cudagraph cap on Ampere (vllm#40385 backport). Defensive cap of `max_cudagraph_capture_sizes` for TP>=2 + Marlin on SM 8.6. v7.63.x audit fix: hook now wired into apply_all.py |
-| `GENESIS_ENABLE_P98` | P98 | TurboQuant WorkspaceManager revert (vllm#40941 perf hotfix — DELIBERATE INVERSE of merged upstream behavior; Ampere small-batch single-stream perf fix) |
-| `GENESIS_ENABLE_P99` | P99 | WorkspaceManager memoize variant (companion to P98 for hybrid TQ) |
-| `GENESIS_ENABLE_P100` | P100 | FlashInfer FULL CUDA graph for spec-decode (vllm#41127 backport — Ampere SM 8.6 +5-10% TPS estimated) |
-| `GENESIS_ENABLE_P101` | P101 | TurboQuant continuation 64-token slicing (vllm#41123 SELECTIVE backport — long-prefix continuation OOM mitigation) |
+| `GENESIS_ENABLE_PR41043` | PR41043 | Spec-decode `prepare_next_token_ids_padded` zero-alloc (vllm#41043 backport, PR40941b TPOT -9.3% per author). MERGED upstream 2026-04-29 — superseded-on-pin-bump |
+| `GENESIS_ENABLE_PR40385` | PR40385 | Marlin TP cudagraph cap on Ampere (vllm#40385 backport). Defensive cap of `max_cudagraph_capture_sizes` for TP>=2 + Marlin on SM 8.6. v7.63.x audit fix: hook now wired into apply_all.py |
+| `GENESIS_ENABLE_PR40941` | PR40941 | TurboQuant WorkspaceManager revert (vllm#40941 perf hotfix — DELIBERATE INVERSE of merged upstream behavior; Ampere small-batch single-stream perf fix) |
+| `GENESIS_ENABLE_PR40941B` | PR40941b | WorkspaceManager memoize variant (companion to PR40941 for hybrid TQ) |
+| `GENESIS_ENABLE_PR41127` | PR41127 | FlashInfer FULL CUDA graph for spec-decode (vllm#41127 backport — Ampere SM 8.6 +5-10% TPS estimated) |
+| `GENESIS_ENABLE_PR41123` | PR41123 | TurboQuant continuation 64-token slicing (vllm#41123 SELECTIVE backport — long-prefix continuation OOM mitigation) |
 | `GENESIS_ENABLE_P102` | P102 | Spec-meta sanity check (live in `spec_meta.py`) |
 | `GENESIS_ENABLE_P103` | P103 | FLA Cliff 2 chunked fwd_h+fwd_o orchestrator. Tunable: `GENESIS_FLA_FWD_H_MAX_T` (default 16384, rounded to FLA_CHUNK_SIZE multiple) |
-| `GENESIS_ENABLE_PN8_MTP_DRAFT_ONLINE_QUANT` | PN8 | MTP draft online-quant propagation (~1 GiB VRAM savings per GPU) |
-| `GENESIS_ENABLE_PN9_INDEPENDENT_DRAFTER_ATTN_BACKEND` | PN9 | Independent drafter attention backend (vllm#39930). Tunable: `GENESIS_PN9_DRAFTER_BACKEND` |
-| `GENESIS_ENABLE_PN11_GDN_AB_CONTIGUOUS` | PN11 | GDN a/b contiguity in fix_query_key_value_ordering (vllm#41142 — already in our pin) |
-| `GENESIS_ENABLE_PN12_FFN_INTERMEDIATE_POOL` | PN12 | FFN intermediate scratch pool — Cliff 1 fix on TQ3 path |
-| `GENESIS_ENABLE_PN13_CUDA_GRAPH_LAMBDA_ARITY` | PN13 | CUDAGraphWrapper gc.collect/empty_cache lambda arity (vllm#41235 backport, JartX) |
-| `GENESIS_ENABLE_PN14_TQ_DECODE_OOB_CLAMP` | PN14 | TQ decode `safe_page_idx` clamp (vllm#40074 backport) |
+| `GENESIS_ENABLE_PR40849` | PR40849 | MTP draft online-quant propagation (~1 GiB VRAM savings per GPU) |
+| `GENESIS_ENABLE_PR39930_BACKEND` | PR39930 | Independent drafter attention backend (vllm#39930). Tunable: `GENESIS_PR39930_DRAFTER_BACKEND` |
+| `GENESIS_ENABLE_PR41142` | PR41142 | GDN a/b contiguity in fix_query_key_value_ordering (vllm#41142 — already in our pin) |
+| `GENESIS_ENABLE_PR34207` | PR34207 | FFN intermediate scratch pool — Cliff 1 fix on TQ3 path |
+| `GENESIS_ENABLE_PR41235` | PR41235 | CUDAGraphWrapper gc.collect/empty_cache lambda arity (vllm#41235 backport, JartX) |
+| `GENESIS_ENABLE_PR40074` | PR40074 | TQ decode `safe_page_idx` clamp (vllm#40074 backport) |
 | `GENESIS_ENABLE_PN16_LAZY_REASONER` | PN16 | Lazy-reasoner per-request `enable_thinking` middleware. Tunables: `GENESIS_PN16_THRESHOLD_CHARS` (default 300), `GENESIS_PN16_MAX_THINKING_TOKENS` (variant 5 soft cap) |
 | `GENESIS_ENABLE_PN17_FA2_LSE_CLAMP` | PN17 | FA2 softmax_lse runtime clamp (Cliff 1 mechanism A — Issue #11). Closes long-text-no-vision envelope ~150K → ~205K |
-| `GENESIS_ENABLE_PN19_SCOPED_MAX_SPLIT` | PN19 | Scoped max_split_size_mb during model load (vllm#41268 backport — PyTorch 2.10+ fragmentation, 200-500 MiB headroom on H100; unverified on Ampere) |
+| `GENESIS_ENABLE_PR41268` | PR41268 | Scoped max_split_size_mb during model load (vllm#41268 backport — PyTorch 2.10+ fragmentation, 200-500 MiB headroom on H100; unverified on Ampere) |
 
 #### P82 tunables (when `GENESIS_ENABLE_P82=1`)
 
@@ -172,17 +172,17 @@ Memory pool architecture — added v7.48 to control whether prealloc patches use
 
 ---
 
-## P75 Suffix Decoding tunables (opt-in via `GENESIS_ENABLE_P75_SUFFIX_DECODING=1`)
+## PR25784 Suffix Decoding tunables (opt-in via `GENESIS_ENABLE_PR25784=1`)
 
 Activates upstream PR #25784 (Arctic Inference). All values pass through to vLLM's
 `speculative_config`; defaults from PR's recommended profile.
 
 | Env var | Default | What it does |
 |---|---|---|
-| `GENESIS_P75_TREE_DEPTH` | `24` | Suffix tree max depth |
-| `GENESIS_P75_SPEC_FACTOR` | `2.0` | Max draft length factor (×K) |
-| `GENESIS_P75_MIN_PROB` | `0.10` | Branch probability threshold (drop branches below this) |
-| `GENESIS_P75_CACHE_REQS` | `10000` | Cross-request cache cap |
+| `GENESIS_PR25784_TREE_DEPTH` | `24` | Suffix tree max depth |
+| `GENESIS_PR25784_SPEC_FACTOR` | `2.0` | Max draft length factor (×K) |
+| `GENESIS_PR25784_MIN_PROB` | `0.10` | Branch probability threshold (drop branches below this) |
+| `GENESIS_PR25784_CACHE_REQS` | `10000` | Cross-request cache cap |
 
 ---
 
@@ -313,7 +313,7 @@ These cap kernel-side scratch buffers; useful when vLLM's
 | `GENESIS_FORCE_APPLY_P36` | `0` | Force P36 to apply even if config_detect would skip (test only) |
 | `GENESIS_FORCE_SPEC_DECODE` | (empty) | Force config_detect to report spec-decode active (test / pre-flight) |
 | `GENESIS_FORCE_MARLIN_W8A16` | `0` | Force Marlin kernel for W8A16 (bypasses AllSpark dispatch). Set together with `VLLM_DISABLED_KERNELS=AllSparkLinearKernel`. P93 companion |
-| `GENESIS_P71_USE_PYTORCH` | `0` | P71 block-verify: use PyTorch reference path instead of Triton kernel |
+| `GENESIS_PR40819_USE_PYTORCH` | `0` | PR40819 block-verify: use PyTorch reference path instead of Triton kernel |
 | `GENESIS_PROFILE_RUN_CAP_LOG` | `1` | P72: log when profile_run M is capped |
 | `GENESIS_ENABLE_PERF_TESTS` | `0` | Run perf-benchmark tests (gated to keep CI fast) |
 | `GENESIS_SKIP_PERF_TESTS` | `0` | Force-skip perf tests even when implicitly enabled |

@@ -74,8 +74,8 @@ _GDN_PATCH_PROFILES: dict[str, GdnPatchProfile] = {
                     "buffer reduction). Complementary to PN59 (different "
                     "code path).",
     ),
-    "PN29": GdnPatchProfile(
-        patch_id="PN29",
+    "PR41446": GdnPatchProfile(
+        patch_id="PR41446",
         sites=frozenset({GdnSite.CHUNK_FWD_O}),
         description="GDN chunk_o scale-fold optimization. Triton kernel "
                     "arithmetic — composable with PN59 (PN59 calls "
@@ -87,15 +87,15 @@ _GDN_PATCH_PROFILES: dict[str, GdnPatchProfile] = {
         description="DS conv state layout fix (causal_conv1d). Different "
                     "kernel from FLA chunk_*; no overlap with PN59.",
     ),
-    "PN11": GdnPatchProfile(
-        patch_id="PN11",
+    "PR41142": GdnPatchProfile(
+        patch_id="PR41142",
         sites=frozenset({GdnSite.GDN_BODY}),
         description="GDN AB tensor contiguous fix in gqa_interleaved branch "
                     "(Qwen3-Next path). PN59 operates only in non-interleaved "
                     "Qwen3.5/3.6 branch — disjoint code paths.",
     ),
-    "PN26b": GdnPatchProfile(
-        patch_id="PN26b",
+    "PR41422": GdnPatchProfile(
+        patch_id="PR41422",
         sites=frozenset({}),  # Non-GDN attention layers
         description="Sparse-V kernel for non-GDN attention path "
                     "(35B Qwen3MoE). Doesn't touch GDN.",

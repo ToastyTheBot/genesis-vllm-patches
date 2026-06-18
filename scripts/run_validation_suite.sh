@@ -2,10 +2,10 @@
 # Genesis universal per-model validation runner — v7.62.x updated.
 #
 # Active model tags (v7.62.x):
-#   qwen3_6_35b_fp8         — 35B-A3B-FP8 PROD (TQ k8v4 + MTP K=3 + PN8)
+#   qwen3_6_35b_fp8         — 35B-A3B-FP8 PROD (TQ k8v4 + MTP K=3 + PR40849)
 #   qwen3_6_27b_int4_short  — 27B-int4-Lorbus short-ctx (no TQ, fp8_e5m2)
 #   qwen3_6_27b_int4_long   — 27B-int4-Lorbus long-ctx 256K (no TQ)
-#   qwen3_6_27b_int4_TQ     — 27B-int4-Lorbus + TurboQuant k8v4 (P98 required)
+#   qwen3_6_27b_int4_TQ     — 27B-int4-Lorbus + TurboQuant k8v4 (PR40941 required)
 # Cross-arch (compat verification, not PROD):
 #   qwen3_next_awq | qwen3_32b_dense | gemma4_26b_moe
 # Legacy aliases (still supported): qwen3_next_fp8 → qwen3_6_35b_fp8

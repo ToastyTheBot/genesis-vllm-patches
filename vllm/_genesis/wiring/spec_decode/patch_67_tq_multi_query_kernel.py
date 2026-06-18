@@ -31,7 +31,7 @@ SAFETY / FALLBACK
 After P67 is empirically validated:
   1. Restore P65 to declare UNIFORM_BATCH (no longer need cudagraph downgrade)
   2. Spec-decode batches regain FULL cudagraph speedup
-  3. Net effect: P64+P65v2+P66+P67 = correct + fast
+  3. Net effect: PR39598+P65v2+P66+P67 = correct + fast
 
 Author: Sandermage (Sander) Barzov Aleksandr, Ukraine, Odessa.
 """

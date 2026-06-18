@@ -26,7 +26,7 @@ _VALID_RECIPE = {
     "genesis_recipe_version": "1.0",
     "name": "adopted-recipe",
     "description": "Pulled from URL",
-    "envs": {"GENESIS_ENABLE_PN14_TQ_DECODE_OOB_CLAMP": "1"},
+    "envs": {"GENESIS_ENABLE_PR40074": "1"},
     "vllm_serve": {"model": "/models/X", "tensor_parallel_size": 2},
     "container": {"image": "vllm/vllm-openai:nightly", "name": "test"},
 }

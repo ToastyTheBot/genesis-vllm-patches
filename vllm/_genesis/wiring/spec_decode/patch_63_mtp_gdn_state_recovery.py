@@ -4,7 +4,7 @@
 Genesis-original investigation (no upstream PR yet at time of writing).
 
 ================================================================
-DEPENDS ON P60 (Phase 1) being applied. P60 fixes the MAIN model's
+DEPENDS ON PR40738 (Phase 1) being applied. PR40738 fixes the MAIN model's
 post-verify decode path. P63 covers the same class of bug for the
 DRAFTER forward path that MTP/Eagle methods take.
 ================================================================
@@ -27,7 +27,7 @@ spec-decode:
      `self.build(common_prefix_len=0, common_attn_metadata=cad,
      fast_build=True)` — **WITHOUT** `num_accepted_tokens`.
   5. Inside GDN's `build()`, the non-spec branch sees
-     `num_accepted_tokens is None` → P60's recovery logic guard
+     `num_accepted_tokens is None` → PR40738's recovery logic guard
      (`if self.use_spec_decode and num_accepted_tokens is not None
      and num_decodes > 0`) fails → `spec_decode_src_indices = None`.
   6. In `_forward_core` (gdn_linear_attn.py), the SSM state pre-copy
@@ -44,7 +44,7 @@ Symptoms (reproduced by @noonghunna's Probe 9, 2026-04-25):
     correlated with `prompt_lookup_min=2` ngram bug class but
     DIFFERENT root cause path
 
-Why P60 doesn't cover this
+Why PR40738 doesn't cover this
 --------------------------
 - PR #40738 (tdoublep) fixes `gpu_model_runner._build_attn_group_metadata`
   to pass `num_accepted_tokens` to the builder for MAIN model non-spec
@@ -69,7 +69,7 @@ acceptance counts.
 `GDNAttentionMetadataBuilder` that:
   - Reads cached `num_accepted_tokens` from `self.num_accepted_tokens`
     buffer IF the fresh flag is set
-  - Calls `self.build()` with that num_accepted (engaging P60's
+  - Calls `self.build()` with that num_accepted (engaging PR40738's
     spec_decode_src_indices computation + SSM state pre-copy)
   - Resets the fresh flag after consume (one-shot semantics)
   - Falls back to base behavior (no num_accepted) if fresh flag is
@@ -77,9 +77,9 @@ acceptance counts.
 
 Critical invariants
 -------------------
-1. **P60 must be applied first.** P63 relies on P60's
+1. **PR40738 must be applied first.** P63 relies on PR40738's
    `spec_decode_src_indices` field on the metadata + `build()`
-   recovery logic in the non-spec branch. Without P60, P63 is a no-op
+   recovery logic in the non-spec branch. Without PR40738, P63 is a no-op
    (passes num_accepted but build() doesn't compute the recovery).
 2. **One-shot consume.** Each fresh flag set is consumed by ONE
    build_for_drafting call. Subsequent calls fall back to base
@@ -147,7 +147,7 @@ GENESIS_P63_MARKER = "Genesis P63 MTP/Eagle drafter GDN state recovery v7.13"
 # ─── Sub-patch A: mark fresh flag after spec branch populates buffer ────────
 # Anchor targets the closing of the spec branch in build() — specifically
 # the line that fills num_accepted_tokens with 1 for non-spec sequences.
-# This region is NOT touched by P60, so the anchor is stable post-P60.
+# This region is NOT touched by PR40738, so the anchor is stable post-PR40738.
 
 GDN_FRESH_FLAG_OLD = (
     "            self.num_accepted_tokens[:num_spec_decodes].copy_(\n"
@@ -171,7 +171,7 @@ GDN_FRESH_FLAG_NEW = (
 
 # ─── Sub-patch B: insert build_for_drafting() override ──────────────────────
 # Anchor targets the start of build_for_cudagraph_capture (stable, not
-# touched by P60). We insert the new method right before it.
+# touched by PR40738). We insert the new method right before it.
 
 GDN_DRAFTING_OVERRIDE_OLD = (
     "    def build_for_cudagraph_capture(\n"
@@ -188,7 +188,7 @@ GDN_DRAFTING_OVERRIDE_NEW = (
     "        \"\"\"[Genesis P63] Override base build_for_drafting to pass cached\n"
     "        num_accepted_tokens through to build(). Without this, MTP/Eagle\n"
     "        drafter forwards drop into the non-spec branch with\n"
-    "        num_accepted=None → P60's spec_decode_src_indices stays None →\n"
+    "        num_accepted=None → PR40738's spec_decode_src_indices stays None →\n"
     "        SSM state pre-copy in gdn_linear_attn._forward_core never fires →\n"
     "        drafter reads stale SSM state from block[0] → corrupt drafts.\n"
     "\n"
@@ -197,7 +197,7 @@ GDN_DRAFTING_OVERRIDE_NEW = (
     "        (see Sub-patch A: _p63_num_accepted_fresh flag). The flag is\n"
     "        consumed once per drafter call to avoid cross-step staleness.\n"
     "\n"
-    "        Depends on P60 being applied (build() must accept num_accepted\n"
+    "        Depends on PR40738 being applied (build() must accept num_accepted\n"
     "        kwarg + compute spec_decode_src_indices in non-spec branch).\n"
     "        \"\"\"\n"
     "        # [Genesis P63 trace] log invocation for diagnostic tracing\n"
@@ -312,8 +312,8 @@ def apply() -> tuple[str, str]:
                     "skipped",
                     f"required anchor for {sp.name!r} not found in "
                     f"{patcher.target_file} — anchor drifted, P63 cannot apply. "
-                    "Most likely cause: P60 not yet applied (P63 depends on "
-                    "P60's spec_decode_src_indices logic in build()).",
+                    "Most likely cause: PR40738 not yet applied (P63 depends on "
+                    "PR40738's spec_decode_src_indices logic in build()).",
                 )
 
     result, failure = patcher.apply()
@@ -328,7 +328,7 @@ def apply() -> tuple[str, str]:
 
     return "applied", (
         "P63 applied: GDNAttentionMetadataBuilder.build_for_drafting() now "
-        "passes cached num_accepted_tokens through to build(), engaging P60's "
-        "SSM state recovery for MTP/Eagle drafter forward path. Requires P60 "
-        "+ P60b for full correctness."
+        "passes cached num_accepted_tokens through to build(), engaging PR40738's "
+        "SSM state recovery for MTP/Eagle drafter forward path. Requires PR40738 "
+        "+ PR40738b for full correctness."
     )

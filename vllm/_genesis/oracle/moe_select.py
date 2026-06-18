@@ -3,7 +3,7 @@
 
 Centralizes the decision "which fused_moe expert impl to use" based on
 (quant_format × hardware × workload regime). Replaces ad-hoc if/elif
-scattered across PN8/P81/P83/P87/P91 patches.
+scattered across PR40849/PR40925/P83/P87/P91 patches.
 
 Doesn't ENABLE patches — that's still done by `should_apply` in dispatcher.
 This oracle just provides a single function operators / our own validators
@@ -20,7 +20,7 @@ no-op for that checkpoint). An oracle would have flagged this earlier:
 Models on Genesis stack:
 - 27B Lorbus AutoRound INT4 (group_size=128) → Marlin path → P87/P91 fire
 - 27B Minachist INT8 (group_size=-1) → AllSpark → P87/P91 NO-OP
-- 35B-A3B FP8 → fused_moe block-quantized → P81 fires for low-M
+- 35B-A3B FP8 → fused_moe block-quantized → PR40925 fires for low-M
 """
 from __future__ import annotations
 
@@ -56,18 +56,18 @@ def select_moe_expert_impl(
     Returns:
       MoESelection — which impl, which Genesis patches matter, why.
     """
-    # Per-tensor MM low-M optimization (Genesis P81 vllm#37035 hot path)
+    # Per-tensor MM low-M optimization (Genesis PR40925 vllm#37035 hot path)
     if quant_format == "fp8" and num_tokens <= 8:
         return MoESelection(
             impl_name="fp8_block_scaled_low_m",
-            relevant_patches=("P81", "P82", "PN8"),
-            notes="FP8 block-scaled MM, low-M decode path; P81 fires when M<=8 "
+            relevant_patches=("PR40925", "P82", "PR40849"),
+            notes="FP8 block-scaled MM, low-M decode path; PR40925 fires when M<=8 "
                   "(35B PROD MTP K=3 verify hits this every step)",
         )
     if quant_format == "fp8":
         return MoESelection(
             impl_name="fp8_block_scaled",
-            relevant_patches=("PN8", "P82"),
+            relevant_patches=("PR40849", "P82"),
             notes="Standard FP8 block-scaled fused_moe (35B prefill / large batch)",
         )
     if quant_format in ("compressed_tensors_int4_marlin", "int4_autoround"):

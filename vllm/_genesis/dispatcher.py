@@ -22,9 +22,9 @@ From a patch wiring (`patch_NN_*.py::apply()`):
 
     from vllm._genesis.dispatcher import should_apply, log_decision
 
-    decision, reason = should_apply("P60")
+    decision, reason = should_apply("PR40738")
     if not decision:
-        log_decision("P60", decision, reason)
+        log_decision("PR40738", decision, reason)
         return "skipped", reason
     # ... do the patching ...
 
@@ -101,51 +101,56 @@ PATCH_REGISTRY: dict[str, dict[str, Any]] = {
             "future hardware with larger VRAM budgets."
         ),
     },
-    "P58": {
+    "PR40768": {
         "title": "Async-scheduler -1 placeholder fix",
-        "env_flag": "GENESIS_ENABLE_P58_ASYNC_PLACEHOLDER_FIX",
+        "env_flag": "GENESIS_ENABLE_PR40768",
+        "env_flag_aliases": ["GENESIS_ENABLE_P58_ASYNC_PLACEHOLDER_FIX"],
         "default_on": False,
         "category": "spec_decode",
         "credit": "z1ying (vllm#40768)",
         "upstream_pr": 40768,
     },
-    "P59": {
+    "PR39055": {
         "title": "Qwen3 reasoning embedded tool_call recovery",
-        "env_flag": "GENESIS_ENABLE_P59_QWEN3_TOOL_RECOVERY",
+        "env_flag": "GENESIS_ENABLE_PR39055",
+        "env_flag_aliases": ["GENESIS_ENABLE_P59_QWEN3_TOOL_RECOVERY"],
         "default_on": False,
         "category": "structured_output",
         "credit": "ZenoAFfectionate (vllm#39055)",
         "upstream_pr": 39055,
         "applies_to": {"model_class": ["qwen3", "qwen3_5", "qwen3_moe", "qwen3_next"]},
     },
-    "P60": {
+    "PR40738": {
         "title": "GDN+ngram state recovery (Phase 1: SSM pre-copy)",
-        "env_flag": "GENESIS_ENABLE_P60_GDN_NGRAM_FIX",
+        "env_flag": "GENESIS_ENABLE_PR40738",
+        "env_flag_aliases": ["GENESIS_ENABLE_P60_GDN_NGRAM_FIX"],
         "default_on": False,
         "category": "spec_decode",
         "credit": "tdoublep (vllm#40738), bhaktatejas922 (#39273)",
         "upstream_pr": 40738,
         "applies_to": {"is_hybrid": [True]},
     },
-    "P60b": {
+    "PR40738b": {
         "title": "GDN+ngram Triton kernel offset (Phase 2)",
-        "env_flag": "GENESIS_ENABLE_P60B_TRITON_KERNEL",
+        "env_flag": "GENESIS_ENABLE_PR40738B",
+        "env_flag_aliases": ["GENESIS_ENABLE_P60B_TRITON_KERNEL"],
         "default_on": False,
         "category": "spec_decode",
         "credit": "tdoublep (vllm#40738)",
         "upstream_pr": 40738,
         "applies_to": {"is_hybrid": [True]},
-        "requires_patches": ["P60"],
+        "requires_patches": ["PR40738"],
     },
-    "P62": {
+    "PR36138": {
         "title": "Structured-output spec-decode reasoning-end timing fix",
-        "env_flag": "GENESIS_ENABLE_P62_STRUCT_OUT_SPEC_TIMING",
+        "env_flag": "GENESIS_ENABLE_PR36138",
+        "env_flag_aliases": ["GENESIS_ENABLE_P62_STRUCT_OUT_SPEC_TIMING"],
         "default_on": False,
         "category": "structured_output",
         "credit": "sfbemerk (vllm#36138), cicirori (vllm#34650)",
         "upstream_pr": 36138,
         "applies_to": {"model_class": ["qwen3", "qwen3_5", "qwen3_6", "qwen3_moe", "qwen3_next"]},
-        "conflicts_with": ["PN58"],
+        "conflicts_with": ["PR40962"],
     },
     "P63": {
         "title": "MTP/Eagle drafter GDN state recovery (deprecated — wrong layer)",
@@ -164,9 +169,10 @@ PATCH_REGISTRY: dict[str, dict[str, Any]] = {
             "drafter model with hybrid layers, but no such configuration is verified yet."
         ),
     },
-    "P64": {
+    "PR39598": {
         "title": "qwen3coder MTP streaming early-return fix",
-        "env_flag": "GENESIS_ENABLE_P64_QWEN3CODER_MTP_STREAMING",
+        "env_flag": "GENESIS_ENABLE_PR39598",
+        "env_flag_aliases": ["GENESIS_ENABLE_P64_QWEN3CODER_MTP_STREAMING"],
         "default_on": False,
         "category": "structured_output",
         "credit": "kotori-yan (vllm#39598)",
@@ -245,9 +251,10 @@ PATCH_REGISTRY: dict[str, dict[str, Any]] = {
         "credit": "Genesis-original (Dynamo fake-tensor mismatch workaround for moe_align_block_size symbolic shape)",
         "upstream_pr": None,
     },
-    "P71": {
+    "PR40819": {
         "title": "Block-verify rejection sampler (Sun 2024 ICLR)",
-        "env_flag": "GENESIS_ENABLE_P71_BLOCK_VERIFY",
+        "env_flag": "GENESIS_ENABLE_PR40819",
+        "env_flag_aliases": ["GENESIS_ENABLE_P71_BLOCK_VERIFY"],
         "default_on": False,
         "category": "spec_decode",
         "credit": "Backport of vllm#40819 (Z. Golpayegani draft) + Sun et al. arXiv 2403.10444 + 2 critical fixes from gemini-code-assist review (shared u per request, denom==0 → 1.0)",
@@ -263,9 +270,10 @@ PATCH_REGISTRY: dict[str, dict[str, Any]] = {
         "applies_to": {"model_class": ["qwen3", "qwen3_5", "qwen3_moe", "qwen3_next"]},
         "requires_patches": ["P72"],
     },
-    "P75": {
+    "PR25784": {
         "title": "Auto-enable Suffix Decoding (Arctic Inference, vllm#25784)",
-        "env_flag": "GENESIS_ENABLE_P75_SUFFIX_DECODING",
+        "env_flag": "GENESIS_ENABLE_PR25784",
+        "env_flag_aliases": ["GENESIS_ENABLE_P75_SUFFIX_DECODING"],
         "default_on": False,
         "category": "spec_decode",
         "credit": "Backport-enabler of vllm#25784 (Arctic Inference Suffix Decoding) — operator convenience: auto-swap method=ngram→suffix when env enabled. Algorithm: arxiv 2411.04975.",
@@ -291,25 +299,28 @@ PATCH_REGISTRY: dict[str, dict[str, Any]] = {
             "quant_format": ["fp8", "compressed_tensors"],
         },
     },
-    "P79b": {
+    "PR40610": {
         "title": "Async × spec-decode proposer-sync backport (vllm#40610)",
-        "env_flag": "GENESIS_ENABLE_P79B_ASYNC_PROPOSER_SYNC",
+        "env_flag": "GENESIS_ENABLE_PR40610",
+        "env_flag_aliases": ["GENESIS_ENABLE_P79B_ASYNC_PROPOSER_SYNC"],
         "default_on": False,
         "category": "spec_decode",
         "credit": "Backport of vllm#40610 (OPEN draft, tracked from #40608). Re-records prepare_inputs_event AFTER spec-decode proposer GPU work in sample_tokens(). Fixes async × spec-decode race where next batch _update_states could mutate block_table while previous batch's proposer was still reading on GPU. Genesis prod uses sync ngram so direct value is minimal; protects users on async+EAGLE/MTP/ngram_gpu.",
         "upstream_pr": 40610,
     },
-    "P79c": {
+    "PR37629": {
         "title": "Stale spec_token_ids cleanup for unscheduled requests (vllm#37629)",
-        "env_flag": "GENESIS_ENABLE_P79C_STALE_SPEC_TOKEN_CLEANUP",
+        "env_flag": "GENESIS_ENABLE_PR37629",
+        "env_flag_aliases": ["GENESIS_ENABLE_P79C_STALE_SPEC_TOKEN_CLEANUP"],
         "default_on": False,
         "category": "spec_decode",
         "credit": "Backport of vllm#37629 (OPEN, fixes #36906). Cleanup pass after main scheduling loop clears spec_token_ids for unscheduled running requests. Prevents -1 placeholder leak into F.embedding() under budget-exhausted high-concurrency on async + EAGLE/MTP. Genesis prod (max_num_seqs=2, sync ngram) gains nothing direct; protects high-concurrency multimodal users.",
         "upstream_pr": 37629,
     },
-    "P81": {
+    "PR40925": {
         "title": "fp8 block-scaled MM low-M decode tuning (vllm#40925)",
-        "env_flag": "GENESIS_ENABLE_P81_FP8_BLOCK_SCALED_M_LE_8",
+        "env_flag": "GENESIS_ENABLE_PR40925",
+        "env_flag_aliases": ["GENESIS_ENABLE_P81_FP8_BLOCK_SCALED_M_LE_8"],
         "default_on": False,
         "category": "kernel_perf",
         "credit": "Backport of vllm#40925 (tonyliu312, OPEN). Specializes w8a8_triton_block_scaled_mm default config for M<=8 (single-request decode + MTP K=3 verify): BLOCK_SIZE_M 64->16, num_stages 2->3 (non-ROCm). Empirical +23% median decode on GB10. Direct hit for Genesis prod (Qwen3.6-A3B FP8 + max_num_seqs=2 + no pre-tuned JSON for A5000).",
@@ -354,9 +365,10 @@ PATCH_REGISTRY: dict[str, dict[str, Any]] = {
         "applies_to": {"is_hybrid": [True]},
         "requires_patches": ["P84"],
     },
-    "PN8": {
+    "PR40849": {
         "title": "MTP/draft online-quant propagation (vllm#40849)",
-        "env_flag": "GENESIS_ENABLE_PN8_MTP_DRAFT_ONLINE_QUANT",
+        "env_flag": "GENESIS_ENABLE_PR40849",
+        "env_flag_aliases": ["GENESIS_ENABLE_PN8_MTP_DRAFT_ONLINE_QUANT"],
         "default_on": False,
         "category": "spec_decode",
         "credit": (
@@ -380,9 +392,10 @@ PATCH_REGISTRY: dict[str, dict[str, Any]] = {
             # branch falls through identical to vanilla. No model gating.
         },
     },
-    "PN9": {
+    "PR39930": {
         "title": "Independent drafter attention backend (vllm#39930)",
-        "env_flag": "GENESIS_ENABLE_PN9_INDEPENDENT_DRAFTER_ATTN",
+        "env_flag": "GENESIS_ENABLE_PR39930",
+        "env_flag_aliases": ["GENESIS_ENABLE_PN9_INDEPENDENT_DRAFTER_ATTN"],
         "default_on": False,
         "category": "spec_decode",
         "credit": (
@@ -394,7 +407,7 @@ PATCH_REGISTRY: dict[str, dict[str, Any]] = {
             "Modifies `LLMBaseProposer._create_draft_vllm_config()` to "
             "always reset the drafter's attention backend (None = "
             "auto-select). Genesis minimal port: env "
-            "GENESIS_PN9_DRAFTER_BACKEND chooses backend (e.g. FLASH_ATTN); "
+            "GENESIS_PR39930_DRAFTER_BACKEND chooses backend (e.g. FLASH_ATTN); "
             "unset/auto → drafter auto-selects. Does NOT add the new "
             "SpeculativeConfig.attention_backend pydantic field (too "
             "invasive at runtime for a frozen dataclass + field_validator). "
@@ -408,9 +421,10 @@ PATCH_REGISTRY: dict[str, dict[str, Any]] = {
             # is only called when spec-decode is active. No additional gate.
         },
     },
-    "PN38": {
+    "PR40425": {
         "title": "DFlash drafter quantization support (PR #40425 backport)",
-        "env_flag": "GENESIS_ENABLE_PN38_DFLASH_QUANT_DRAFTER",
+        "env_flag": "GENESIS_ENABLE_PR40425",
+        "env_flag_aliases": ["GENESIS_ENABLE_PN38_DFLASH_QUANT_DRAFTER"],
         "default_on": False,
         "category": "spec_decode",
         "credit": (
@@ -485,7 +499,7 @@ PATCH_REGISTRY: dict[str, dict[str, Any]] = {
             "to disable individually. Strict-superset throughout: "
             "any eligibility failure falls through to baseline. Default "
             "OFF master-gated until A/B prod-validates. Composes "
-            "additively with PN21/PN23/PN24/P77."
+            "additively with PR40898/PN23/PR40727/P77."
         ),
         "upstream_pr": None,
         "applies_to": {
@@ -499,11 +513,11 @@ PATCH_REGISTRY: dict[str, dict[str, Any]] = {
     # entry intentionally NOT in PATCH_REGISTRY (no dispatcher matrix
     # row, no apply_all skip-noise on every boot).
     # PN36 was removed 2026-05-04 — was a misdiagnosis. The 5 `self.reasoner`
-    # call-sites I found were inserted by OUR P62 backport (vllm#36138, still
+    # call-sites I found were inserted by OUR PR36138 backport (vllm#36138, still
     # OPEN), NOT by upstream. Upstream PR #41199 (MERGED 2026-05-01, included
     # in our pin) intentionally moved reasoner to per-request lazy build via
     # `self._get_reasoner(request)`. Pristine upstream code does NOT reference
-    # `self.reasoner`. Fix path: disable P62 on this pin (it collides with
+    # `self.reasoner`. Fix path: disable PR36138 on this pin (it collides with
     # the rename refactor) and backport PR #40962 separately for the
     # post-reasoning-boundary spec-decode case.
     "PN50": {
@@ -524,10 +538,10 @@ PATCH_REGISTRY: dict[str, dict[str, Any]] = {
             "head_dim, V_PER_GROUP non-integer, kernel launch failure. "
             "Affects: 27B Lorbus only (35B is Qwen3MoE — no GDN layers, "
             "patch never fires). Claimed gain on H200/Qwen3.5-35B-A3B (SGLang "
-            "naming): +7.4% TPS, -10.8% TTFT, -31.2% ITL P95. On A5000 + "
+            "naming): +7.4% TPS, -10.8% TTFT, -31.2% ITL PR40385. On A5000 + "
             "27B Lorbus expect modest gain (memory-bound layer, A5000 PCIe "
-            "slower than H200). Composable with PN11/PN29/PN32/P103 — verified "
-            "no overlap (PN11 acts in interleaved branch, others in different "
+            "slower than H200). Composable with PR41142/PR41446/PN32/P103 — verified "
+            "no overlap (PR41142 acts in interleaved branch, others in different "
             "files). Default OFF until live A/B prod-validates."
         ),
         "upstream_pr": None,
@@ -553,7 +567,7 @@ PATCH_REGISTRY: dict[str, dict[str, Any]] = {
             "limitation is the triton kernel for cliff 2; doesn't appear with "
             "llama.cpp'. Phase 1 numerical TDD proves bit-equivalence "
             "(rtol<1e-5) on 10 Genesis 27B shape cases. Composes with "
-            "PN50/PN54/PN26b/P67 (orthogonal). Supersedes P103 outer chunked "
+            "PN50/PN54/PR41422/P67 (orthogonal). Supersedes P103 outer chunked "
             "wrapper when both ON. Default OFF until live A/B prod-validates."
         ),
         "upstream_pr": None,  # FLA RFC #485, #190 pending — first-mover position
@@ -562,36 +576,38 @@ PATCH_REGISTRY: dict[str, dict[str, Any]] = {
         },
         "conflicts_with": [],
     },
-    "PN58": {
-        "title": "Spec-decode reasoning boundary validation — narrower alt to P62 (vllm#40962)",
-        "env_flag": "GENESIS_ENABLE_PN58_SPEC_REASONING_BOUNDARY",
+    "PR40962": {
+        "title": "Spec-decode reasoning boundary validation — narrower alt to PR36138 (vllm#40962)",
+        "env_flag": "GENESIS_ENABLE_PR40962",
+        "env_flag_aliases": ["GENESIS_ENABLE_PN58_SPEC_REASONING_BOUNDARY"],
         "default_on": False,
         "category": "structured_output",
         "credit": (
             "Backport of vllm#40962 (OPEN, AI-assisted by author). NARROWER "
-            "alternative to our existing P62 (vllm#36138 broader pipeline-"
-            "level fix). MUTUALLY EXCLUSIVE with P62 — both patch the same "
+            "alternative to our existing PR36138 (vllm#36138 broader pipeline-"
+            "level fix). MUTUALLY EXCLUSIVE with PR36138 — both patch the same "
             "`should_advance` block in scheduler.update_from_output(). "
-            "Apply check enforces P62 OFF requirement; SKIPS otherwise. "
-            "PN58 modifies ONLY commit-time validation, doesn't touch "
+            "Apply check enforces PR36138 OFF requirement; SKIPS otherwise. "
+            "PR40962 modifies ONLY commit-time validation, doesn't touch "
             "bitmask/draft validation. Author warns: significant perf drop "
             "with multi-token reasoning markers (per-token boundary scan "
-            "expensive). Engineering tradeoff: P62 = more correct (per-pos "
-            "grammar masks), more invasive; PN58 = less correct in edge "
+            "expensive). Engineering tradeoff: PR36138 = more correct (per-pos "
+            "grammar masks), more invasive; PR40962 = less correct in edge "
             "cases (commit-time only), cheaper hot-path. Multi-file "
             "(envs.py + abs_reasoning_parsers.py + basic_parsers.py + "
             "v1/structured_output/__init__.py + v1/core/sched/scheduler.py "
             "= 5 files, 6 sub-patches). Default OFF; current Genesis PROD "
-            "uses P62 (broader). Enable PN58 only after measuring P62 perf "
+            "uses PR36138 (broader). Enable PR40962 only after measuring PR36138 perf "
             "hit on YOUR specific reasoning parser."
         ),
         "upstream_pr": 40962,
         "applies_to": {},
-        "conflicts_with": ["P62"],
+        "conflicts_with": ["PR36138"],
     },
-    "P107": {
+    "PR41467": {
         "title": "MTP truncation detector at reasoning→tool_call boundary (vllm#41467)",
-        "env_flag": "GENESIS_ENABLE_P107_MTP_TRUNCATION_DETECTOR",
+        "env_flag": "GENESIS_ENABLE_PR41467",
+        "env_flag_aliases": ["GENESIS_ENABLE_P107_MTP_TRUNCATION_DETECTOR"],
         "default_on": False,
         "category": "structured_output",
         "credit": (
@@ -602,7 +618,7 @@ PATCH_REGISTRY: dict[str, dict[str, Any]] = {
             "tool_calls, ни content. Defensive guard в "
             "chat_completion_stream_generator detect'ит combo и raise "
             "GenerationError (retryable) → клиент retries вместо silent "
-            "stop. Author явно ссылается на наш P58/P59/P60/P61/P64 path. "
+            "stop. Author явно ссылается на наш PR40768/PR39055/PR40738/P61/PR39598 path. "
             "EXACT наш PROD config (27B Lorbus + MTP K=3 + tools). Defensive "
             "safety-net, не root-cause fix. Default OFF до live verify "
             "tool-call sweep на 27B PROD."
@@ -610,9 +626,10 @@ PATCH_REGISTRY: dict[str, dict[str, Any]] = {
         "upstream_pr": 41467,
         "applies_to": {},
     },
-    "PN57": {
+    "PR41418b": {
         "title": "TurboQuant centroids disk-persistent cache (vllm#41418-inspired)",
-        "env_flag": "GENESIS_ENABLE_PN57_TQ_CENTROIDS_DISK_CACHE",
+        "env_flag": "GENESIS_ENABLE_PR41418B",
+        "env_flag_aliases": ["GENESIS_ENABLE_PN57_TQ_CENTROIDS_DISK_CACHE"],
         "default_on": False,
         "category": "perf_hotfix",
         "credit": (
@@ -631,9 +648,10 @@ PATCH_REGISTRY: dict[str, dict[str, Any]] = {
         "upstream_pr": 41418,
         "applies_to": {},
     },
-    "PN55": {
+    "PR41602": {
         "title": "wake_up crash fix on hybrid (Mamba/DeltaNet) models — vllm#41602 backport",
-        "env_flag": "GENESIS_ENABLE_PN55_WAKE_UP_HYBRID_KV",
+        "env_flag": "GENESIS_ENABLE_PR41602",
+        "env_flag_aliases": ["GENESIS_ENABLE_PN55_WAKE_UP_HYBRID_KV"],
         "default_on": False,
         "category": "perf_hotfix",
         "credit": (
@@ -680,9 +698,10 @@ PATCH_REGISTRY: dict[str, dict[str, Any]] = {
             "model_class": ["qwen3_5", "qwen3_6"],
         },
     },
-    "PN52": {
+    "PR41411": {
         "title": "prompt_logprobs eviction fix during chunked prefill (vllm#41411 backport)",
-        "env_flag": "GENESIS_ENABLE_PN52_PROMPT_LOGPROBS_EVICTION",
+        "env_flag": "GENESIS_ENABLE_PR41411",
+        "env_flag_aliases": ["GENESIS_ENABLE_PN52_PROMPT_LOGPROBS_EVICTION"],
         "default_on": False,
         "category": "perf_hotfix",
         "credit": (
@@ -727,9 +746,10 @@ PATCH_REGISTRY: dict[str, dict[str, Any]] = {
         "upstream_pr": 40816,
         "applies_to": {},
     },
-    "PN35": {
+    "PR35975": {
         "title": "Skip inputs_embeds buffer for text-only models (vllm#35975 backport)",
-        "env_flag": "GENESIS_ENABLE_PN35_INPUTS_EMBEDS_OPTIONAL",
+        "env_flag": "GENESIS_ENABLE_PR35975",
+        "env_flag_aliases": ["GENESIS_ENABLE_PN35_INPUTS_EMBEDS_OPTIONAL"],
         "default_on": True,
         "category": "perf_hotfix",
         "credit": (
@@ -753,9 +773,10 @@ PATCH_REGISTRY: dict[str, dict[str, Any]] = {
         ),
         "upstream_pr": 35975,
     },
-    "PN33": {
+    "PR37521": {
         "title": "Spec-decode warmup K-aware sizing (vllm#37521 extended to MTP/ngram)",
-        "env_flag": "GENESIS_ENABLE_PN33_SPEC_DECODE_WARMUP_K",
+        "env_flag": "GENESIS_ENABLE_PR37521",
+        "env_flag_aliases": ["GENESIS_ENABLE_PN33_SPEC_DECODE_WARMUP_K"],
         "default_on": True,
         "category": "spec_decode",
         "credit": (
@@ -773,7 +794,7 @@ PATCH_REGISTRY: dict[str, dict[str, Any]] = {
             "2026-05-01). Same root cause for both bugs; one fix "
             "closes both. Default ON when spec-decode active — real "
             "correctness fix, not experimental. Disable via "
-            "GENESIS_DISABLE_PN33_SPEC_DECODE_WARMUP_K=1 if K-sized "
+            "GENESIS_DISABLE_PR37521_SPEC_DECODE_WARMUP_K=1 if K-sized "
             "warmup itself OOMs (better-than-runtime-OOM diagnosis)."
         ),
         "upstream_pr": 37521,
@@ -884,7 +905,7 @@ PATCH_REGISTRY: dict[str, dict[str, Any]] = {
         "default_on": False,
         "category": "perf_hotfix",
         "credit": (
-            "Genesis-original 2026-05-01 — synthesizes PN26b proven uniform-"
+            "Genesis-original 2026-05-01 — synthesizes PR41422 proven uniform-"
             "scalar `if` pattern (Triton 3.6 scf.if), TRT-LLM #9821 sink "
             "protection design, TheTom #41422 threshold=0 bit-exact contract. "
             "Per-q_t skip via `if SPARSE_V: ...` constexpr-DCE'd to nothing "
@@ -900,9 +921,10 @@ PATCH_REGISTRY: dict[str, dict[str, Any]] = {
         "requires_patches": ["P67"],
         "conflicts_with": [],
     },
-    "PN29": {
+    "PR41446": {
         "title": "GDN chunk_o scale-fold (vllm#41446 pattern (c))",
-        "env_flag": "GENESIS_ENABLE_PN29_GDN_SCALE_FOLD",
+        "env_flag": "GENESIS_ENABLE_PR41446",
+        "env_flag_aliases": ["GENESIS_ENABLE_PN29_GDN_SCALE_FOLD"],
         "default_on": False,
         "category": "perf_hotfix",
         "credit": (
@@ -925,9 +947,10 @@ PATCH_REGISTRY: dict[str, dict[str, Any]] = {
             # patch is silently no-op even if env enabled.
         },
     },
-    "PN11": {
+    "PR41142": {
         "title": "GDN a/b contiguity in fix_query_key_value_ordering (vllm#41142)",
-        "env_flag": "GENESIS_ENABLE_PN11_GDN_AB_CONTIGUOUS",
+        "env_flag": "GENESIS_ENABLE_PR41142",
+        "env_flag_aliases": ["GENESIS_ENABLE_PN11_GDN_AB_CONTIGUOUS"],
         "default_on": False,
         "category": "model_correctness",
         "credit": (
@@ -949,17 +972,18 @@ PATCH_REGISTRY: dict[str, dict[str, Any]] = {
             # patch is harmless (no-op .contiguous() call).
         },
     },
-    "PN12": {
+    "PR34207": {
         "title": "FFN intermediate scratch pool — Cliff 1 fix on TQ3 path",
-        "env_flag": "GENESIS_ENABLE_PN12_FFN_INTERMEDIATE_POOL",
+        "env_flag": "GENESIS_ENABLE_PR34207",
+        "env_flag_aliases": ["GENESIS_ENABLE_PN12_FFN_INTERMEDIATE_POOL"],
         "default_on": False,
         "category": "memory_savings",
         "credit": (
             "Genesis-original 2026-04-29 — Cliff 1 fix on TQ3 path. "
             "Closes 138 MiB OOM at 192K + tool-call on RTX 3090 (noonghunna "
-            "report). PN8 closes Cliff 1 on FP8 by freeing ~600 MiB persistent "
+            "report). PR40849 closes Cliff 1 on FP8 by freeing ~600 MiB persistent "
             "draft VRAM, but on TQ3 frees only ~230 MiB — not enough slack "
-            "for the 138 MiB transient. Different memory class. PN12 pools "
+            "for the 138 MiB transient. Different memory class. PR34207 pools "
             "the SiluAndMul output across layers (single buffer per "
             "(intermediate_size, dtype, device)) — reduces per-step allocator "
             "churn from ~4.7-18 GiB to ~73-285 MiB on Lorbus 27B-int4. "
@@ -976,9 +1000,10 @@ PATCH_REGISTRY: dict[str, dict[str, Any]] = {
             # mistral, deepseek, etc.). For MoE models impact is per-expert.
         },
     },
-    "PN19": {
+    "PR41268": {
         "title": "Scoped max_split_size_mb during model load (vllm#41268)",
-        "env_flag": "GENESIS_ENABLE_PN19_SCOPED_MAX_SPLIT",
+        "env_flag": "GENESIS_ENABLE_PR41268",
+        "env_flag_aliases": ["GENESIS_ENABLE_PN19_SCOPED_MAX_SPLIT"],
         "default_on": False,
         "category": "memory_savings",
         "credit": (
@@ -1003,9 +1028,10 @@ PATCH_REGISTRY: dict[str, dict[str, Any]] = {
             # unchanged.
         },
     },
-    "PN21": {
+    "PR40898": {
         "title": "DFlash SWA support partial backport (vllm#40898)",
-        "env_flag": "GENESIS_ENABLE_PN21_DFLASH_SWA",
+        "env_flag": "GENESIS_ENABLE_PR40898",
+        "env_flag_aliases": ["GENESIS_ENABLE_PN21_DFLASH_SWA"],
         "default_on": False,
         "category": "spec_decode",
         "credit": (
@@ -1014,20 +1040,21 @@ PATCH_REGISTRY: dict[str, dict[str, Any]] = {
             "causal=True on sliding-window layer attention metadata in "
             "v1/spec_decode/dflash.py. The qwen3_dflash.py model class "
             "changes (7+ sub-patches) are NOT backported. EMPIRICAL on 35B-A3B "
-            "DFlash 160K: tool-call regresses 5-6/7 vs 7/7 baseline (without PN21) — "
+            "DFlash 160K: tool-call regresses 5-6/7 vs 7/7 baseline (without PR40898) — "
             "metadata/compute mismatch (config says SWA, model computes full attn). "
             "DEFAULT OFF, NOT enabled in any launch script. Wait for upstream merge "
             "or full manual model class backport before enabling. Composes (no conflict) "
-            "with PN24 if/when full enabler lands."
+            "with PR40727 if/when full enabler lands."
         ),
         "upstream_pr": 40898,
         "applies_to": {},
         "conflicts_with": [],
-        "requires_patches": [],  # Pairs with PN24 but does not strictly require it
+        "requires_patches": [],  # Pairs with PR40727 but does not strictly require it
     },
-    "PN22": {
+    "PR39419": {
         "title": "Local argmax for TP draft (vllm#39419 backport)",
-        "env_flag": "GENESIS_ENABLE_PN22_LOCAL_ARGMAX_TP",
+        "env_flag": "GENESIS_ENABLE_PR39419",
+        "env_flag_aliases": ["GENESIS_ENABLE_PN22_LOCAL_ARGMAX_TP"],
         "default_on": False,
         "category": "spec_decode",
         "credit": (
@@ -1045,9 +1072,10 @@ PATCH_REGISTRY: dict[str, dict[str, Any]] = {
         "conflicts_with": [],
         "requires_patches": [],
     },
-    "PN24": {
+    "PR40727": {
         "title": "DFlash aux layer +1 indexing fix (vllm#40727)",
-        "env_flag": "GENESIS_ENABLE_PN24_DFLASH_AUX_LAYER_FIX",
+        "env_flag": "GENESIS_ENABLE_PR40727",
+        "env_flag_aliases": ["GENESIS_ENABLE_PN24_DFLASH_AUX_LAYER_FIX"],
         "default_on": False,
         "category": "spec_decode",
         "credit": (
@@ -1062,9 +1090,10 @@ PATCH_REGISTRY: dict[str, dict[str, Any]] = {
         "conflicts_with": [],
         "requires_patches": [],
     },
-    "PN28": {
+    "PR39148": {
         "title": "merge_attn_states NaN guard (vllm#39148 backport)",
-        "env_flag": "GENESIS_ENABLE_PN28_MERGE_ATTN_NAN_GUARD",
+        "env_flag": "GENESIS_ENABLE_PR39148",
+        "env_flag_aliases": ["GENESIS_ENABLE_PN28_MERGE_ATTN_NAN_GUARD"],
         "default_on": False,
         "category": "perf_hotfix",
         "credit": (
@@ -1075,7 +1104,7 @@ PATCH_REGISTRY: dict[str, dict[str, Any]] = {
             "corrupts output — one bad token can break tool-call JSON parsing. "
             "Fix: clamp max_lse to -1e30 finite floor + add 1e-10 epsilon to "
             "denominator. Quality-only — no perf impact. CUDA merge_attn_states "
-            "kernel already had this guard; PN28 brings Triton to parity."
+            "kernel already had this guard; PR39148 brings Triton to parity."
         ),
         "upstream_pr": 39148,
         "applies_to": {},
@@ -1127,9 +1156,10 @@ PATCH_REGISTRY: dict[str, dict[str, Any]] = {
         "conflicts_with": [],
         "requires_patches": [],  # P38 install order: P38 first (provides impl), P38B second (installs hook)
     },
-    "PN26b": {
+    "PR41422": {
         "title": "Sparse-V tile-skip Genesis kernel (BLASST λ=a/L for SM86)",
-        "env_flag": "GENESIS_ENABLE_PN26_SPARSE_V",
+        "env_flag": "GENESIS_ENABLE_PR41422",
+        "env_flag_aliases": ["GENESIS_ENABLE_PN26_SPARSE_V"],
         "default_on": False,
         "category": "perf_hotfix",
         "credit": (
@@ -1143,20 +1173,21 @@ PATCH_REGISTRY: dict[str, dict[str, Any]] = {
             "Mechanism: when tl.max(p) < threshold for a KV tile, skip V load + "
             "dequant + weighted sum, just decay accumulator. Online softmax "
             "denominator/max still update so totals stay numerically exact "
-            "for non-skipped tiles. Composes with PN26 main (centroids "
-            "prebake) + P98 (workspace revert) + P67 (multi-query — separate "
+            "for non-skipped tiles. Composes with PR41418 main (centroids "
+            "prebake) + PR40941 (workspace revert) + P67 (multi-query — separate "
             "code path, not affected). Default OFF; opt-in via "
-            "GENESIS_ENABLE_PN26_SPARSE_V=1 + GENESIS_PN26_SPARSE_V_THRESHOLD "
-            "(fixed) OR GENESIS_PN26_SPARSE_V_SCALE_FACTOR (BLASST adaptive)."
+            "GENESIS_ENABLE_PR41422=1 + GENESIS_PR41418_SPARSE_V_THRESHOLD "
+            "(fixed) OR GENESIS_PR41418_SPARSE_V_SCALE_FACTOR (BLASST adaptive)."
         ),
         "upstream_pr": 41422,
         "applies_to": {},
         "conflicts_with": [],
         "requires_patches": [],
     },
-    "PN26": {
+    "PR41418": {
         "title": "TQ unified perf pack (centroids prebake + sparse V scaffold)",
-        "env_flag": "GENESIS_ENABLE_PN26_TQ_UNIFIED",
+        "env_flag": "GENESIS_ENABLE_PR41418",
+        "env_flag_aliases": ["GENESIS_ENABLE_PN26_TQ_UNIFIED"],
         "default_on": False,
         "category": "perf_hotfix",
         "credit": (
@@ -1171,7 +1202,7 @@ PATCH_REGISTRY: dict[str, dict[str, Any]] = {
             "module-init asserts prebaked centroids equal solver output; on "
             "drift (e.g. upstream changes Lloyd-Max algo) auto-disables "
             "prebake and falls through to runtime solver with WARNING. No "
-            "silent staleness. Composes with P67/P98/PN8 — orthogonal code "
+            "silent staleness. Composes with P67/PR40941/PR40849 — orthogonal code "
             "paths."
         ),
         "upstream_pr": 41418,
@@ -1187,11 +1218,11 @@ PATCH_REGISTRY: dict[str, dict[str, Any]] = {
         "credit": (
             "Genesis-original 2026-05-01 in response to noonghunna's "
             "club-3090#16 (VolandBerlioz/ampersandru cross-rig OOM trace, "
-            "RTX 3090 24 GB + Lorbus 27B + OpenCode 29K prefill). PN12 "
+            "RTX 3090 24 GB + Lorbus 27B + OpenCode 29K prefill). PR34207 "
             "patches eager `forward_cuda` but `custom_ops=['none']` (default "
             "under V1 aot_compile_fullgraph) routes dispatch through "
             "`forward_native` which Inductor inlines and lowers to "
-            "`empty_strided_cuda(...)`, bypassing PN12's pool. "
+            "`empty_strided_cuda(...)`, bypassing PR34207's pool. "
             "Sister-patch PN25 patches `forward_native` to dispatch through "
             "an opaque `genesis::silu_and_mul_pooled` torch.library.custom_op "
             "(Inductor cannot inline opaque ops). Both patches share the "
@@ -1201,7 +1232,7 @@ PATCH_REGISTRY: dict[str, dict[str, Any]] = {
         "upstream_pr": None,
         "applies_to": {},
         "conflicts_with": [],
-        "requires_patches": [],  # complements PN12 but does not require it
+        "requires_patches": [],  # complements PR34207 but does not require it
     },
     "PN17": {
         "title": "FA2 softmax_lse runtime clamp (Cliff 1 mechanism A, Issue #11)",
@@ -1260,9 +1291,10 @@ PATCH_REGISTRY: dict[str, dict[str, Any]] = {
         ),
         "upstream_pr": None,
     },
-    "PN14": {
+    "PR40074": {
         "title": "TQ decode IOOB safe_page_idx clamp (vllm#40074)",
-        "env_flag": "GENESIS_ENABLE_PN14_TQ_DECODE_OOB_CLAMP",
+        "env_flag": "GENESIS_ENABLE_PR40074",
+        "env_flag_aliases": ["GENESIS_ENABLE_PN14_TQ_DECODE_OOB_CLAMP"],
         "default_on": False,
         "category": "kernel_safety",
         "credit": (
@@ -1287,25 +1319,27 @@ PATCH_REGISTRY: dict[str, dict[str, Any]] = {
             "is_turboquant": [True],
         },
     },
-    # PN13 entry moved to legacy/retired section below (lifecycle: retired_2026-05-04)
+    # PR41235 entry moved to legacy/retired section below (lifecycle: retired_2026-05-04)
     # Reason: vllm 0.20.2 commit c2fb013 merged identical change (#41235).
-    # See PN13 entry near line 1289 for retirement metadata.
+    # See PR41235 entry near line 1289 for retirement metadata.
 
-    "P94": {
+    "PR41043": {
         "title": "Spec-decode prepare_next_token_ids_padded zero-alloc (vllm#41043)",
-        "env_flag": "GENESIS_ENABLE_P94",
+        "env_flag": "GENESIS_ENABLE_PR41043",
+        "env_flag_aliases": ["GENESIS_ENABLE_P94"],
         "default_on": False,
         "category": "spec_decode",
-        "credit": "Backport of vllm#41043 (wangluochao902, MERGED 2026-04-29). Removes GPU->CPU .tolist() sync + list-comp Python objects + np.array allocation in LLMBaseProposer.prepare_next_token_ids_padded hot path. PR author measured P99 TPOT -9.3% on Llama-3.1-8B + Eagle3 TP=4. For our MTP K=3 single-stream: expected +2-4% wall TPS + tighter CV. SUPERSEDED-ON-MERGE: when our pin advances past the merge SHA the patch will SKIP cleanly via drift detection on the original .tolist() anchor — at that point delete the wiring file + this entry.",
+        "credit": "Backport of vllm#41043 (wangluochao902, MERGED 2026-04-29). Removes GPU->CPU .tolist() sync + list-comp Python objects + np.array allocation in LLMBaseProposer.prepare_next_token_ids_padded hot path. PR author measured PR40941b TPOT -9.3% on Llama-3.1-8B + Eagle3 TP=4. For our MTP K=3 single-stream: expected +2-4% wall TPS + tighter CV. SUPERSEDED-ON-MERGE: when our pin advances past the merge SHA the patch will SKIP cleanly via drift detection on the original .tolist() anchor — at that point delete the wiring file + this entry.",
         "upstream_pr": 41043,
         "superseded_by": "vllm#41043 (merged 2026-04-29)",
         "applies_to": {
             # Applies whenever spec-decode is active. All spec methods.
         },
     },
-    "P100": {
+    "PR41127": {
         "title": "FlashInfer FULL CUDA graph for spec-decode (vllm#41127)",
-        "env_flag": "GENESIS_ENABLE_P100",
+        "env_flag": "GENESIS_ENABLE_PR41127",
+        "env_flag_aliases": ["GENESIS_ENABLE_P100"],
         "default_on": False,
         "category": "perf_hotfix",
         "credit": "Backport of vllm#41127 (open 2026-04-28). Per Sander 'не ждём, изучаем, импортируем'. Native FlashInfer can route uniform query_len>1 (1+num_spec_tokens) batches through prefill wrapper in cudagraph mode (zero_rows padding bit-identical). Adds FISpecDecode dataclass + _get_spec_decode_prefill_wrapper method + per-row qo_indptr delta scan in build() + FISpecDecode case in forward(). 11 sub-patches on flashinfer.py. NO-OP for PROD (turboquant_attn). Active for 27B variants (FlashInfer + spec-decode + non-DCP). Expected: +5-10% TPS on Ampere SM 8.6. RECOMMENDED on Blackwell consumer (sm_120) where FlashInfer is the default backend and PIECEWISE downgrade was observed (apnar club-3090#51). Recommendation surfaced via gpu_profile.PATCH_RECOMMENDATIONS rule.",
@@ -1327,12 +1361,13 @@ PATCH_REGISTRY: dict[str, dict[str, Any]] = {
             ],
         },
     },
-    "P101": {
+    "PR41123": {
         "title": "TQ continuation 64-token slicing (vllm#41123 SELECTIVE)",
-        "env_flag": "GENESIS_ENABLE_P101",
+        "env_flag": "GENESIS_ENABLE_PR41123",
+        "env_flag_aliases": ["GENESIS_ENABLE_P101"],
         "default_on": False,
         "category": "perf_hotfix",
-        "credit": "Selective backport of vllm#41123 TQ on hybrid models. TAKE: _CONTINUATION_DECODE_THRESHOLD 128→64 + _CONTINUATION_DECODE_MAX_CACHED_LEN=32K + 64-token slicing loop in _prefill_attention. SKIP: cudagraph_support downgrade (would hurt PROD), hybrid boundary-skip (would break our explicit skip-layers). Expected: +3-12% TPS on PROD long-context. Composes with P98/P99.",
+        "credit": "Selective backport of vllm#41123 TQ on hybrid models. TAKE: _CONTINUATION_DECODE_THRESHOLD 128→64 + _CONTINUATION_DECODE_MAX_CACHED_LEN=32K + 64-token slicing loop in _prefill_attention. SKIP: cudagraph_support downgrade (would hurt PROD), hybrid boundary-skip (would break our explicit skip-layers). Expected: +3-12% TPS on PROD long-context. Composes with PR40941/PR40941b.",
         "upstream_pr": 41123,
         "applies_to": {
             "kv_cache_dtype": [
@@ -1341,18 +1376,20 @@ PATCH_REGISTRY: dict[str, dict[str, Any]] = {
             ],
         },
     },
-    "P99": {
+    "PR40941b": {
         "title": "WorkspaceManager.get_simultaneous memoization (perf hotfix)",
-        "env_flag": "GENESIS_ENABLE_P99",
+        "env_flag": "GENESIS_ENABLE_PR40941B",
+        "env_flag_aliases": ["GENESIS_ENABLE_P99"],
         "default_on": False,
         "category": "perf_hotfix",
-        "credit": "Per Sander 2026-04-28: 'if revert gives speedup, look at kernel — maybe rewrite'. P99 keeps upstream WorkspaceManager design (shared memory, 60x savings) but adds memoization to bypass per-call list-comp + accumulate + _ensure_workspace_size. Cache hit ~5x faster than full computation. Composes with P98 (P98 reverts turboquant_attn to per-layer; P99 helps any other backend using WorkspaceManager).",
+        "credit": "Per Sander 2026-04-28: 'if revert gives speedup, look at kernel — maybe rewrite'. PR40941b keeps upstream WorkspaceManager design (shared memory, 60x savings) but adds memoization to bypass per-call list-comp + accumulate + _ensure_workspace_size. Cache hit ~5x faster than full computation. Composes with PR40941 (PR40941 reverts turboquant_attn to per-layer; PR40941b helps any other backend using WorkspaceManager).",
         "upstream_pr": 40941,
         "applies_to": {},  # applies whenever WorkspaceManager is used
     },
-    "P98": {
+    "PR40941": {
         "title": "TQ WorkspaceManager revert (vllm#40941 perf hotfix)",
-        "env_flag": "GENESIS_ENABLE_P98",
+        "env_flag": "GENESIS_ENABLE_PR40941",
+        "env_flag_aliases": ["GENESIS_ENABLE_P98"],
         "default_on": False,
         "category": "perf_hotfix",
         "credit": "Reverts upstream PR #40941 (MERGED 2026-04-27). PR introduced WorkspaceManager indirection in turboquant_attn._decode_attention hot path. Diagnosis 2026-04-28: caused 17% TPS regression on PROD (200 → 167 TPS) due to current_workspace_manager().get_simultaneous() Python lookup × N layers × per-step. Restores OLD per-layer cached buffer pattern. Memory cost: O(num_layers) extra dequant buffers (~1GB for 64-layer model). DO NOT enable on H100/H200 high-concurrency where WorkspaceManager amortizes better. NOTE: this patch is a DELIBERATE INVERSE of merged upstream behavior (NOT a backport) — it remains a perf hotfix specifically for Ampere small-batch single-stream workloads even though the upstream PR is merged. Author: Sandermage.",
@@ -1364,9 +1401,10 @@ PATCH_REGISTRY: dict[str, dict[str, Any]] = {
             ],
         },
     },
-    "P95": {
+    "PR40385": {
         "title": "Marlin TP cudagraph cap on Ampere (vllm#40385)",
-        "env_flag": "GENESIS_ENABLE_P95",
+        "env_flag": "GENESIS_ENABLE_PR40385",
+        "env_flag_aliases": ["GENESIS_ENABLE_P95"],
         "default_on": False,
         "category": "stability",
         "credit": "Backport of vllm#40385 (OPEN as of 2026-04-28). Defensive cap of max_cudagraph_capture_size to 8 when ALL of: TP>1, Ampere SM 8.0 family (covers SM 8.6 A5000), quantization endswith '_marlin', AND user did NOT set explicit cudagraph sizing. Mitigates vllm#40121 (illegal memory access during CG replay on TP>1 + Marlin + Ampere). NO-OP for our PROD (FP8, not Marlin); ACTIVE for Lorbus INT4 + Minachist gs128 (Marlin path). Operator override via --compilation-config bypasses entirely.",
@@ -1472,9 +1510,10 @@ PATCH_REGISTRY: dict[str, dict[str, Any]] = {
         "credit": "Pre-dispatcher legacy patch. Custom-op variant of P7 dual-stream — opt-in alternative for cudagraph capture compatibility experiments.",
         "conflicts_with": ["P7"],
     },
-    "PN13": {
+    "PR41235": {
         "title": "CUDAGraphWrapper lambda arity (vllm#41235 backport) — RETIRED 2026-05-04",
-        "env_flag": "GENESIS_ENABLE_PN13_CUDA_GRAPH_LAMBDA_ARITY",
+        "env_flag": "GENESIS_ENABLE_PR41235",
+        "env_flag_aliases": ["GENESIS_ENABLE_PN13_CUDA_GRAPH_LAMBDA_ARITY"],
         "default_on": False,
         "lifecycle": "retired",
         "notes": (
@@ -1482,8 +1521,8 @@ PATCH_REGISTRY: dict[str, dict[str, Any]] = {
             "c2fb013) merged identical change in cuda_graph.py: "
             "patch(\"gc.collect\", lambda *args, **kwargs: None) + "
             "patch(\"torch.accelerator.empty_cache\", lambda *args, "
-            "**kwargs: None). Upstream code now matches our PN13 "
-            "replacement byte-for-byte. PN13 anchor (pre-fix lambda: "
+            "**kwargs: None). Upstream code now matches our PR41235 "
+            "replacement byte-for-byte. PR41235 anchor (pre-fix lambda: "
             "None pattern) no longer matches → silent skip. Per Sander "
             "rule (2026-05-04): «если код соответствует патчу, патч "
             "отключаем». Retired."
@@ -1745,7 +1784,7 @@ PATCH_REGISTRY: dict[str, dict[str, Any]] = {
         "env_flag": "GENESIS_ENABLE_PN62",
         "default_on": False,
         "category": "memory_savings",
-        "credit": "Genesis-original 2026-05-05 (apnar club-3090#51 highest-impact gap). When mm_limits_all_zero AND --language-model-only, the qwen3_vl visual-tower scratch allocation in gpu_model_runner._dummy_run still fires and reserves ~3-5 GiB. PN62 v1 wraps _dummy_run and SETS marker `_pn62_skip_vit_scratch=True` — but no production hook reads it yet (audit G-POST-04 honesty). Real ViT-alloc skip lands when the inner alloc helper learns to honour the marker. Predicted 3-5 GiB save on qwen3_vl + NVFP4 single-card boot pending real hook + cross-rig validation. Sister to PN35 (text-only inputs_embeds skip, vllm#35975 merged).",
+        "credit": "Genesis-original 2026-05-05 (apnar club-3090#51 highest-impact gap). When mm_limits_all_zero AND --language-model-only, the qwen3_vl visual-tower scratch allocation in gpu_model_runner._dummy_run still fires and reserves ~3-5 GiB. PN62 v1 wraps _dummy_run and SETS marker `_pn62_skip_vit_scratch=True` — but no production hook reads it yet (audit G-POST-04 honesty). Real ViT-alloc skip lands when the inner alloc helper learns to honour the marker. Predicted 3-5 GiB save on qwen3_vl + NVFP4 single-card boot pending real hook + cross-rig validation. Sister to PR35975 (text-only inputs_embeds skip, vllm#35975 merged).",
         "upstream_pr": None,
         "applies_to": {"model_class": ["qwen3_vl"]},
     },
@@ -1775,9 +1814,10 @@ PATCH_REGISTRY: dict[str, dict[str, Any]] = {
         "upstream_pr": None,
         "applies_to": {},
     },
-    "PN67": {
+    "PR41674": {
         "title": "thinking_token_budget inverted-bool fix (vllm#41674 backport, 1-line)",
-        "env_flag": "GENESIS_ENABLE_PN67",
+        "env_flag": "GENESIS_ENABLE_PR41674",
+        "env_flag_aliases": ["GENESIS_ENABLE_PN67"],
         "default_on": False,
         "category": "stability",
         "credit": "Backport of vllm#41674 (JasonKeyiL, OPEN as of 2026-05-04). Single-token fix in `vllm/v1/worker/gpu_input_batch.py:879` — removes `not` from `or not thinking_budget_tracks_reqs`. Bug: thinking_token_budget was silently ignored for any request without penalty parameters. NULL on Genesis PROD (we don't enable thinking_token_budget); defensive for users who experiment with it. Trivial backport, zero risk.",
@@ -1945,6 +1985,20 @@ def should_apply(patch_id: str) -> tuple[bool, str]:
     env_flag = meta.get("env_flag")
     env_value = os.environ.get(env_flag, "") if env_flag else ""
     env_truthy = env_value.strip().lower() in ("1", "true", "yes", "on")
+
+    # Back-compat: honor deprecated env-flag aliases (the pre-2026-06 PN##/P##
+    # names superseded by the GENESIS_ENABLE_PR##### scheme). Set the new flag
+    # going forward; old names keep working with a one-time deprecation log.
+    if not env_truthy:
+        for _alias in meta.get("env_flag_aliases", ()):
+            if os.environ.get(_alias, "").strip().lower() in ("1", "true", "yes", "on"):
+                env_truthy = True
+                log.warning(
+                    "[Genesis dispatcher] %s: env flag %s is DEPRECATED — "
+                    "use %s instead (still honored for now).",
+                    patch_id, _alias, env_flag,
+                )
+                break
 
     # Operator override: env truthy = always apply (subject to anchor presence)
     if env_truthy:
@@ -2326,7 +2380,7 @@ def log_structured_boot_summary() -> None:
 #   2. validate_apply_plan(set) — runtime check on actual decisions
 #
 # Patch metadata may declare:
-#   "requires_patches": ["P60"]      — list of patch_ids that must also apply
+#   "requires_patches": ["PR40738"]      — list of patch_ids that must also apply
 #   "conflicts_with":   ["P65"]      — list of patch_ids that MUST NOT apply
 # Both fields default to [] when absent (no relationship declared).
 

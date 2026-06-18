@@ -12,7 +12,7 @@ PROBLEM
   hallucinate, or emit Python-style call.
 - Empirically observed in Genesis ladder test 2026-04-25:
   prompts 0-12K chars → 3/3 OK, prompts 16K+ chars → 0/3 OK.
-- Same behavior on prod ngram baseline AND on P64+P65+P66 test
+- Same behavior on prod ngram baseline AND on PR39598+P65+P66 test
   container — confirmed model-level, NOT engine-level bug.
 
 ================================================================

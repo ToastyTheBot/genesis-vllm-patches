@@ -54,7 +54,7 @@ NVIDIA-tuned design choices vs upstream PR #41422
   >> compute, so skipping V loads frees HBM. Disabled on SM<8.0 (Pascal/
   Volta) where the speculative branch overhead may exceed the win.
 - **Threshold tuning**: default 1e-3 from upstream PR #41422. Configurable
-  via `GENESIS_PN26_SPARSE_V_THRESHOLD` env. Literature (H2O, Quest)
+  via `GENESIS_PR41418_SPARSE_V_THRESHOLD` env. Literature (H2O, Quest)
   suggests 1e-3 to 5e-3 is the sweet spot for most workloads. We err on
   the conservative side.
 - **Min-context gate**: default 8192 tokens (matches upstream PR #41422).
@@ -72,19 +72,19 @@ Composition with other Genesis patches
 - **P67 multi-query kernel**: separate code path (spec-decode K+1 verify)
   — does NOT call this function. Orthogonal.
 - **P40 grouped decode**: dispatcher wraps `triton_turboquant_decode_attention`
-  for `kv_group_size > 1 and key_fp8`. PN26 sparse V wraps the SAME
-  function but at a different layer — PN26 hooks AFTER P40 dispatcher
+  for `kv_group_size > 1 and key_fp8`. PR41418 sparse V wraps the SAME
+  function but at a different layer — PR41418 hooks AFTER P40 dispatcher
   (or before, depending on registration order). To avoid double-wrapping,
   we detect `_genesis_p40_wrapped` marker and chain through.
-- **P98 TQ WorkspaceManager revert**: orthogonal — different code site
+- **PR40941 TQ WorkspaceManager revert**: orthogonal — different code site
   (`_decode_attention` caller, not the kernel itself).
-- **PN26 centroids prebake**: complementary — affects centroid loading
+- **PR41418 centroids prebake**: complementary — affects centroid loading
   before kernel launch. Both can be enabled together.
 
 Author: Sandermage(Sander) Barzov Aleksandr, Ukraine, Odessa.
 Sources:
   - vllm#41422 (jasonkim8652) — kernel design template (AMD-validated)
-  - vllm#41418 (jasonkim8652) — centroids prebake (taken in PN26 main)
+  - vllm#41418 (jasonkim8652) — centroids prebake (taken in PR41418 main)
   - arXiv 2306.14048 (H2O) — heavy-hitter sparsity intuition
   - arXiv 2406.10774 (Quest) — query-aware sparsity validation
   - SGLang gdn_gating prior art (per Genesis cross-engine notes)
@@ -98,7 +98,7 @@ EMPIRICAL A/B (2026-05-01) — TWO ITERATIONS
 | Config           | tool-call | prose 256t TPS (CV)  | long-ctx 53K+256t TPS (CV) |
 |------------------|-----------|----------------------|----------------------------|
 | Baseline (OFF)   | 7/7       | 159.10 (5.78%)       | 3.23 (0.47%)               |
-| PN26b v1 (sync)  | 7/7       | 133.52 (3.10%)       | 2.50 (9.04%)               |
+| PR41422 v1 (sync)  | 7/7       | 133.52 (3.10%)       | 2.50 (9.04%)               |
 | Δ                | match     | **-16.1%** ⚠️        | **-22.6%** ⚠️             |
 
 Root cause: per-call `.item()` GPU→CPU sync at 60 layers × decode-tokens
@@ -111,7 +111,7 @@ the no-op case.
 | Config              | tool-call | prose 256t TPS (CV)  | long-ctx 53K+256t TPS (CV) |
 |---------------------|-----------|----------------------|----------------------------|
 | Baseline (OFF)      | 7/7       | 159.10 (5.78%)       | 3.23 (0.47%)               |
-| PN26b v2 (lean)     | 7/7       | **166.21 (3.11%)**   | 3.23 (0.65%)               |
+| PR41422 v2 (lean)     | 7/7       | **166.21 (3.11%)**   | 3.23 (0.65%)               |
 | Δ                   | match     | **+4.4%**            | **0% (neutral)**           |
 
 **v3 (lean + tuning):** added P67 v7.50 patterns: `tl.range()` explicit
@@ -139,10 +139,10 @@ of 171-204 TPS):
 | Config              | tool-call | mean   | max   | CV    |
 |---------------------|-----------|--------|-------|-------|
 | Baseline (OFF)      | 7/7       | 175.41 | 185.15| 4.20% |
-| **PN26b v4 winner** | **7/7**   | **~181-185** | **194-202** | 4.6-5.6% |
+| **PR41422 v4 winner** | **7/7**   | **~181-185** | **194-202** | 4.6-5.6% |
 | Δ                   | match     | **+3-5%** | **+5-9%** | similar |
 
-**PN26b v3 ships as the SHIPPED variant.** Marginal +1.7% mean, but
+**PR41422 v3 ships as the SHIPPED variant.** Marginal +1.7% mean, but
 +4.8% min TPS improvement — the slow-tail latency improves more than the
 average. Plus -0.42pp CV (more consistent perf). Tool-call quality
 preserved (7/7).
@@ -169,7 +169,7 @@ This confirms what 4-agent research synthesis warned about:
 - On SM86 with PCIe TP=2 + small batch sizes, the optimization's
   per-call sync + branch overhead exceeds any tile-skip savings.
 
-Implication: PN26b ships as a **scaffold for future SM89/SM90 hardware
+Implication: PR41422 ships as a **scaffold for future SM89/SM90 hardware
 or larger-batch / single-card workloads** where the cost-benefit ratio
 may invert. **DO NOT enable in any production launch script** until:
 - Empirical validation on different SM (89/90)
@@ -178,7 +178,7 @@ may invert. **DO NOT enable in any production launch script** until:
 - OR removal of the per-call `.item()` sync (requires upstream API
   change to pass seq_len_max as Python int from caller)
 
-Status: opt-in via GENESIS_ENABLE_PN26_SPARSE_V=1. Default OFF, NOT
+Status: opt-in via GENESIS_ENABLE_PR41422=1. Default OFF, NOT
 enabled in any launch script. Experimental.
 """
 from __future__ import annotations
@@ -191,10 +191,10 @@ import torch
 
 log = logging.getLogger("genesis.kernels.tq_decode_sparse_v")
 
-_ENV_ENABLE = "GENESIS_ENABLE_PN26_SPARSE_V"
-_ENV_THRESHOLD = "GENESIS_PN26_SPARSE_V_THRESHOLD"
-_ENV_MIN_CTX = "GENESIS_PN26_SPARSE_V_MIN_CTX"
-_ENV_SCALE_FACTOR = "GENESIS_PN26_SPARSE_V_SCALE_FACTOR"
+_ENV_ENABLE = "GENESIS_ENABLE_PR41422"
+_ENV_THRESHOLD = "GENESIS_PR41418_SPARSE_V_THRESHOLD"
+_ENV_MIN_CTX = "GENESIS_PR41418_SPARSE_V_MIN_CTX"
+_ENV_SCALE_FACTOR = "GENESIS_PR41418_SPARSE_V_SCALE_FACTOR"
 
 # Defaults match upstream PR #41422
 _DEFAULT_THRESHOLD = 0.001
@@ -230,9 +230,9 @@ def compute_effective_threshold(seq_len: int) -> float:
     """Resolve effective sparse-V threshold given current context length.
 
     Priority:
-    1. If `GENESIS_PN26_SPARSE_V_SCALE_FACTOR > 0` → BLASST λ=a/L mode
+    1. If `GENESIS_PR41418_SPARSE_V_SCALE_FACTOR > 0` → BLASST λ=a/L mode
        (auto-scales with context length).
-    2. Else → fixed `GENESIS_PN26_SPARSE_V_THRESHOLD` (default 0.001).
+    2. Else → fixed `GENESIS_PR41418_SPARSE_V_THRESHOLD` (default 0.001).
 
     NOTE: capped to [1e-7, 0.5] to avoid degenerate kernel behavior.
     """
@@ -261,7 +261,7 @@ def get_sparse_v_threshold() -> float:
         # Clamp to sane range
         if v < 0.0 or v > 0.5:
             log.warning(
-                "[PN26 sparse_v] threshold=%s out of [0, 0.5] — using default %s",
+                "[PR41418 sparse_v] threshold=%s out of [0, 0.5] — using default %s",
                 raw, _DEFAULT_THRESHOLD,
             )
             return _DEFAULT_THRESHOLD
@@ -270,7 +270,7 @@ def get_sparse_v_threshold() -> float:
         return _DEFAULT_THRESHOLD
 
 
-_ENV_DEBUG_SKIP = "GENESIS_PN26_SPARSE_V_DEBUG"
+_ENV_DEBUG_SKIP = "GENESIS_PR41418_SPARSE_V_DEBUG"
 
 
 def is_debug_skip_enabled() -> bool:
@@ -476,12 +476,12 @@ def _build_kernel():
 
         bt_base = bid * stride_bt_b
 
-        # [Genesis PN26 v5] Skip-rate observability — register-resident.
+        # [Genesis PR41418 v5] Skip-rate observability — register-resident.
         # Constexpr-DCE'd to nothing when DEBUG_SKIP_CTR=0.
         local_total = 0
         local_skip = 0
 
-        # [Genesis PN26 v3] tl.range() pipelining hint (P67 v7.50 pattern):
+        # [Genesis PR41418 v3] tl.range() pipelining hint (P67 v7.50 pattern):
         # explicit Triton pipelining hint — compiler overlaps cp.async loads
         # with prior-iteration MMA on Ampere. +5-10% on P67 benchmark.
         for start_n in tl.range(split_start, split_end, BLOCK_KV):
@@ -508,7 +508,7 @@ def _build_kernel():
             # ============================================================
             if KEY_FP8:
                 k_addrs = slot_bases[:, None] + d_offs[None, :]
-                # [Genesis PN26 v3] cache_modifier=".cg" — L2 streaming hint
+                # [Genesis PR41418 v3] cache_modifier=".cg" — L2 streaming hint
                 # for K dequant raw data (one-shot per tile, no reuse).
                 k_raw = tl.load(
                     KV_cache_ptr + k_addrs,
@@ -584,7 +584,7 @@ def _build_kernel():
             p = tl.exp(scores - n_e_max)
 
             # ============================================================
-            # GENESIS PN26: SPARSE V tile-skip — opt-in via constexpr.
+            # GENESIS PR41418: SPARSE V tile-skip — opt-in via constexpr.
             # When SPARSE_V==0 (default), Triton dead-code-eliminates the
             # `if/else` below at compile time → byte-equivalent to upstream.
             #
@@ -600,7 +600,7 @@ def _build_kernel():
                 if not tile_protected:
                     skip_v_tile = tl.max(p) < SPARSE_V_THRESHOLD
 
-            # [Genesis PN26 v5] Skip-rate counter — register-only increments.
+            # [Genesis PR41418 v5] Skip-rate counter — register-only increments.
             # Compiler removes when DEBUG_SKIP_CTR=0 (constexpr branch).
             if DEBUG_SKIP_CTR:
                 local_total += 1
@@ -618,7 +618,7 @@ def _build_kernel():
 
                 if VQB == 3:
                     val_addrs0 = val_bases[:, None] + val_byte_idx[None, :]
-                    # [Genesis PN26 v3] L2 streaming hint on V dequant raw
+                    # [Genesis PR41418 v3] L2 streaming hint on V dequant raw
                     val_raw0 = tl.load(
                         KV_cache_ptr + val_addrs0,
                         mask=kv_mask[:, None] & d_mask[None, :],
@@ -658,7 +658,7 @@ def _build_kernel():
                     vb_idx = d_offs // 2
                     vb_shift = (d_offs % 2) * 4
                     val_addrs = val_bases[:, None] + vb_idx[None, :]
-                    # [Genesis PN26 v3] L2 streaming hint on V dequant raw
+                    # [Genesis PR41418 v3] L2 streaming hint on V dequant raw
                     val_raw = tl.load(
                         KV_cache_ptr + val_addrs,
                         mask=kv_mask[:, None] & d_mask[None, :],
@@ -699,7 +699,7 @@ def _build_kernel():
         lse = m_prev + tl.log(safe_l)
         tl.store(Mid_o_ptr + out_base + HEAD_DIM, lse)
 
-        # [Genesis PN26 v5] Skip-rate epilogue — single atomic per CTA,
+        # [Genesis PR41418 v5] Skip-rate epilogue — single atomic per CTA,
         # per-CTA distinct slot (no contention). Constexpr-DCE'd when off.
         if DEBUG_SKIP_CTR:
             ctr_idx = (bid * NUM_KV_HEADS + hid) * NUM_KV_SPLITS + sid
@@ -707,7 +707,7 @@ def _build_kernel():
             tl.atomic_add(skip_count_ctr_ptr + ctr_idx, local_skip)
 
     _CACHED_KERNEL = _genesis_tq_decode_stage1_sparse_v
-    log.info("[Genesis PN26 sparse_v] kernel built and cached")
+    log.info("[Genesis PR41418 sparse_v] kernel built and cached")
     return _CACHED_KERNEL
 
 
@@ -783,25 +783,25 @@ def triton_turboquant_decode_attention_sparse_v(
             buf_holder._tq_mid_o_buf = mid_o
 
     fp8_e4b15 = _use_fp8_e4b15(device.index or 0)
-    # [Genesis PN26 v3+] launch params configurable via env for sweeps.
+    # [Genesis PR41418 v3+] launch params configurable via env for sweeps.
     # Defaults match upstream when unset. Larger BLOCK_KV reduces loop
     # iterations + per-iter branch overhead at cost of register pressure;
     # higher num_warps improves occupancy on SM86 if shared-mem fits.
-    BLOCK_KV = int(os.environ.get("GENESIS_PN26_SPARSE_V_BLOCK_KV", "4"))
+    BLOCK_KV = int(os.environ.get("GENESIS_PR41418_SPARSE_V_BLOCK_KV", "4"))
     if BLOCK_KV not in (4, 8, 16, 32):
         BLOCK_KV = 4
     # Default num_warps=4 — empirical winner from BLOCK_KV × num_warps
     # sweep on 35B FP8 PROD A5000: gave 184.89 TPS mean (+5.4% vs upstream
     # num_warps=1 baseline). Override via env for re-tuning on different SM.
-    NUM_WARPS = int(os.environ.get("GENESIS_PN26_SPARSE_V_NUM_WARPS", "4"))
+    NUM_WARPS = int(os.environ.get("GENESIS_PR41418_SPARSE_V_NUM_WARPS", "4"))
     if NUM_WARPS not in (1, 2, 4, 8):
         NUM_WARPS = 4
-    NUM_STAGES = int(os.environ.get("GENESIS_PN26_SPARSE_V_NUM_STAGES", "1"))
+    NUM_STAGES = int(os.environ.get("GENESIS_PR41418_SPARSE_V_NUM_STAGES", "1"))
     if NUM_STAGES not in (1, 2, 3):
         NUM_STAGES = 1
     grid = (B, Hq, NUM_KV_SPLITS)
 
-    # [Genesis PN26 v5] Auto-allocate skip-rate counter buffers when env-enabled
+    # [Genesis PR41418 v5] Auto-allocate skip-rate counter buffers when env-enabled
     # and not explicitly passed by caller.
     if debug_skip_ctr and skip_total_ctr is None:
         grid_size = B * Hq * NUM_KV_SPLITS

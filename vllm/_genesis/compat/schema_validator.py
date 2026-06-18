@@ -84,6 +84,10 @@ _KNOWN_FIELDS = {
     # is the execution-order index. Underscore-prefixed = runtime-attached,
     # not authored in the dict literal.
     "_display_name", "_apply_order",
+    # PR-rename (2026-06) — deprecated env-flag alias(es) preserved when a
+    # patch's env_flag was renamed to GENESIS_ENABLE_PR#####. Honored by
+    # dispatcher.should_apply for back-compat.
+    "env_flag_aliases",
 }
 
 

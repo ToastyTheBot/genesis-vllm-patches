@@ -21,7 +21,7 @@ This is ~5-6 separate kernel launches plus 2 explicit copies. PN50 fuses
 this into a single Triton kernel with grid `(batch, num_heads_qk)`.
 
 Claimed gain (SGLang H200 Qwen3.5-35B-A3B tp=2): +7.4% TPS, -10.8% TTFT,
--31.2% ITL P95. On Genesis 27B Lorbus INT4 + TQ k8v4 + MTP K=3 expect
+-31.2% ITL PR40385. On Genesis 27B Lorbus INT4 + TQ k8v4 + MTP K=3 expect
 modest gain (memory-bound layer; A5000 PCIe slower than H200).
 
 Numerical safety

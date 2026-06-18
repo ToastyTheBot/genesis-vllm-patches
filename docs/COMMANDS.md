@@ -152,7 +152,7 @@ GENESIS_AB_BASELINE='GENESIS_ENABLE_PN59=0' \
 GENESIS_AB_TREATMENT='GENESIS_ENABLE_PN59=1' \
   python3 tests/bench/ab_bench.py --runs 5
 
-# Quick latency probe — 10 prompts, P50 / P95 / P99
+# Quick latency probe — 10 prompts, P50 / PR40385 / PR40941b
 python3 tests/bench/latency_probe.py --endpoint http://192.168.1.10:8000
 
 # Needle-in-haystack at 4 depths (1K / 10K / 51K / 92K)

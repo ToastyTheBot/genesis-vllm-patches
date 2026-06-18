@@ -318,8 +318,8 @@ def check_spec_decode_token_loop(
             ),
             remediation=(
                 "Try: (1) restart container — preempt cycle stuck on EOS; "
-                "(2) check P107 MTP truncation detector is enabled "
-                "(`GENESIS_ENABLE_P107_MTP_TRUNCATION_DETECTOR=1`) for "
+                "(2) check PR41467 MTP truncation detector is enabled "
+                "(`GENESIS_ENABLE_PR41467=1`) for "
                 "retryable error visibility; (3) reduce "
                 "`--max-num-seqs` if running multiple concurrent requests. "
                 "Cross-ref noonghunna club-3090#34."

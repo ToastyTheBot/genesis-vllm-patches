@@ -6,7 +6,7 @@ when it engages, what it depends on / conflicts with, what the upstream
 status is, and whether it would APPLY on the current system right now.
 
 Usage:
-  python3 -m vllm._genesis.compat.explain PN14
+  python3 -m vllm._genesis.compat.explain PR40074
   python3 -m vllm._genesis.compat.explain P67 --json
   python3 -m vllm._genesis.compat.explain --list
 
@@ -119,9 +119,9 @@ def explain_patch(patch_id: str) -> dict[str, Any]:
         #   1. EXACT key match — `PR_<num>_*` where num == meta.upstream_pr.
         #      This is the canonical link from a patch to its tracker.
         #   2. `affects_patch` field where patch_id appears as a standalone
-        #      token (not just substring) — e.g. "PN14 TQ decode" matches
-        #      patch_id PN14, but "PN14, P40 — re-derivation" does NOT win
-        #      over an exact PR-number match for PN14.
+        #      token (not just substring) — e.g. "PR40074 TQ decode" matches
+        #      patch_id PR40074, but "PR40074, P40 — re-derivation" does NOT win
+        #      over an exact PR-number match for PR40074.
         chosen_key, chosen_info = None, None
         pr_num = meta.get("upstream_pr")
 
@@ -330,7 +330,7 @@ def main(argv=None) -> int:
                     "patch do, when does it engage, what does it depend on?",
     )
     parser.add_argument("patch_id", nargs="?",
-                        help="Patch ID (e.g. PN14, P67, PN16)")
+                        help="Patch ID (e.g. PR40074, P67, PN16)")
     parser.add_argument("--list", action="store_true",
                         help="List all patches and exit")
     parser.add_argument("--json", action="store_true",

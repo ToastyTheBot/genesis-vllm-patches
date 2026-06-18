@@ -44,7 +44,7 @@ Tunables (forwarded to controller):
 INTERACTIONS
 ================================================================
 
-- P75 (suffix decoding): if active, NgramProposer is replaced with
+- PR25784 (suffix decoding): if active, NgramProposer is replaced with
   SuffixDecodingProposer → P77 wiring's text-patch on `ngram_proposer.py`
   is harmless (file still loaded but never instantiated). No conflict.
 - P70 (auto-strict-ngram min>=8): orthogonal — P70 sets

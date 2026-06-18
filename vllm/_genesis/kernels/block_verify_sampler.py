@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: Apache-2.0
-"""Block-verify rejection sampler kernels for Genesis P71.
+"""Block-verify rejection sampler kernels for Genesis PR40819.
 
 Backport of upstream PR vllm-project/vllm#40819 (Z. Golpayegani, OPEN draft)
 implementing Sun et al. 2024 (arXiv 2403.10444) block verification rule.
@@ -50,13 +50,13 @@ ratio < 1. Same target marginal preserved (unbiased).
 GENESIS-SPECIFIC NOTES
 ================================================================
 
-- Default OFF — opt-in via `GENESIS_ENABLE_P71_BLOCK_VERIFY=1`
+- Default OFF — opt-in via `GENESIS_ENABLE_PR40819=1`
 - Realistic gain on 35B-A3B + Ampere: +0-3% wall-clock (PR's own Qwen3-32B
   bench shows parity at our model size). Treat as experimental.
 - Safe fallback: any error in this kernel raises and is caught by an outer
   try/except in the wiring patch, which reverts to upstream per-token rule.
 - Cudagraph compatibility: PIECEWISE only (data-dependent loop bounds).
-  If P67b enables FULL_AND_PIECEWISE for spec-decode, P71 forces fallback
+  If P67b enables FULL_AND_PIECEWISE for spec-decode, PR40819 forces fallback
   to PIECEWISE for the rejection_sample call — unavoidable.
 
 Author: Sandermage (Sander) Barzov Aleksandr, Ukraine, Odessa.
@@ -104,7 +104,7 @@ def generate_rejection_q(
 
 # ════════════════════════════════════════════════════════════════════════
 # PyTorch reference (with both gemini bug-fixes applied).
-# Used by parity tests + when GENESIS_P71_USE_PYTORCH=1.
+# Used by parity tests + when GENESIS_PR40819_USE_PYTORCH=1.
 # ════════════════════════════════════════════════════════════════════════
 
 def rejection_random_sample_block_verify_pytorch(
@@ -154,7 +154,7 @@ def rejection_random_sample_block_verify_pytorch(
         batch_size, max_spec_len
     )
 
-    # ─── [Genesis P71 FIX 1] SHARED u per request, not per position ────────
+    # ─── [Genesis PR40819 FIX 1] SHARED u per request, not per position ────────
     # PR #40819 used `uniform_token_probs = uniform_probs[global_token_indices]`
     # which is per-position. Sun 2024 requires ONE Bernoulli per request.
     # Take the FIRST uniform draw per request (at cu_start) and broadcast.
@@ -196,7 +196,7 @@ def rejection_random_sample_block_verify_pytorch(
         residual_mass[intermediate_mask] = flat_residual_mass
 
         denom = residual_mass + (1.0 - p_grid)
-        # ─── [Genesis P71 FIX 2] denom==0 means PERFECT match → ACCEPT (1.0) ─
+        # ─── [Genesis PR40819 FIX 2] denom==0 means PERFECT match → ACCEPT (1.0) ─
         # PR #40819 returned 0.0 here, REJECTING perfect drafts. Wrong.
         h_block = torch.where(
             intermediate_mask,
@@ -333,7 +333,7 @@ def sample_recovered_tokens_blockwise_pytorch(
 
 # ════════════════════════════════════════════════════════════════════════
 # Triton kernels (with both gemini bug-fixes applied).
-# Used in production path when GENESIS_ENABLE_P71_BLOCK_VERIFY=1.
+# Used in production path when GENESIS_ENABLE_PR40819=1.
 # ════════════════════════════════════════════════════════════════════════
 
 if _TRITON_OK:
@@ -441,7 +441,7 @@ if _TRITON_OK:
             tl.store(output_token_ids_ptr + req_idx * (max_spec_len + 1), bonus_token_id)
             return
 
-        # ─── [Genesis P71 FIX 1] Load SHARED u once per request ─────────────
+        # ─── [Genesis PR40819 FIX 1] Load SHARED u once per request ─────────────
         # PR #40819 loaded uniform_prob inside the loop (per-position).
         # Sun 2024 requires ONE shared u for the whole block.
         uniform_prob_shared = tl.load(uniform_probs_ptr + start_idx)
@@ -483,7 +483,7 @@ if _TRITON_OK:
                     local = tl.maximum(prefix_prob * next_target - next_draft, 0.0)
                     residual_mass += tl.sum(local, axis=0)
                 denom = residual_mass + 1.0 - prefix_prob
-                # ─── [Genesis P71 FIX 2] denom==0 → ACCEPT (1.0) ─────────
+                # ─── [Genesis PR40819 FIX 2] denom==0 → ACCEPT (1.0) ─────────
                 # PR returned 0.0 here, rejecting perfect drafts. Wrong.
                 h_block = residual_mass / denom if denom > 0 else 1.0
                 # ────────────────────────────────────────────────────────
@@ -541,7 +541,7 @@ def call_block_verify_sample(
     On any exception, the wiring patch's outer try/except falls back to the
     upstream per-token rejection sampler — no engine impact.
     """
-    # ── A4 audit (PN13 follow-up) — defensive preconditions ────────────
+    # ── A4 audit (PR41235 follow-up) — defensive preconditions ────────────
     # Fail loudly with informative messages on shape / device / dtype
     # mismatches rather than letting Triton kernel raise cryptic errors.
     if output_token_ids.dim() < 1:
@@ -575,7 +575,7 @@ def call_block_verify_sample(
     }
     if len(set(devs.values())) > 1:
         raise RuntimeError(
-            f"All P71 input tensors must be on the same device. Got: "
+            f"All PR40819 input tensors must be on the same device. Got: "
             + ", ".join(f"{k}={v}" for k, v in devs.items())
         )
     batch_size = output_token_ids.shape[0]
@@ -639,8 +639,8 @@ def call_block_verify_sample(
 
 
 def is_active() -> bool:
-    """Returns True if P71 is enabled via env."""
+    """Returns True if PR40819 is enabled via env."""
     import os
     return os.environ.get(
-        "GENESIS_ENABLE_P71_BLOCK_VERIFY", ""
+        "GENESIS_ENABLE_PR40819", ""
     ).strip().lower() in ("1", "true", "yes", "on")

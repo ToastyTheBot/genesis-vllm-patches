@@ -6,7 +6,7 @@ Strict-superset optimization for DFlash spec-decode that:
   - Improves memory/cache utilization (persistent buffer pool)
   - Adapts to workload (short/long ctx, code, free-form)
   - Provides runtime stability sentinel + auto-fallback
-  - Composes additively with PN21/PN23/PN24 (other DFlash patches)
+  - Composes additively with PR40898/PN23/PR40727 (other DFlash patches)
 
 Architecture (4 sub-kernels under one umbrella):
 

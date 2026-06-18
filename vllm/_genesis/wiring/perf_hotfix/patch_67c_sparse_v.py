@@ -74,7 +74,7 @@ Safety
   If P67 disabled, P67c skips with clear reason.
 
 Author: Sandermage(Sander) Barzov Aleksandr, Ukraine, Odessa.
-Synthesizes: PN26b proven uniform-scalar `if` pattern (Triton 3.6),
+Synthesizes: PR41422 proven uniform-scalar `if` pattern (Triton 3.6),
 TRT-LLM #9821 sink protection design, TheTom #41422 threshold=0
 bit-exact contract.
 """

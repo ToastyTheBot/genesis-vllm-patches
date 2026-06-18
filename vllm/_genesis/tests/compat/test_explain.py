@@ -187,17 +187,17 @@ class TestUpstreamTracking:
         r = explain_patch("PN_TEST_STABLE")
         assert r["upstream"]["pr_number"] is None
 
-    def test_PN14_prefers_PR_40074_over_cross_reference(self):
-        """Real-registry regression: PN14 declares upstream_pr=40074. The
+    def test_PR40074_prefers_PR_40074_over_cross_reference(self):
+        """Real-registry regression: PR40074 declares upstream_pr=40074. The
         upstream_compat module also has PR_39939_jartx_per_token_head_refactor
-        whose `affects_patch` field mentions 'PN14' as a cross-reference.
+        whose `affects_patch` field mentions 'PR40074' as a cross-reference.
         explain_patch must prefer the EXACT PR-number match (40074) over
         the substring-match in affects_patch."""
         from vllm._genesis.compat.explain import explain_patch
-        r = explain_patch("PN14")
-        # Marker must be PN14's actual symbol, not the JartX cross-ref
+        r = explain_patch("PR40074")
+        # Marker must be PR40074's actual symbol, not the JartX cross-ref
         assert r["upstream"]["marker"] == "safe_page_idx", (
-            f"expected PN14's safe_page_idx marker, got {r['upstream']['marker']!r} "
+            f"expected PR40074's safe_page_idx marker, got {r['upstream']['marker']!r} "
             f"(probably hit the JartX #39939 cross-reference)"
         )
         assert "40074" in (r["upstream"].get("compat_key") or "")
@@ -207,14 +207,14 @@ class TestUpstreamTracking:
 
 
 class TestRealRegistry:
-    def test_PN14_explain_produces_valid_output(self):
-        """Live test against the actual PATCH_REGISTRY — PN14 should
+    def test_PR40074_explain_produces_valid_output(self):
+        """Live test against the actual PATCH_REGISTRY — PR40074 should
         produce a coherent explain report including the upstream PR."""
         from vllm._genesis.compat.explain import explain_patch
-        r = explain_patch("PN14")
-        assert r["patch_id"] == "PN14"
-        assert "PN14" in r["title"] or "TQ decode" in r["title"]
-        assert r["env_flag"] == "GENESIS_ENABLE_PN14_TQ_DECODE_OOB_CLAMP"
+        r = explain_patch("PR40074")
+        assert r["patch_id"] == "PR40074"
+        assert "PR40074" in r["title"] or "TQ decode" in r["title"]
+        assert r["env_flag"] == "GENESIS_ENABLE_PR40074"
         assert r["upstream"]["pr_number"] == 40074
 
     def test_P67_explain_includes_conflicts(self):
@@ -265,7 +265,7 @@ class TestCLISmoke:
     def test_main_returns_int(self):
         from vllm._genesis.compat.explain import main
         # Real registry entry
-        rc = main(["PN14"])
+        rc = main(["PR40074"])
         assert isinstance(rc, int)
         assert rc == 0
 
@@ -276,11 +276,11 @@ class TestCLISmoke:
 
     def test_main_json_mode(self, capsys):
         from vllm._genesis.compat.explain import main
-        main(["PN14", "--json"])
+        main(["PR40074", "--json"])
         captured = capsys.readouterr()
         # Verify output is valid JSON
         parsed = json.loads(captured.out)
-        assert parsed["patch_id"] == "PN14"
+        assert parsed["patch_id"] == "PR40074"
 
     def test_main_no_args_prints_usage(self, capsys):
         from vllm._genesis.compat.explain import main

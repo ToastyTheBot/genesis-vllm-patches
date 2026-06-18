@@ -248,12 +248,12 @@ UPSTREAM_MARKERS: dict[str, dict[str, str]] = {
         "description": (
             "JartX vllm-project/vllm#39939 (OPEN). Refactor to add first-chunk "
             "fast-path, mixed batch split, fused K+V, dedicated decode kernel. "
-            "Touches the same TQ decode kernel that PN14 (vllm#40074) clamps "
-            "and that P40 (#40792) tunes. If merged, our PN14 anchor + P40 "
+            "Touches the same TQ decode kernel that PR40074 (vllm#40074) clamps "
+            "and that P40 (#40792) tunes. If merged, our PR40074 anchor + P40 "
             "drift markers must be re-derived against the refactored kernel."
         ),
         "merged_date": "OPEN as of 2026-04-30",
-        "affects_patch": "PN14, P40 — anchor re-derivation likely on merge",
+        "affects_patch": "PR40074, P40 — anchor re-derivation likely on merge",
         "verified_in_main_2026_04_30": False,
     },
 
@@ -304,7 +304,7 @@ UPSTREAM_MARKERS: dict[str, dict[str, str]] = {
             "this is the safe_page_idx clamp from devarakondasrikanth."
         ),
         "merged_date": "OPEN as of 2026-04-29",
-        "affects_patch": "PN14 TQ decode safe_page_idx clamp",
+        "affects_patch": "PR40074 TQ decode safe_page_idx clamp",
         "verified_in_main_2026_04_29": False,
     },
 

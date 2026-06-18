@@ -54,7 +54,7 @@ requirement entirely. Tracking in genesis-vllm-patches v7.72.5 sprint.
 | Card / VRAM | Workload | Recipe |
 |---|---|---|
 | 1× 3090 24 GB | Code completion (short ctx ≤ 8K) | TQ k8v4 + util 0.92 + max_num_seqs=4 |
-| 1× 3090 24 GB | Long ctx 60-180K + multi-turn | **fp8_e5m2** KV (TQ OOMs); util 0.85; PN35 ON |
+| 1× 3090 24 GB | Long ctx 60-180K + multi-turn | **fp8_e5m2** KV (TQ OOMs); util 0.85; PR35975 ON |
 | 2× 3080 20 GB (TP=2) | Long ctx > 90K | fp8_e5m2 (TQ k8v4 OOMs at 90K — see club-3090#47) |
 | 1× 3090 WSL2 | Any | util 0.85 (vGPU/Xwayland eats ~3.6 GB/card) — see #32 |
 | 2× A5000 24 GB (TP=2) | All PROD configs | TQ k8v4 + util 0.90 + MTP K=3 stable |
@@ -67,7 +67,7 @@ single-card vLLM composes FAIL continuous soak. Only TP=2 + llama.cpp
 survive cleanly.
 
 **Root cause** (per noonghunna codex residency analysis):
-- PN12 stays exactly flat at 137 MiB across turns ✓ (Genesis pools clean)
+- PR34207 stays exactly flat at 137 MiB across turns ✓ (Genesis pools clean)
 - Growth is in PyTorch caching allocator + vLLM internal state (NOT Genesis)
 - Per turn: `total_reserved +1400 MiB`, `total_alloc +590 MiB`,
   `fragmentation +810 MiB`, `free −1402 MiB`
@@ -95,7 +95,7 @@ soak.
 | K activation peak | **HIGHER** (per club-3090#47) | lower |
 | V activation peak | lower | higher |
 | Quality preservation | very high (8-bit K, 4-bit V) | high (lossy fp8) |
-| Genesis kernels | P67/P67b/P98/P101 etc | none Genesis-specific |
+| Genesis kernels | P67/P67b/PR40941/PR41123 etc | none Genesis-specific |
 | Recommended for | TP=2 (24+ GB total), high-quality | single-card tight VRAM |
 
 **Empirical** (club-3090#47, efschu's 2× 3080 20 GB): `turboquant_k8v4` OOMs
@@ -109,13 +109,13 @@ when VRAM is < 24 GB total.
 ~3.6 GB/card slack for vGPU, Xwayland, and any Windows-side display
 interleave. Otherwise Worker_TP1 OOMs around model load.
 
-## PN35 (vllm#35975 backport) status
+## PR35975 (vllm#35975 backport) status
 
-PN35 frees ~64 MiB GPU + ~64 MiB pinned for text-only models — **necessary
+PR35975 frees ~64 MiB GPU + ~64 MiB pinned for text-only models — **necessary
 but not sufficient** at 0.95 mem-util to close 60K Cliff 2 alone. Pairs with
 mem-util drop to 0.93 + the other Cliff 2b mitigations above.
 
-PN35 default-on since v7.68; verify ON via `apply_all` boot log.
+PR35975 default-on since v7.68; verify ON via `apply_all` boot log.
 
 ## P103 cu_seqlens=[0,T] fix (Issue #18 → fixed v7.71)
 

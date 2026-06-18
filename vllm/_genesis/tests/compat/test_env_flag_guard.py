@@ -10,17 +10,17 @@ def test_levenshtein_distance():
     assert _levenshtein("", "") == 0
     assert _levenshtein("abc", "abc") == 0
     assert _levenshtein("kitten", "sitting") == 3  # classic
-    assert _levenshtein("PN55", "PN56") == 1
-    assert _levenshtein("PN67", "P67c") == 2
+    assert _levenshtein("abc", "abd") == 1          # one substitution
+    assert _levenshtein("abc", "abde") == 2         # substitution + insertion
 
 
 def test_collect_known_flags_includes_pn55():
     from vllm._genesis.compat.env_flag_guard import collect_known_flags
     known = collect_known_flags()
-    # PN55 was added in this session — must be picked up
-    assert "GENESIS_ENABLE_PN55_WAKE_UP_HYBRID_KV" in known
+    # PR41602 was added in this session — must be picked up
+    assert "GENESIS_ENABLE_PR41602" in known
     # And legacy patches
-    assert "GENESIS_ENABLE_PN26_SPARSE_V" in known
+    assert "GENESIS_ENABLE_PR41422" in known
 
 
 def test_no_typos_on_clean_environ():
@@ -32,8 +32,8 @@ def test_no_typos_on_clean_environ():
 def test_known_flag_no_finding():
     from vllm._genesis.compat.env_flag_guard import find_typos
     findings = find_typos(environ={
-        "GENESIS_ENABLE_PN55_WAKE_UP_HYBRID_KV": "1",
-        "GENESIS_ENABLE_PN26_SPARSE_V": "1",
+        "GENESIS_ENABLE_PR41602": "1",
+        "GENESIS_ENABLE_PR41422": "1",
     })
     assert findings == []
 
@@ -41,7 +41,7 @@ def test_known_flag_no_finding():
 def test_disable_inverse_no_finding():
     from vllm._genesis.compat.env_flag_guard import find_typos
     findings = find_typos(environ={
-        "GENESIS_DISABLE_PN35_INPUTS_EMBEDS_OPTIONAL": "1",
+        "GENESIS_DISABLE_PR35975_INPUTS_EMBEDS_OPTIONAL": "1",
     })
     # GENESIS_DISABLE_<X> is valid pattern even if not in env_flag values
     assert findings == []
@@ -49,14 +49,14 @@ def test_disable_inverse_no_finding():
 
 def test_typo_detected_close_match():
     from vllm._genesis.compat.env_flag_guard import find_typos
-    # Typo: missing _ before WAKE
+    # Typo: a dropped digit vs the real flag GENESIS_ENABLE_PR41602
     findings = find_typos(environ={
-        "GENESIS_ENABLE_PN55_WAKEUP_HYBRID_KV": "1",  # missing _ before HYBRID
+        "GENESIS_ENABLE_PR4162": "1",  # missing one digit
     })
     assert len(findings) == 1
-    assert "WAKEUP" in findings[0].env_var
+    assert "PR4162" in findings[0].env_var
     assert findings[0].closest_known is not None
-    assert "PN55" in findings[0].closest_known
+    assert "PR41602" in findings[0].closest_known
     assert findings[0].distance is not None and findings[0].distance <= 4
 
 
@@ -64,8 +64,8 @@ def test_tuning_knob_allowlisted():
     """Suffix _DEBUG/_THRESHOLD/etc. = tuning knob, not patch toggle."""
     from vllm._genesis.compat.env_flag_guard import find_typos
     findings = find_typos(environ={
-        "GENESIS_ENABLE_PN26_SPARSE_V_DEBUG": "1",       # allowlisted suffix
-        "GENESIS_ENABLE_PN26_SPARSE_V_THRESHOLD": "0.005",  # tuning knob
+        "GENESIS_ENABLE_PR41422_DEBUG": "1",       # allowlisted suffix
+        "GENESIS_ENABLE_PR41422_THRESHOLD": "0.005",  # tuning knob
     })
     # These shouldn't flag as typos (allowlisted)
     assert findings == []
@@ -82,8 +82,8 @@ def test_assert_no_typos_default_warn(caplog):
 
 def test_assert_no_typos_strict_raises(monkeypatch):
     from vllm._genesis.compat.env_flag_guard import assert_no_typos
-    # Use a close-typo (off-by-1 char from real flag) to trigger
-    monkeypatch.setenv("GENESIS_ENABLE_PN55_WAKE_UP_HYBRID_KX", "1")  # KX vs KV
+    # Use a close-typo (dropped digit) of the real flag GENESIS_ENABLE_PR41602
+    monkeypatch.setenv("GENESIS_ENABLE_PR4162", "1")
     with pytest.raises(RuntimeError, match="suspicious GENESIS_ENABLE"):
         assert_no_typos(strict=True)
 
@@ -95,6 +95,6 @@ def test_assert_no_typos_unrelated_unaffected():
         "GENESIS_ENABLE_TOTALLY_DIFFERENT_USER_KNOB_HERE": "1",
     })
     # Distance > 4 from any real flag → not flagged (unlikely typo)
-    # But also possible to flag if distance ≤ 4 from PN35/PN51
+    # But also possible to flag if distance ≤ 4 from PR35975/PN51
     # Just ensure logic doesn't crash
     assert isinstance(findings, list)

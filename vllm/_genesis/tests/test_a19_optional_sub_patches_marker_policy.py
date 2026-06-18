@@ -85,9 +85,9 @@ _KNOWN_SAFE_OPTIONAL_SHARING = frozenset({
     # paths (non-stream capture / non-stream return / stream start).
     # Any subset apply is graceful degradation by design.
     "legacy/patch_27_reasoning_before_think.py",
-    # P59 — empirically DISPROVEN backport of vllm#39055; deprecated
+    # PR39055 — empirically DISPROVEN backport of vllm#39055; deprecated
     # opt-in research artifact. partial-apply has zero PROD impact.
-    "structured_output/patch_59_qwen3_reasoning_tool_call_recovery.py",
+    "structured_output/patch_pr39055_qwen3_reasoning_tool_call_recovery.py",
     # P83 — empirically DISPROVEN MTP keep-last-cached-block; kept as
     # opt-in research artifact for a workload we don't trigger.
     "spec_decode/patch_83_mtp_keep_last_cached_block.py",

@@ -22,9 +22,9 @@ on any eligibility failure or kernel error, falls through to the
 original per-layer loop (preserved verbatim under `else` branch).
 
 Composition (no conflicts):
-  - PN21 (DFlash SWA) — different file (dflash.py); unaffected
+  - PR40898 (DFlash SWA) — different file (dflash.py); unaffected
   - PN23 (combine_hidden_states cast) — same file, different method
-  - PN24 (aux layer +1) — different file (gpu_model_runner.py)
+  - PR40727 (aux layer +1) — different file (gpu_model_runner.py)
   - PN37 (research artifact) — different code path (forward, not precompute)
 
 Author: Sandermage (Sander) Barzov Aleksandr, Ukraine, Odessa.
@@ -272,7 +272,7 @@ def _make_scheduler_patcher() -> TextPatcher | None:
 # ═══════════════════════════════════════════════════════════════════
 
 # Anchor: PRISTINE form (no Genesis hooks). PN40 sub-C K-trim applies
-# BEFORE P62/P58 wiring patches because PN40 dispatcher entry comes
+# BEFORE PR36138/PR40768 wiring patches because PN40 dispatcher entry comes
 # earlier in apply_all order. The anchor pair `request.spec_token_ids =
 # spec_token_ids` + blank line + `def update_draft_token_ids_in_output(`
 # is unique in the file (one occurrence in pristine scheduler.py from
@@ -288,7 +288,7 @@ PN40_K_TRIM_REPLACEMENT = (
     "            # recommends K < base, trim spec_token_ids. Saves verify\n"
     "            # compute on later verify pass. Defensive: never raises;\n"
     "            # falls through to baseline if PN40 disabled or trip.\n"
-    "            # NOTE: Inserted BEFORE P62/P58 hooks (which extend this\n"
+    "            # NOTE: Inserted BEFORE PR36138/PR40768 hooks (which extend this\n"
     "            # area). Both patches compose additively — see PN40 design.\n"
     "            try:\n"
     "                from vllm._genesis.kernels.pn40_dflash_omnibus import (\n"

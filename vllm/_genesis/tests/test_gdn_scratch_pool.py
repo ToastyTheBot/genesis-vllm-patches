@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: Apache-2.0
 """TDD for vllm._genesis.kernels.gdn_scratch_pool — Variant D Phase 1.
 
-Pattern adapted from test_ffn_intermediate_cache.py (PN12 proven design).
+Pattern adapted from test_ffn_intermediate_cache.py (PR34207 proven design).
 
 Design invariants tested:
   1. Single shared buffer per shape key (B, H, V, K, dtype, device)

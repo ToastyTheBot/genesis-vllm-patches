@@ -29,12 +29,12 @@ import pytest
 @pytest.fixture
 def synthetic_vllm_tree(tmp_path):
     """Build a synthetic vllm/ directory mimicking the file layout for
-    text-patch targets we care about (PN14, PN13)."""
+    text-patch targets we care about (PR40074, PR41235)."""
     vllm = tmp_path / "vllm"
     (vllm / "v1" / "attention" / "ops").mkdir(parents=True)
     (vllm / "compilation").mkdir(parents=True)
 
-    # PN14 target — pristine version (anchor still matches)
+    # PR40074 target — pristine version (anchor still matches)
     (vllm / "v1" / "attention" / "ops" / "triton_turboquant_decode.py").write_text(
         '''
 @triton.jit
@@ -55,7 +55,7 @@ def _tq_decode_stage1(...):
 '''
     )
 
-    # PN13 target — upstream MERGED variant (var-arg lambda already there)
+    # PR41235 target — upstream MERGED variant (var-arg lambda already there)
     (vllm / "compilation" / "cuda_graph.py").write_text(
         '''
 class CUDAGraphWrapper:
@@ -80,13 +80,13 @@ class TestAnchorChecker:
     def test_anchor_present_returns_clean(self, synthetic_vllm_tree):
         from vllm._genesis.compat.migrate import check_patch_against_upstream
         verdict = check_patch_against_upstream(
-            "PN14", upstream_root=synthetic_vllm_tree,
+            "PR40074", upstream_root=synthetic_vllm_tree,
         )
         assert verdict["status"] in ("clean", "would_apply", "anchor_present")
-        assert verdict["patch_id"] == "PN14"
+        assert verdict["patch_id"] == "PR40074"
 
     def test_anchor_drift_detected(self, synthetic_vllm_tree):
-        # Mutate the PN14 target file to break the anchor
+        # Mutate the PR40074 target file to break the anchor
         target = (synthetic_vllm_tree / "vllm" / "v1" / "attention" / "ops"
                   / "triton_turboquant_decode.py")
         target.write_text(target.read_text().replace(
@@ -95,20 +95,20 @@ class TestAnchorChecker:
         ))
         from vllm._genesis.compat.migrate import check_patch_against_upstream
         verdict = check_patch_against_upstream(
-            "PN14", upstream_root=synthetic_vllm_tree,
+            "PR40074", upstream_root=synthetic_vllm_tree,
         )
         assert verdict["status"] == "anchor_drift"
         assert "anchor" in verdict["message"].lower()
 
     def test_upstream_merged_marker_present(self, synthetic_vllm_tree):
-        """PN13 fixture has var-arg lambdas already in upstream → patch
+        """PR41235 fixture has var-arg lambdas already in upstream → patch
         will self-retire on merge. The migrate tool should detect this."""
         from vllm._genesis.compat.migrate import check_patch_against_upstream
         verdict = check_patch_against_upstream(
-            "PN13", upstream_root=synthetic_vllm_tree,
+            "PR41235", upstream_root=synthetic_vllm_tree,
         )
         assert verdict["status"] == "upstream_merged"
-        assert verdict["patch_id"] == "PN13"
+        assert verdict["patch_id"] == "PR41235"
 
     def test_target_file_missing(self, synthetic_vllm_tree):
         # Remove the target file
@@ -117,7 +117,7 @@ class TestAnchorChecker:
         target.unlink()
         from vllm._genesis.compat.migrate import check_patch_against_upstream
         verdict = check_patch_against_upstream(
-            "PN14", upstream_root=synthetic_vllm_tree,
+            "PR40074", upstream_root=synthetic_vllm_tree,
         )
         assert verdict["status"] in ("file_missing", "anchor_drift")
 
@@ -134,7 +134,7 @@ class TestRunbookGenerator:
         from vllm._genesis.compat.migrate import generate_runbook
         runbook = generate_runbook(
             upstream_root=synthetic_vllm_tree,
-            patch_ids=["PN14", "PN13"],
+            patch_ids=["PR40074", "PR41235"],
         )
         assert isinstance(runbook, dict)
         assert "summary" in runbook
@@ -145,11 +145,11 @@ class TestRunbookGenerator:
         from vllm._genesis.compat.migrate import generate_runbook
         runbook = generate_runbook(
             upstream_root=synthetic_vllm_tree,
-            patch_ids=["PN14", "PN13"],
+            patch_ids=["PR40074", "PR41235"],
         )
         assert "by_status" in runbook["summary"]
         statuses = runbook["summary"]["by_status"]
-        # Both PN14 (clean) and PN13 (merged) should be in their buckets
+        # Both PR40074 (clean) and PR41235 (merged) should be in their buckets
         assert sum(statuses.values()) == 2
 
     def test_runbook_includes_action_items(self, synthetic_vllm_tree):
@@ -157,7 +157,7 @@ class TestRunbookGenerator:
         from vllm._genesis.compat.migrate import generate_runbook
         runbook = generate_runbook(
             upstream_root=synthetic_vllm_tree,
-            patch_ids=["PN14", "PN13"],
+            patch_ids=["PR40074", "PR41235"],
         )
         for p in runbook["patches"]:
             assert "action" in p, f"patch {p.get('patch_id')!r} missing action"
@@ -170,13 +170,13 @@ class TestMarkdownFormatter:
         )
         runbook = generate_runbook(
             upstream_root=synthetic_vllm_tree,
-            patch_ids=["PN14", "PN13"],
+            patch_ids=["PR40074", "PR41235"],
         )
         md = format_runbook_md(runbook)
         assert isinstance(md, str)
         assert "Genesis migration runbook" in md
-        assert "PN14" in md
-        assert "PN13" in md
+        assert "PR40074" in md
+        assert "PR41235" in md
 
     def test_format_includes_action_section(self, synthetic_vllm_tree):
         from vllm._genesis.compat.migrate import (
@@ -184,7 +184,7 @@ class TestMarkdownFormatter:
         )
         runbook = generate_runbook(
             upstream_root=synthetic_vllm_tree,
-            patch_ids=["PN14"],
+            patch_ids=["PR40074"],
         )
         md = format_runbook_md(runbook)
         # Action section should appear in the output
@@ -194,7 +194,7 @@ class TestMarkdownFormatter:
 class TestCLI:
     def test_cli_returns_int(self, synthetic_vllm_tree):
         from vllm._genesis.compat.migrate import main
-        rc = main([str(synthetic_vllm_tree), "--patches", "PN14"])
+        rc = main([str(synthetic_vllm_tree), "--patches", "PR40074"])
         assert isinstance(rc, int)
 
     def test_cli_unknown_path_returns_nonzero(self):
@@ -205,7 +205,7 @@ class TestCLI:
     def test_cli_json_output(self, synthetic_vllm_tree, capsys):
         from vllm._genesis.compat.migrate import main
         import json
-        main([str(synthetic_vllm_tree), "--patches", "PN14", "--json"])
+        main([str(synthetic_vllm_tree), "--patches", "PR40074", "--json"])
         captured = capsys.readouterr()
         parsed = json.loads(captured.out)
         assert "patches" in parsed

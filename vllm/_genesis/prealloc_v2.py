@@ -70,10 +70,10 @@ SAFETY
 - Both off → zero behavioral change vs stock vLLM.
 
 ================================================================
-RELATIONSHIP TO PN59 / PN12 / P22 / P26 / P37 / P39a / GdnScratchPool
+RELATIONSHIP TO PN59 / PR34207 / P22 / P26 / P37 / P39a / GdnScratchPool
 ================================================================
 
-The hand-instrumented per-kernel pools (PN12 FFN, P22 dequant, P37 MoE,
+The hand-instrumented per-kernel pools (PR34207 FFN, P22 dequant, P37 MoE,
 PN59 GdnScratchPool with acquire_h_window / acquire_o_output) are the
 **reference implementations** of this pattern at specific call sites.
 prealloc_v2 generalizes the same pattern to the LONG TAIL of un-

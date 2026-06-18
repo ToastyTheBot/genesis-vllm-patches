@@ -22,20 +22,20 @@ class TestResultMapping:
     def test_applied_returns_applied_status(self):
         status, reason = result_to_wiring_status(
             TextPatchResult.APPLIED, None,
-            applied_message="PN14 applied: clamp engaged",
-            patch_name="PN14",
+            applied_message="PR40074 applied: clamp engaged",
+            patch_name="PR40074",
         )
         assert status == "applied"
-        assert reason == "PN14 applied: clamp engaged"
+        assert reason == "PR40074 applied: clamp engaged"
 
     def test_idempotent_returns_skipped_with_marker_reason(self):
         status, reason = result_to_wiring_status(
             TextPatchResult.IDEMPOTENT, None,
             applied_message="not used",
-            patch_name="PN14",
+            patch_name="PR40074",
         )
         assert status == "skipped"
-        assert "PN14" in reason
+        assert "PR40074" in reason
         assert "marker present" in reason
 
     def test_skipped_with_failure_reason_and_detail(self):
@@ -44,10 +44,10 @@ class TestResultMapping:
         status, reason = result_to_wiring_status(
             TextPatchResult.SKIPPED, f,
             applied_message="not used",
-            patch_name="PN14",
+            patch_name="PR40074",
         )
         assert status == "skipped"
-        assert "PN14" in reason
+        assert "PR40074" in reason
         assert "upstream_merged" in reason
         assert "safe_page_idx" in reason
 
@@ -55,7 +55,7 @@ class TestResultMapping:
         status, reason = result_to_wiring_status(
             TextPatchResult.SKIPPED, None,
             applied_message="not used",
-            patch_name="PN14",
+            patch_name="PR40074",
         )
         assert status == "skipped"
         assert "unknown_skip" in reason
@@ -65,7 +65,7 @@ class TestResultMapping:
         status, reason = result_to_wiring_status(
             TextPatchResult.SKIPPED, f,
             applied_message="not used",
-            patch_name="PN14",
+            patch_name="PR40074",
         )
         assert status == "skipped"
         assert "required_anchor_missing" in reason
@@ -78,10 +78,10 @@ class TestResultMapping:
         status, reason = result_to_wiring_status(
             TextPatchResult.FAILED, f,
             applied_message="not used",
-            patch_name="PN14",
+            patch_name="PR40074",
         )
         assert status == "failed"
-        assert "PN14" in reason
+        assert "PR40074" in reason
         assert "ambiguous_anchor" in reason
         assert "3 times" in reason
 
@@ -89,7 +89,7 @@ class TestResultMapping:
         status, reason = result_to_wiring_status(
             TextPatchResult.FAILED, None,
             applied_message="not used",
-            patch_name="PN14",
+            patch_name="PR40074",
         )
         assert status == "failed"
         assert "unknown" in reason
@@ -110,7 +110,7 @@ class TestResultMapping:
 class TestRegressionAgainstOldBug:
     """The original bug this helper fixes: many wiring `apply()` copies
     only checked `if result == FAILED` and fell through with "applied"
-    for IDEMPOTENT and SKIPPED. Caught by PN14 TDD 2026-04-29."""
+    for IDEMPOTENT and SKIPPED. Caught by PR40074 TDD 2026-04-29."""
 
     def test_idempotent_must_NOT_report_applied(self):
         """The pre-helper bug returned 'applied' here. The helper must
@@ -123,7 +123,7 @@ class TestRegressionAgainstOldBug:
         assert status == "skipped"
 
     def test_skipped_must_NOT_report_applied(self):
-        """Drift detection caused a SKIPPED return in PN14 fixture; the
+        """Drift detection caused a SKIPPED return in PR40074 fixture; the
         old code reported 'applied' anyway. The helper must return
         'skipped'."""
         f = TextPatchFailure(reason="upstream_merged", detail="marker present")

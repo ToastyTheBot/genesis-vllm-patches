@@ -397,10 +397,10 @@ The 4 PROD-ready configs ship in two flavors each — Docker (`start_*.sh`) and 
 
 | Config | Docker | Bare metal |
 |---|---|---|
-| **35B-A3B-FP8** PROD (TQ k8v4 + MTP K=3 + PN8, 320K) | [`start_35b_fp8_PROD.sh`](../scripts/launch/start_35b_fp8_PROD.sh) | [`bare_metal_35b_fp8_PROD.sh`](../scripts/launch/bare_metal_35b_fp8_PROD.sh) |
+| **35B-A3B-FP8** PROD (TQ k8v4 + MTP K=3 + PR40849, 320K) | [`start_35b_fp8_PROD.sh`](../scripts/launch/start_35b_fp8_PROD.sh) | [`bare_metal_35b_fp8_PROD.sh`](../scripts/launch/bare_metal_35b_fp8_PROD.sh) |
 | **27B-INT4-Lorbus** short-ctx (no TQ, fp8_e5m2, ≤8K, high TPS) | [`start_27b_int4_no_TQ_short.sh`](../scripts/launch/start_27b_int4_no_TQ_short.sh) | [`bare_metal_27b_int4_no_TQ_short.sh`](../scripts/launch/bare_metal_27b_int4_no_TQ_short.sh) |
 | **27B-INT4-Lorbus** long-ctx 256K (no TQ, util 0.90) | [`start_27b_int4_no_TQ_long_256K.sh`](../scripts/launch/start_27b_int4_no_TQ_long_256K.sh) | [`bare_metal_27b_int4_no_TQ_long_256K.sh`](../scripts/launch/bare_metal_27b_int4_no_TQ_long_256K.sh) |
-| **27B-INT4-Lorbus** + TurboQuant k8v4 (P98 required) | [`start_27b_int4_TQ_k8v4.sh`](../scripts/launch/start_27b_int4_TQ_k8v4.sh) | [`bare_metal_27b_int4_TQ_k8v4.sh`](../scripts/launch/bare_metal_27b_int4_TQ_k8v4.sh) |
+| **27B-INT4-Lorbus** + TurboQuant k8v4 (PR40941 required) | [`start_27b_int4_TQ_k8v4.sh`](../scripts/launch/start_27b_int4_TQ_k8v4.sh) | [`bare_metal_27b_int4_TQ_k8v4.sh`](../scripts/launch/bare_metal_27b_int4_TQ_k8v4.sh) |
 
 The Docker variants bind-mount Genesis into a stock `vllm/vllm-openai:nightly` image (recommended for reproducibility).
 The bare-metal variants assume vLLM is installed via `pip install vllm` and symlink Genesis `_genesis` into the existing vllm package on first run.

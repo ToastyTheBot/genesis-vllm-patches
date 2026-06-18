@@ -41,9 +41,9 @@
 
 """PN25 — `silu_and_mul` as torch.library.custom_op (Inductor-safe pool).
 
-Problem (continuation of PN12)
+Problem (continuation of PR34207)
 ------------------------------
-PN12 text-patches `SiluAndMul.forward_cuda` to acquire its
+PR34207 text-patches `SiluAndMul.forward_cuda` to acquire its
 `[M, intermediate_size]` BF16/FP16 transient from `FFNIntermediateCache`
 instead of `torch.empty()`. That works in eager mode.
 
@@ -61,7 +61,7 @@ is
 
 torch.compile's Inductor traces this body into a fused kernel and
 issues its own `empty_strided_cuda((s18, intermediate_size), fp16)`
-for the multiplication output. PN12's pool never gets a chance —
+for the multiplication output. PR34207's pool never gets a chance —
 the patched `forward_cuda` method is never reached.
 
 Symptom on a 24 GB 3090 + Lorbus 27B (intermediate=17408) at
@@ -72,7 +72,7 @@ and pass.
 
 Genesis stack vulnerability
 ---------------------------
-Same architectural flaw exists in our PN12 — we only patch
+Same architectural flaw exists in our PR34207 — we only patch
 `forward_cuda`. Our 27B PROD configs avoid the inductor path because
 `--cudagraph-mode=PIECEWISE` + offline-quant INT4 short-circuits the
 compile pipeline on this kernel. But long-context + chunked prefill
@@ -83,27 +83,27 @@ Fix design (this module)
 Register `genesis::silu_and_mul_pooled` as `torch.library.custom_op`
 with `device_types=("cuda",)`. Inductor treats custom ops as opaque
 nodes — emits a call to the op and does NOT trace through the body.
-Inside the op body we run the same eager logic as PN12's patched
+Inside the op body we run the same eager logic as PR34207's patched
 forward_cuda: acquire output from `FFNIntermediateCache.acquire_silu_out`
 when the [M, d] 2-D shape matches, fall back to `torch.empty` otherwise,
 then dispatch to the underlying CUDA `silu_and_mul` kernel.
 
 Companion patch PN25 (`patch_N25_silu_inductor_safe_pool.py`) edits
 `SiluAndMul.forward_native` to route through this op when available.
-PN12 stays as the eager-path patch on `forward_cuda`. Both can run
+PR34207 stays as the eager-path patch on `forward_cuda`. Both can run
 simultaneously without conflict — `forward_cuda` is called when
 `custom_ops=["+silu_and_mul"]`, `forward_native` is called otherwise.
 
-Composition with PN12
+Composition with PR34207
 ---------------------
-PN12 patches `forward_cuda` (eager dispatch).
+PR34207 patches `forward_cuda` (eager dispatch).
 PN25 patches `forward_native` via opaque op (compile dispatch).
 
 Together: both paths acquire from the same `FFNIntermediateCache`
 pool. No state collision — pool is keyed by (intermediate_size, dtype,
 device), and forward is strictly sequential in vLLM's schedule.
 
-If only PN12 enabled: eager workloads work, compile path leaks.
+If only PR34207 enabled: eager workloads work, compile path leaks.
 If only PN25 enabled: compile workloads work, eager path leaks.
 If both enabled: full coverage. Recommended for any inductor-heavy
 config (35B FP8 + future MoE; club-3090 long-text/long-vision).

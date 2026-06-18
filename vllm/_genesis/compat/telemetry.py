@@ -24,7 +24,7 @@ Anonymized data the report DOES include
   - Genesis version + commit (from version_check + git rev)
   - Detected model class (qwen3_5 / qwen3_next / etc.) + flags
     (is_hybrid / is_moe / is_turboquant / quant_format)
-  - List of applied core patch IDs (P67, PN14, ...)
+  - List of applied core patch IDs (P67, PR40074, ...)
   - Skip count, lifecycle distribution (counts, not patch_ids)
   - Plugin count (NAMES default off; opt-in env)
   - Run timestamp

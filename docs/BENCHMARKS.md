@@ -139,7 +139,7 @@ Genesis numbers above are 2× RTX A5000 single-rig. Cross-rig validation request
 - **noonghunna** (1× RTX 3090, 4× RTX 3090 club-3090) — long-time Cliff 2 + tool-call collaborator
 - **apnar** (1× RTX 5090 sm_120 consumer Blackwell) — first sm_120 production rig (club-3090#51 thread)
 - **tfriedel** (4× RTX 3090) — vendors Genesis as submodule, runs verify-full.sh against same checkpoints
-- **Quentin Machu** (varies, fork commits) — P64 sub-patch E author + bug-class triage
+- **Quentin Machu** (varies, fork commits) — PR39598 sub-patch E author + bug-class triage
 - **MidasMining**, **JartX**, **jhsmith409**, **webcodes-cz** — hardware variety (5090, H20, R6000 Blackwell, 8× A4000)
 
 If you are running Genesis on hardware not listed, please file a benchmark report at `tests/bench/cross_rig_reports/` (PR welcome).

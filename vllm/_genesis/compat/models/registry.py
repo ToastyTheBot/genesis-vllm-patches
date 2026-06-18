@@ -117,10 +117,10 @@ SUPPORTED_MODELS: dict[str, ModelEntry] = {
                 speculative_config={"method": "mtp", "num_speculative_tokens": 3},
                 enable_prefix_caching=False,
                 recommended_genesis_patches=(
-                    "P58", "P60", "P60b", "P61", "P61b", "P62", "P64",
+                    "PR40768", "PR40738", "PR40738b", "P61", "P61b", "PR36138", "PR39598",
                     "P66", "P67", "P68", "P69", "P72", "P74",
-                    "P85", "P87", "P91", "P98", "P99", "P100", "P101",
-                    "PN8", "PN11", "PN12", "PN13", "PN14",
+                    "P85", "P87", "P91", "PR40941", "PR40941b", "PR41127", "PR41123",
+                    "PR40849", "PR41142", "PR34207", "PR41235", "PR40074",
                 ),
                 expected=ExpectedMetrics(
                     hardware_class="rtx_a5000_x2",
@@ -179,10 +179,10 @@ SUPPORTED_MODELS: dict[str, ModelEntry] = {
                 enable_prefix_caching=False,
                 recommended_genesis_patches=(
                     "P3", "P5", "P6", "P15", "P22", "P26",
-                    "P58", "P60", "P60b", "P61", "P61b", "P62", "P64",
+                    "PR40768", "PR40738", "PR40738b", "P61", "P61b", "PR36138", "PR39598",
                     "P66", "P67", "P68", "P69", "P72", "P74",
-                    "P81", "P87", "P91", "P100", "P101",
-                    "PN8", "PN11", "PN12", "PN13",
+                    "PR40925", "P87", "P91", "PR41127", "PR41123",
+                    "PR40849", "PR41142", "PR34207", "PR41235",
                 ),
                 expected=ExpectedMetrics(
                     hardware_class="rtx_a5000_x2",
@@ -200,7 +200,7 @@ SUPPORTED_MODELS: dict[str, ModelEntry] = {
         gated=False,
         credits="Qwen team (Alibaba)",
         quirks=(
-            "Pure FP8 — P81 (block-scaled MM low-M decode) gives +23% "
+            "Pure FP8 — PR40925 (block-scaled MM low-M decode) gives +23% "
             "median decode on small batch sizes.",
         ),
         status="SUPPORTED",
@@ -236,8 +236,8 @@ SUPPORTED_MODELS: dict[str, ModelEntry] = {
                 speculative_config={"method": "mtp", "num_speculative_tokens": 3},
                 enable_prefix_caching=False,
                 recommended_genesis_patches=(
-                    "P58", "P60", "P60b", "P67", "P87", "P91",
-                    "PN8", "PN11", "PN12", "PN13", "PN14",
+                    "PR40768", "PR40738", "PR40738b", "P67", "P87", "P91",
+                    "PR40849", "PR41142", "PR34207", "PR41235", "PR40074",
                 ),
                 expected=None,  # awaiting blessed measurement
             ),
@@ -284,8 +284,8 @@ SUPPORTED_MODELS: dict[str, ModelEntry] = {
                 enable_prefix_caching=False,
                 additional_args=(),
                 recommended_genesis_patches=(
-                    "P58", "P60", "P60b", "P67", "P81",
-                    "PN8", "PN11", "PN12", "PN13", "PN14",
+                    "PR40768", "PR40738", "PR40738b", "P67", "PR40925",
+                    "PR40849", "PR41142", "PR34207", "PR41235", "PR40074",
                 ),
                 expected=None,
             ),

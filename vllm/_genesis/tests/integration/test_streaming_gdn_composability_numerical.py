@@ -6,7 +6,7 @@ of which combinations of upstream patches modify inputs:
 
   * PN50 effect simulation: pre-fused vs unfused projection inputs
   * PN54 effect simulation: contiguous vs non-contiguous initial_state
-  * PN29 effect simulation: scale-folded vs separate scale chunk_o
+  * PR41446 effect simulation: scale-folded vs separate scale chunk_o
   * Multi-window state chaining: window-0's final state == window-N start
 
 All tests use pure-PyTorch reference (no Triton — runs on Mac CPU).

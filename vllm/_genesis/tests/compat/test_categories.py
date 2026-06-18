@@ -2,8 +2,8 @@
 """Tests for vllm._genesis.compat.categories — patch category navigation API.
 
 The categories API answers questions like:
-  - "what category does PN14 belong to?"  → kernel_safety
-  - "what patches are in spec_decode?"     → ['P56', 'P58', 'P60', ...]
+  - "what category does PR40074 belong to?"  → kernel_safety
+  - "what patches are in spec_decode?"     → ['P56', 'PR40768', 'PR40738', ...]
   - "what's the canonical Python module for P67?" → wiring.patch_67_tq_multi_query_kernel
 
 This is the navigation surface for the explain CLI and operator UX.
@@ -37,9 +37,9 @@ class TestCategoriesAPI:
         assert "kv_cache" in CATEGORIES
         assert "structured_output" in CATEGORIES
 
-    def test_PN14_in_kernel_safety(self):
+    def test_PR40074_in_kernel_safety(self):
         from vllm._genesis.compat.categories import CATEGORIES
-        assert "PN14" in CATEGORIES.get("kernel_safety", [])
+        assert "PR40074" in CATEGORIES.get("kernel_safety", [])
 
     def test_P67_in_spec_decode(self):
         from vllm._genesis.compat.categories import CATEGORIES
@@ -59,7 +59,7 @@ class TestCategoriesAPI:
 class TestLookupHelpers:
     def test_category_for_known_patch(self):
         from vllm._genesis.compat.categories import category_for
-        assert category_for("PN14") == "kernel_safety"
+        assert category_for("PR40074") == "kernel_safety"
         assert category_for("P67") == "spec_decode"
 
     def test_category_for_unknown_returns_None(self):
@@ -71,7 +71,7 @@ class TestLookupHelpers:
         spec = patches_in("spec_decode")
         assert isinstance(spec, list)
         assert "P67" in spec
-        assert "P60" in spec
+        assert "PR40738" in spec
 
     def test_patches_in_unknown_category_returns_empty(self):
         from vllm._genesis.compat.categories import patches_in
@@ -80,9 +80,9 @@ class TestLookupHelpers:
     def test_module_for_known_patch(self):
         """Returns the wiring module path."""
         from vllm._genesis.compat.categories import module_for
-        mod = module_for("PN14")
+        mod = module_for("PR40074")
         assert mod is not None
-        assert "patch_N14" in mod or "patch_n14" in mod
+        assert "patch_pr40074" in mod
         assert mod.startswith("vllm._genesis.wiring.")
 
     def test_module_for_unknown_patch_returns_None(self):
@@ -123,15 +123,15 @@ class TestModuleResolution:
     def test_simple_pid_to_module(self):
         from vllm._genesis.compat.categories import module_for
         # Just exemplary — exact mapping depends on filename convention
-        m = module_for("PN14")
-        assert "patch_N14" in m
+        m = module_for("PR40074")
+        assert m is not None and "patch_pr40074" in m
 
     def test_subpatches_resolve(self):
-        """P60b should resolve too (suffix variant)."""
+        """PR40738b should resolve too (suffix variant)."""
         from vllm._genesis.compat.categories import module_for
-        m = module_for("P60b")
+        m = module_for("PR40738b")
         assert m is not None
-        assert "patch_60b" in m
+        assert "patch_pr40738b" in m
 
     def test_compound_patches_resolve_to_combined_file(self):
         """P68 and P69 share file patch_68_69_long_ctx_tool_adherence.py.
@@ -157,8 +157,8 @@ class TestCLIBrowse:
         from vllm._genesis.compat.categories import main
         rc = main(["--category", "kernel_safety"])
         captured = capsys.readouterr()
-        # Only PN14 should show (only kernel_safety entry)
-        assert "PN14" in captured.out
+        # Only PR40074 should show (only kernel_safety entry)
+        assert "PR40074" in captured.out
         assert rc == 0
 
     def test_main_unknown_category_returns_nonzero(self, capsys):

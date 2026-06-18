@@ -7,7 +7,7 @@ so a casual workflow edit can't silently drop one.
 
 Today the workflow runs four gates:
 
-  1. The pytest session suite (compat/* + dispatcher_validator + PN14 +
+  1. The pytest session suite (compat/* + dispatcher_validator + PR40074 +
      PN16 + B2 wiring helper + D3 ablation bench + version sanity)
   2. `lifecycle_audit_cli --quiet` (exit 1 on unknown lifecycle state)
   3. `schema_validator` (exit 1 on malformed PATCH_REGISTRY entry)

@@ -3,7 +3,7 @@
 
 Each Genesis patch can declare version ranges in its `applies_to` block:
 
-    "PN14": {
+    "PR40074": {
         ...
         "applies_to": {
             "vllm_version_range":   (">=0.20.0", "<0.21.0"),

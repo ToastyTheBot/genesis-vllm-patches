@@ -9,14 +9,14 @@ def test_fp8_low_m_routes_to_p81():
     from vllm._genesis.oracle import select_moe_expert_impl
     sel = select_moe_expert_impl("fp8", sm_major=8, num_tokens=4)
     assert "low_m" in sel.impl_name
-    assert "P81" in sel.relevant_patches
+    assert "PR40925" in sel.relevant_patches
 
 
 def test_fp8_high_m_routes_to_standard():
     from vllm._genesis.oracle import select_moe_expert_impl
     sel = select_moe_expert_impl("fp8", sm_major=8, num_tokens=512)
     assert sel.impl_name == "fp8_block_scaled"
-    assert "PN8" in sel.relevant_patches
+    assert "PR40849" in sel.relevant_patches
 
 
 def test_lorbus_27b_int4_g128_marlin_stock():
@@ -53,5 +53,5 @@ def test_explain_helper_human_readable():
     from vllm._genesis.oracle.moe_select import explain_for_config
     out = explain_for_config("fp8", sm_major=8, num_tokens=4)
     assert "MoE oracle" in out
-    assert "P81" in out
+    assert "PR40925" in out
     assert "low_m" in out

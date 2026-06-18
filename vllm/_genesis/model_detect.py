@@ -598,7 +598,7 @@ def get_quant_format() -> str:
 
     See `_probe_quant_format` for the value space. Used by the dispatcher's
     Layer 2 `applies_to` gate to hard-skip patches whose quant compatibility
-    list does not include the active format (e.g. P67/P78/P81 are FP8/TQ
+    list does not include the active format (e.g. P67/P78/PR40925 are FP8/TQ
     only and have no business firing on an INT8 AutoRound model).
     """
     return get_model_profile()["quant_format"]

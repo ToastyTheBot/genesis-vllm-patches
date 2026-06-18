@@ -3,8 +3,8 @@
 
 The categories API answers operator questions like:
 
-  - "What category does PN14 belong to?"  → kernel_safety
-  - "What patches are in spec_decode?"     → ['P56', 'P58', 'P60', ...]
+  - "What category does PR40074 belong to?"  → kernel_safety
+  - "What patches are in spec_decode?"     → ['P56', 'PR40768', 'PR40738', ...]
   - "What's the wiring module for P67?"    → vllm._genesis.wiring.patch_67_*
 
 Categories are derived from PATCH_REGISTRY's `category` field — there
@@ -59,7 +59,7 @@ def _build_module_index() -> dict[str, str]:
           → 'vllm._genesis.wiring.spec_decode.patch_67_tq_multi_query_kernel'
 
     Index key format examples:
-      'PN14'  → '...wiring.kernels.patch_N14_tq_decode_oob_clamp'
+      'PR40074'  → '...wiring.kernels.patch_pr40074_tq_decode_oob_clamp'
       'P67'   → '...wiring.spec_decode.patch_67_tq_multi_query_kernel'
       'P67b'  → '...wiring.spec_decode.patch_67b_spec_verify_routing'
       'P68'   → '...wiring.structured_output.patch_68_69_long_ctx_tool_adherence' (shared)
@@ -75,11 +75,15 @@ def _build_module_index() -> dict[str, str]:
         #   patch_<NUM>[<LETTER>]_*    → P<NUM>[<LETTER>] (numeric P-series)
         #   patch_N<NUM>_*             → PN<NUM>
         #   patch_<A>_<B>_*            → covers multiple (P_A and P_B both → this file)
-        m = re.match(r"^patch_(N\d+|\d+\w*?)_", stem)
+        m = re.match(r"^patch_(pr\d+\w*?|N\d+|\d+\w*?)_", stem)
         if not m:
             continue
         first_id_token = m.group(1)
-        if first_id_token.startswith("N"):
+        if first_id_token.startswith("pr"):
+            # patch_pr40074_* → PR40074 ; patch_pr40941b_* → PR40941b
+            primary = "PR" + first_id_token[2:]
+            ids = [primary]
+        elif first_id_token.startswith("N"):
             # patch_N14_* → PN14
             primary = "PN" + first_id_token[1:]
             ids = [primary]
@@ -184,7 +188,7 @@ def module_for(patch_id: str) -> str | None:
     wiring module is found.
 
     Examples:
-      'PN14' → 'vllm._genesis.wiring.patch_N14_tq_decode_oob_clamp'
+      'PR40074' → 'vllm._genesis.wiring.patch_pr40074_tq_decode_oob_clamp'
       'P67'  → 'vllm._genesis.wiring.patch_67_tq_multi_query_kernel'
     """
     return _module_index().get(patch_id)

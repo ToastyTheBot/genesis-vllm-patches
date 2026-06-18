@@ -32,10 +32,10 @@ Numerical guarantee:
 
 Composition (NO conflict with):
     - P67 (TQ K+1 verify) — TQ ⊥ DFlash mutually exclusive (script comments)
-    - PN21 (DFlash SWA) — sets metadata `causal` flag; PN37 reads
+    - PR40898 (DFlash SWA) — sets metadata `causal` flag; PN37 reads
       `causal=False` and bails if True
     - PN23 (combine_hidden_states cast) — different function, same file
-    - PN24 (aux layer +1) — different file
+    - PR40727 (aux layer +1) — different file
     - P38B/P15B (FA2 LSE clamp / varlen cast) — PN37 bypasses upstream FA2
       entirely on its eligible path
 

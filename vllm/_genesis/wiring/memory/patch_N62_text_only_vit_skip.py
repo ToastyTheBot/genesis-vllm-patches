@@ -29,7 +29,7 @@ Intended end-state (queued for next sprint):
     if mm_limits_all_zero AND --language-model-only:
         skip ViT scratch alloc (text-patch into _dummy_run ViT branch)
 
-Sister to PN35 (text-only inputs_embeds buffer skip — already merged
+Sister to PR35975 (text-only inputs_embeds buffer skip — already merged
 upstream as vllm#35975).
 
 ================================================================
@@ -69,7 +69,7 @@ falls through to original on any uncertainty.
 
 Author: Sandermage 2026-05-05.
 Backport reference: apnar club-3090#51 KV-cache-cliff after lang-only fallback.
-Sister patch: PN35 (text-only inputs_embeds skip, vllm#35975 merged upstream).
+Sister patch: PR35975 (text-only inputs_embeds skip, vllm#35975 merged upstream).
 """
 from __future__ import annotations
 
@@ -184,5 +184,5 @@ def apply() -> tuple[str, str]:
         "mm_limits_all_zero, but no production hook currently reads it. "
         "Predicted 3-5 GiB save on qwen3_vl + NVFP4 single-card boot "
         "lands when the inner alloc helper learns to honour the marker. "
-        "Sister to PN35 (text-only inputs_embeds skip, vllm#35975 merged)."
+        "Sister to PR35975 (text-only inputs_embeds skip, vllm#35975 merged)."
     )

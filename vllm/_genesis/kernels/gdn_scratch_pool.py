@@ -44,7 +44,7 @@ Window-iterative driver: process WINDOW_NT chunks at a time. Pool holds
 single `(B, WINDOW_NT, H, V, K)` window buffer + reusable `v_new` and
 `state` buffers, all shape-keyed.
 
-Pattern lifted from FFNIntermediateCache (PN12), proven safe:
+Pattern lifted from FFNIntermediateCache (PR34207), proven safe:
 1. Class-level singleton registry per (shape_key)
 2. Pointer-stable across same-key acquires (cudagraph-safe)
 3. Grow-once on size increase
@@ -62,7 +62,7 @@ vs. baseline 805 MiB at T=64K → **~270x reduction at WINDOW_NT=4**.
 
 Why this is safe
 ----------------
-1. **Sequential layer execution.** Same as FFN PN12 — vLLM transformer
+1. **Sequential layer execution.** Same as FFN PR34207 — vLLM transformer
    forward calls GDN layers in strict sequence. Layer N's window buffer
    is fully consumed by `chunk_fwd_o` BEFORE layer N+1 acquires.
 2. **Pointer-stable.** Same shape_key → same data_ptr (cudagraph reuse).
@@ -85,7 +85,7 @@ this pool when the request meets streaming criteria (single-seq, T >
 window threshold). Falls through to vanilla `_orig_fwd` otherwise.
 
 Author: Sandermage(Sander)-Barzov Aleksandr, Ukraine, Odessa
-Pattern: FFNIntermediateCache (PN12)
+Pattern: FFNIntermediateCache (PR34207)
 Cross-engine inspirations: llama.cpp ssm-scan.cu (register-streaming),
   Mamba2 ssd_combined (3-stage chunk split), FLA RFC #485 (Songlin Yang
   memory_efficient flag direction)
@@ -436,7 +436,7 @@ class GdnScratchPool:
 
 
 def _dtype_byte_size(dtype: torch.dtype) -> int:
-    """Bytes per element. Same helper as PN12 FFN cache."""
+    """Bytes per element. Same helper as PR34207 FFN cache."""
     if dtype in (torch.float32, torch.int32):
         return 4
     if dtype in (torch.float16, torch.bfloat16, torch.int16):

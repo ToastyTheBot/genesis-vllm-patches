@@ -1,14 +1,14 @@
 #!/bin/bash
-# v788: INT8 27B GS128 + MTP K=3 + P87 + P91 + PN8 + PN9 (+ optional P40 if Phase 2 winning)
+# v788: INT8 27B GS128 + MTP K=3 + P87 + P91 + PR40849 + PR39930 (+ optional P40 if Phase 2 winning)
 #
 # Resume INT8 27B sprint per locked priority. Builds on v764d (untested original).
 # Target model: Minachist Qwen3.6-27B-INT8-gs128 (group_size=128 → Marlin path
 # where P87/P91 fire). Baseline target 86 → 121 t/s per recipe.
 #
 # Phase 3 additions:
-#   + GENESIS_ENABLE_PN8_MTP_DRAFT_ONLINE_QUANT=1   (saves ~600MB on draft worker)
-#   + GENESIS_ENABLE_PN9_INDEPENDENT_DRAFTER_ATTN=1 (drafter auto-selects backend)
-#   + GENESIS_PN9_DRAFTER_BACKEND=auto              (or FLASH_ATTN if needed)
+#   + GENESIS_ENABLE_PR40849=1   (saves ~600MB on draft worker)
+#   + GENESIS_ENABLE_PR39930=1 (drafter auto-selects backend)
+#   + GENESIS_PR39930_DRAFTER_BACKEND=auto              (or FLASH_ATTN if needed)
 #
 # Phase 2 winner toggle (uncomment if Phase 2 confirmed P40 +TPS win):
 #   # -e GENESIS_ENABLE_P40=1                       (TQ k8v4 GQA grouping kernel)
@@ -44,11 +44,11 @@ docker run -d \
   -e GENESIS_ENABLE_P7B=1 \
   \
   \
-  -e GENESIS_ENABLE_P58_ASYNC_PLACEHOLDER_FIX=1 \
-  -e GENESIS_ENABLE_P60_GDN_NGRAM_FIX=1 -e GENESIS_ENABLE_P60B_TRITON_KERNEL=1 \
+  -e GENESIS_ENABLE_PR40768=1 \
+  -e GENESIS_ENABLE_PR40738=1 -e GENESIS_ENABLE_PR40738B=1 \
   \
-  -e GENESIS_ENABLE_P62_STRUCT_OUT_SPEC_TIMING=1 \
-  -e GENESIS_ENABLE_P64_QWEN3CODER_MTP_STREAMING=1 \
+  -e GENESIS_ENABLE_PR36138=1 \
+  -e GENESIS_ENABLE_PR39598=1 \
   \
   -e GENESIS_ENABLE_P68_AUTO_FORCE_TOOL=1 -e GENESIS_ENABLE_P69_LONG_CTX_TOOL_REMINDER=1 \
   -e GENESIS_P68_P69_LONG_CTX_THRESHOLD_CHARS=8000 \
@@ -58,13 +58,13 @@ docker run -d \
   -e GENESIS_ENABLE_P82=1 -e GENESIS_P82_THRESHOLD_SINGLE=0.3 \
   -e GENESIS_ENABLE_P67_TQ_MULTI_QUERY_KERNEL=0 \
   -e GENESIS_ENABLE_P78_TOLIST_CAPTURE_GUARD=0 \
-  -e GENESIS_ENABLE_P81_FP8_BLOCK_SCALED_M_LE_8=0 \
-  -e GENESIS_ENABLE_PN8_MTP_DRAFT_ONLINE_QUANT=1 \
-  -e GENESIS_ENABLE_PN9_INDEPENDENT_DRAFTER_ATTN=1 \
-  -e GENESIS_PN9_DRAFTER_BACKEND=auto \
+  -e GENESIS_ENABLE_PR40925=0 \
+  -e GENESIS_ENABLE_PR40849=1 \
+  -e GENESIS_ENABLE_PR39930=1 \
+  -e GENESIS_PR39930_DRAFTER_BACKEND=auto \
   -e GENESIS_PREALLOC_TOKEN_BUDGET=4096 -e GENESIS_BUFFER_MODE=shared \
   vllm/vllm-openai:nightly -c \
-  "set -e; echo === v788 INT8 27B GS128 + MTP + P87 + P91 + PN8 + PN9 ===; \
+  "set -e; echo === v788 INT8 27B GS128 + MTP + P87 + P91 + PR40849 + PR39930 ===; \
 pip install --quiet --disable-pip-version-check pandas scipy xxhash; \
 cp -r /plugin /tmp/genesis_vllm_plugin; \
 pip install --quiet --disable-pip-version-check --no-deps -e /tmp/genesis_vllm_plugin 2>&1 | tail -3; \
@@ -80,4 +80,4 @@ exec vllm serve --model /models/Qwen3.6-27B-INT8-gs128 --tensor-parallel-size 2 
   --host 0.0.0.0 --port 8000 --disable-log-stats"
 sleep 5
 docker logs --tail 5 vllm-server-mtp-test 2>&1 | sed "s/^/  /"
-echo "v788 INT8 GS128 + PN8 + PN9 container started."
+echo "v788 INT8 GS128 + PR40849 + PR39930 container started."

@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: Apache-2.0
 """FFN intermediate scratch pool for SiluAndMul / MulAndSilu / fatrelu_and_mul.
 
-Cliff 1 fix on TQ3 path (PN12).
+Cliff 1 fix on TQ3 path (PR34207).
 
 Background
 ----------
@@ -17,13 +17,13 @@ that's **73-285 MiB transient × 64 layers = 4.7-18 GiB allocator churn per
 forward step**. The 138 MiB OOM noonghunna reproduced on 3090 + 192K + tool
 call (Cliff 1) matches this size class exactly.
 
-PN8 (MTP draft online-quant propagation) closes Cliff 1 on FP8 by freeing
+PR40849 (MTP draft online-quant propagation) closes Cliff 1 on FP8 by freeing
 ~600 MiB persistent draft VRAM, giving the fragmented heap enough slack
-for the 138 MiB transient to land. On TQ3 PN8 only frees ~230 MiB → not
+for the 138 MiB transient to land. On TQ3 PR40849 only frees ~230 MiB → not
 enough slack → OOM still fires. **Different memory class** — persistent
 footprint vs transient peak.
 
-PN12 fix: pool the SiluAndMul output across layers.
+PR34207 fix: pool the SiluAndMul output across layers.
 
 Why this is safe
 ----------------
@@ -51,9 +51,9 @@ How to use
 ----------
 Operator opt-in via env:
 
-    GENESIS_ENABLE_PN12_FFN_INTERMEDIATE_POOL=1
+    GENESIS_ENABLE_PR34207=1
 
-Genesis text-patch (PN12) rewrites `SiluAndMul.forward_cuda` to:
+Genesis text-patch (PR34207) rewrites `SiluAndMul.forward_cuda` to:
 
     if FFNIntermediateCache.should_apply():
         out = FFNIntermediateCache.acquire_silu_out(
@@ -92,7 +92,7 @@ from vllm._genesis.guards import is_nvidia_cuda
 log = logging.getLogger("genesis.kernels.ffn_intermediate_cache")
 
 
-_ENV_FLAG = "GENESIS_ENABLE_PN12_FFN_INTERMEDIATE_POOL"
+_ENV_FLAG = "GENESIS_ENABLE_PR34207"
 
 
 class FFNIntermediateCache:
@@ -198,7 +198,7 @@ class FFNIntermediateCache:
             )
             cls._BUFFER_REGISTRY[key] = buf
             log.info(
-                "[PN12] first acquire silu_out: alloc [%d, %d] %s on %s "
+                "[PR34207] first acquire silu_out: alloc [%d, %d] %s on %s "
                 "(%.1f MiB)",
                 num_tokens, intermediate_size, dtype, device,
                 num_tokens * intermediate_size *
@@ -218,7 +218,7 @@ class FFNIntermediateCache:
         )
         cls._BUFFER_REGISTRY[key] = new_buf
         log.info(
-            "[PN12] grew silu_out buffer: %d → %d rows for %s on %s",
+            "[PR34207] grew silu_out buffer: %d → %d rows for %s on %s",
             cached_max, num_tokens, dtype, device,
         )
         return new_buf

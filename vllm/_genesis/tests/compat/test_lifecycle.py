@@ -64,7 +64,7 @@ class TestAuditRegistry:
         assert "memory blow-up" in entries[0].note
 
     def test_stable_is_ok(self):
-        registry = {"PN14": {"lifecycle": "stable", "stable_since": "v7.62.18"}}
+        registry = {"PR40074": {"lifecycle": "stable", "stable_since": "v7.62.18"}}
         entries = audit_registry(registry)
         assert entries[0].severity == "ok"
 

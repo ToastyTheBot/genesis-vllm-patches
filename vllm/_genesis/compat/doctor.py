@@ -4,7 +4,7 @@
 Usage:
   python3 -m vllm._genesis.compat.doctor
   python3 -m vllm._genesis.compat.doctor --json
-  python3 -m vllm._genesis.compat.doctor --explain PN14
+  python3 -m vllm._genesis.compat.doctor --explain PR40074
 
 Sections:
   1. Hardware            — GPUs, compute capabilities
@@ -81,7 +81,7 @@ def _section_environment() -> dict[str, Any]:
         kernels (notably P104 L2 persistence) misbehave under WSL paging.
       * Blackwell-class GPU on WSL2 — R6000 Pro 96GB on WSL2 is an
         atypical combo; Sander's planned upgrade target. Warn that NVFP4
-        + PN38 FP8 paths assume bare-metal Linux/Windows, not WSL.
+        + PR40425 FP8 paths assume bare-metal Linux/Windows, not WSL.
       * PCIe lane width (per-GPU) via nvidia-smi when available; warns
         when any GPU is wired below x16 (cuts P2P/host bandwidth and
         affects TQ continuation-prefill perf in TP=2 setups).
@@ -294,7 +294,7 @@ def _section_recommendations(report: dict[str, Any]) -> list[str]:
             if cc and len(cc) >= 1 and cc[0] >= 12:
                 rec.append(
                     f"[WARN] Blackwell-class GPU '{g.get('name','?')}' "
-                    f"detected on {env.get('wsl_version','WSL')}. PN38 NVFP4 "
+                    f"detected on {env.get('wsl_version','WSL')}. PR40425 NVFP4 "
                     "drafter path + Genesis sm_120 kernel autotune "
                     "assume bare-metal Linux/Windows. WSL paging may "
                     "reduce TPS by 5-10%; report results to "

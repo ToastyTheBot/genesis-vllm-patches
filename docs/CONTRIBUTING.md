@@ -264,7 +264,7 @@ feat(patch): P88 SGLang fused_gdn_gating port (+2.1% TPS on 27B)
 fix(patch): P67 anchor drift on vllm pin fe9c3d6c5
 docs(cliffs): add Cliff 7 (DFlash 24GB OOM at >80K ctx)
 perf(kernel): P67 LOG2E fuse +2.1% on TQ k8v4
-test: add unit test for P94 prefix-cache hash backend
+test: add unit test for PR41043 prefix-cache hash backend
 chore: bump pin reference in COMPATIBILITY.md
 ```
 

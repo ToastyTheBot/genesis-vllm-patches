@@ -88,9 +88,9 @@ class TestSubcommandRouting:
             return 0
         monkeypatch.setattr(explain, "main", fake_explain_main)
         from vllm._genesis.compat.cli import main
-        rc = main(["explain", "PN14", "--json"])
+        rc = main(["explain", "PR40074", "--json"])
         assert rc == 0
-        assert called_with == [["PN14", "--json"]]
+        assert called_with == [["PR40074", "--json"]]
 
     def test_categories_subcommand_routes(self, monkeypatch):
         called_with = []

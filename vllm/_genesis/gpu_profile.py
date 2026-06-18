@@ -178,9 +178,9 @@ PATCH_RECOMMENDATIONS: dict[str, dict] = {
         "expected_gain": "+8-12%",
         "expected_cost": "none (sampling layer only)",
     },
-    "PN8": {
+    "PR40849": {
         "title": "MTP/draft online-quant propagation (vllm#40849)",
-        "env": "GENESIS_ENABLE_PN8_MTP_DRAFT_ONLINE_QUANT",
+        "env": "GENESIS_ENABLE_PR40849",
         "predicate": lambda gpu: True,  # VRAM savings useful everywhere
         "evidence": "Verified ~1 GiB VRAM saved per GPU on 35B-A3B-FP8 + MTP K=3. "
                     "Use freed VRAM for higher gpu-mem-util or longer ctx.",
@@ -216,20 +216,20 @@ PATCH_RECOMMENDATIONS: dict[str, dict] = {
         "expected_gain": "+2-6% TPS staying with e5m2 until pin update",
         "expected_cost": "none (CLI flag preserves current behavior)",
     },
-    # P100 — FlashInfer FULL CG for spec-decode, recommended on consumer Blackwell
+    # PR41127 — FlashInfer FULL CG for spec-decode, recommended on consumer Blackwell
     # Source: apnar club-3090#51 — PIECEWISE downgrade observed on RTX 5090
     # because is_blackwell() returned False (Issue #20, since fixed but not yet
-    # released) AND P100 was not auto-recommended. With Issue #20 fix landed,
-    # the gate now passes; this rule surfaces P100 to the operator on sm_120.
-    "P100_blackwell_consumer_recommend": {
-        "title": "P100 FlashInfer FULL CG for spec-decode (recommend on Blackwell consumer)",
-        "env": "GENESIS_ENABLE_P100=1 (when using FlashInfer + spec-decode)",
+    # released) AND PR41127 was not auto-recommended. With Issue #20 fix landed,
+    # the gate now passes; this rule surfaces PR41127 to the operator on sm_120.
+    "PR41127_blackwell_consumer_recommend": {
+        "title": "PR41127 FlashInfer FULL CG for spec-decode (recommend on Blackwell consumer)",
+        "env": "GENESIS_ENABLE_PR41127=1 (when using FlashInfer + spec-decode)",
         "predicate": lambda gpu: (
             gpu.get("cc") == (12, 0)  # consumer Blackwell only
         ),
         "evidence": "club-3090#51 boot log: `CUDAGraphMode.FULL_AND_PIECEWISE "
                     "is not supported with spec-decode for FlashInferBackend; "
-                    "setting cudagraph_mode=PIECEWISE`. P100 backports vllm#41127 "
+                    "setting cudagraph_mode=PIECEWISE`. PR41127 backports vllm#41127 "
                     "to route uniform query_len>1 batches through prefill "
                     "wrapper in cudagraph mode. Bit-identical, +5-10% TPS expected.",
         "expected_gain": "+5-10% TPS (when FlashInfer is the chosen backend)",

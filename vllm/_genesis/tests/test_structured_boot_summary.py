@@ -50,7 +50,7 @@ def test_summary_counters_match_decisions(reset_decisions):
     )
     log_decision("PN59", True, "opt-in env")
     log_decision("PN51", True, "opt-in env")
-    log_decision("PN58", False, "PN58 SKIPPED — P62 mutually exclusive")
+    log_decision("PR40962", False, "PR40962 SKIPPED — PR36138 mutually exclusive")
     out = dump_structured_boot_summary()
     assert "3 total" in out
     assert "2 APPLY" in out
@@ -61,10 +61,10 @@ def test_summary_category_breakdown(reset_decisions):
     from vllm._genesis.dispatcher import (
         dump_structured_boot_summary, log_decision,
     )
-    # PN59 → hybrid; PN51 → perf_hotfix; PN58 → structured_output
+    # PN59 → hybrid; PN51 → perf_hotfix; PR40962 → structured_output
     log_decision("PN59", True, "opt-in env")
     log_decision("PN51", True, "opt-in env")
-    log_decision("PN58", False, "P62 mutually exclusive — conflict")
+    log_decision("PR40962", False, "PR36138 mutually exclusive — conflict")
     out = dump_structured_boot_summary()
     assert "By category:" in out
     assert "hybrid" in out
@@ -88,24 +88,24 @@ def test_summary_skip_reason_classes(reset_decisions):
         dump_structured_boot_summary, log_decision,
     )
     log_decision(
-        "PN14",
+        "PR40074",
         False,
         "upstream_merged — marker safe_page_idx=tl.where(kv_mask, page_idx, 0) present",
     )
     log_decision("PN50", False, "opt-in only — set GENESIS_ENABLE_PN50=1")
     log_decision(
-        "PN58",
+        "PR40962",
         False,
-        "PN58 SKIPPED — P62 (vllm#36138 broader) is active. Mutually exclusive",
+        "PR40962 SKIPPED — PR36138 (vllm#36138 broader) is active. Mutually exclusive",
     )
     out = dump_structured_boot_summary()
     # Pretty labels (v7.70+)
     assert "Upstream merged" in out
     assert "Opt-in" in out
     assert "Conflict" in out
-    assert "PN14" in out
+    assert "PR40074" in out
     assert "PN50" in out
-    assert "PN58" in out
+    assert "PR40962" in out
 
 
 def test_summary_dedup_multiple_workers(reset_decisions):
@@ -115,7 +115,7 @@ def test_summary_dedup_multiple_workers(reset_decisions):
     )
     log_decision("PN59", True, "opt-in env (config: neutral)")
     log_decision("PN59", True, "opt-in env (config: neutral)")
-    log_decision("P107", True, "opt-in env")
+    log_decision("PR41467", True, "opt-in env")
     out = dump_structured_boot_summary()
     # Should report 2 unique patches, not 3 raw decisions
     assert "2 total" in out
@@ -150,9 +150,9 @@ def test_summary_caps_skip_class_with_overflow_marker(reset_decisions):
         dump_structured_boot_summary, log_decision,
     )
     # Generate 14 env-disabled decisions to exceed 12 cap
-    for pid in ["PN50", "PN54", "PN58", "PN29", "PN30", "PN31", "PN32",
-                "PN38", "P83", "P85", "P75", "P77", "P79b",
-                "P79c"]:
+    for pid in ["PN50", "PN54", "PR40962", "PR41446", "PN30", "PN31", "PN32",
+                "PR40425", "P83", "P85", "PR25784", "P77", "PR40610",
+                "PR37629"]:
         log_decision(pid, False, "opt-in only — set GENESIS_ENABLE_*=1")
     out = dump_structured_boot_summary()
     # Should cap the env_disabled list to 12 entries + show overflow marker

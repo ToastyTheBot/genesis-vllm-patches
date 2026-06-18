@@ -27,7 +27,7 @@ Plain text generation at same context length works correctly (3/3),
 so this is NOT an attention bug — it's structured-output adherence
 degradation, a known LLM "lost in the middle" + format-decay issue.
 
-Same behavior reproduces on prod ngram baseline AND on our P64+P65+P66
+Same behavior reproduces on prod ngram baseline AND on our PR39598+P65+P66
 test container — confirming it's MODEL-LEVEL, not engine-level.
 ================================================================
 

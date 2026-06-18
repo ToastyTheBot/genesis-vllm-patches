@@ -285,11 +285,11 @@ cp -r vllm/_genesis "$VLLM_DIR/_genesis"
 
 ### 4. Install Genesis runtime extras
 
-Genesis needs a few extra packages at startup (`pandas`, `scipy`, `xxhash` for prefix-cache hash, optionally `arctic-inference` for Suffix Decoding P75):
+Genesis needs a few extra packages at startup (`pandas`, `scipy`, `xxhash` for prefix-cache hash, optionally `arctic-inference` for Suffix Decoding PR25784):
 
 ```bash
 pip install pandas scipy xxhash
-# Optional — only if you plan to use P75 (suffix decoding):
+# Optional — only if you plan to use PR25784 (suffix decoding):
 pip install arctic-inference
 ```
 
@@ -323,7 +323,7 @@ cd genesis-vllm-patches  # or anywhere — the module is now importable
 export GENESIS_ENABLE_P67_TQ_MULTI_QUERY_KERNEL=1
 export GENESIS_ENABLE_P82=1
 export GENESIS_P82_THRESHOLD_SINGLE=0.3
-export GENESIS_ENABLE_P81_FP8_BLOCK_SCALED_M_LE_8=1
+export GENESIS_ENABLE_PR40925=1
 export GENESIS_ENABLE_P70_AUTO_STRICT_NGRAM=1
 export GENESIS_BUFFER_MODE=shared
 # (See CONFIGURATION.md for the full list)
@@ -385,7 +385,7 @@ source ~/vllm-genesis/.venv/bin/activate
 # Patch enable flags
 export GENESIS_ENABLE_P67_TQ_MULTI_QUERY_KERNEL=1
 export GENESIS_ENABLE_P82=1 GENESIS_P82_THRESHOLD_SINGLE=0.3
-export GENESIS_ENABLE_P81_FP8_BLOCK_SCALED_M_LE_8=1
+export GENESIS_ENABLE_PR40925=1
 export GENESIS_BUFFER_MODE=shared
 # (... full list — see CONFIGURATION.md)
 
@@ -500,25 +500,25 @@ All Genesis patches are opt-in by default. Set the matching env var to `1` to en
 |---|---|---|
 | `GENESIS_ENABLE_P56_SPEC_DECODE_GUARD` | P56 | Spec-decode safe-path guard (deprecated workaround) |
 | `GENESIS_ENABLE_P57_SPEC_DECODE_CAPTURE_SAFE` | P57 | Capture-safe buffer expansion for spec-decode (experimental) |
-| `GENESIS_ENABLE_P58_ASYNC_PLACEHOLDER_FIX` | P58 | Async-scheduler `[-1]` placeholder fix (root cause for #40831) |
-| `GENESIS_ENABLE_P59_QWEN3_TOOL_RECOVERY` | P59 | Backport of vllm#39055 (qwen3 reasoning embedded tool_call). **Currently superseded by upstream PR #35687 in our pin — keep disabled** |
-| `GENESIS_ENABLE_P60_GDN_NGRAM_FIX` | P60 | GDN+ngram SSM state recovery (Phase 1) |
-| `GENESIS_ENABLE_P60B_TRITON_KERNEL` | P60b | GDN+ngram conv state Triton kernel offset (Phase 2) |
+| `GENESIS_ENABLE_PR40768` | PR40768 | Async-scheduler `[-1]` placeholder fix (root cause for #40831) |
+| `GENESIS_ENABLE_PR39055` | PR39055 | Backport of vllm#39055 (qwen3 reasoning embedded tool_call). **Currently superseded by upstream PR #35687 in our pin — keep disabled** |
+| `GENESIS_ENABLE_PR40738` | PR40738 | GDN+ngram SSM state recovery (Phase 1) |
+| `GENESIS_ENABLE_PR40738B` | PR40738b | GDN+ngram conv state Triton kernel offset (Phase 2) |
 | `GENESIS_ENABLE_P61_QWEN3_MULTI_TOOL` | P61 | Qwen3 multi-tool first-occurrence (vs LAST in upstream) |
 | `GENESIS_ENABLE_P61B_STREAMING_OVERLAP` | P61b | Streaming partial-tag overlap guard |
-| `GENESIS_ENABLE_P62_STRUCT_OUT_SPEC_TIMING` | P62 | Reasoning-aware grammar acceptance + spec-token validation |
+| `GENESIS_ENABLE_PR36138` | PR36138 | Reasoning-aware grammar acceptance + spec-token validation |
 | `GENESIS_ENABLE_P63_MTP_GDN_STATE_RECOVERY` | P63 | **DEPRECATED** — kept only for archival diagnostics |
-| `GENESIS_ENABLE_P64_QWEN3CODER_MTP_STREAMING` | P64 | qwen3coder streaming early-return fix (vllm#39598 backport) |
+| `GENESIS_ENABLE_PR39598` | PR39598 | qwen3coder streaming early-return fix (vllm#39598 backport) |
 | `GENESIS_ENABLE_P65_TURBOQUANT_SPEC_CG_DOWNGRADE` | P65 | Cudagraph downgrade for spec-decode (workaround; replaced by P67/P67b) |
 | `GENESIS_ENABLE_P66_CUDAGRAPH_SIZE_FILTER` | P66 | Filter cudagraph_capture_sizes by spec-decode divisibility |
 | `GENESIS_ENABLE_P67_TQ_MULTI_QUERY_KERNEL` | P67/P67b | TurboQuant multi-query kernel for spec-decode K+1 verify (proper fix for #40880, replaces P65) |
 | `GENESIS_ENABLE_P68_AUTO_FORCE_TOOL` | P68 | Auto-upgrade `tool_choice=auto → required` for long-ctx tool calls |
 | `GENESIS_ENABLE_P69_LONG_CTX_TOOL_REMINDER` | P69 | Append format reminder to last user msg on long-ctx |
 | `GENESIS_ENABLE_P70_AUTO_STRICT_NGRAM` | P70 | Auto-bump ngram `prompt_lookup_min ≥ 8` |
-| `GENESIS_ENABLE_P71_BLOCK_VERIFY` | P71 | Block-verify rejection sampler (Sun 2024) — opt-in experimental |
+| `GENESIS_ENABLE_PR40819` | PR40819 | Block-verify rejection sampler (Sun 2024) — opt-in experimental |
 | `GENESIS_ENABLE_P72_PROFILE_RUN_CAP` | P72 | Cap profile_run M to unblock `--max-num-batched-tokens > 4096` |
 | `GENESIS_ENABLE_P74_CHUNK_CLAMP` | P74 | Auto chunk-clamp via `long_prefill_token_threshold` (P72 companion) |
-| `GENESIS_ENABLE_P75_SUFFIX_DECODING` | P75 | Auto-swap `method=ngram → method=suffix` (Arctic Inference) |
+| `GENESIS_ENABLE_PR25784` | PR25784 | Auto-swap `method=ngram → method=suffix` (Arctic Inference) |
 | `GENESIS_ENABLE_P77_ADAPTIVE_NGRAM_K` | P77 | Adaptive ngram K controller (EMA + hysteresis + auto-disable) |
 
 ### Genesis tunable parameters
@@ -539,10 +539,10 @@ All Genesis patches are opt-in by default. Set the matching env var to `1` to en
 | `GENESIS_P77_EMA_ALPHA` | `0.2` | P77: EMA smoothing factor |
 | `GENESIS_P77_DISABLE_THRESHOLD` | `0.30` | P77: accept rate below → drop to K=0 (no-spec) |
 | `GENESIS_P77_PROBE_INTERVAL` | `100` | P77: every N batches, force K>0 to retest acceptance |
-| `GENESIS_P75_TREE_DEPTH` | `24` | P75: suffix tree max depth |
-| `GENESIS_P75_SPEC_FACTOR` | `2.0` | P75: max draft length factor |
-| `GENESIS_P75_MIN_PROB` | `0.10` | P75: branch probability threshold for emission |
-| `GENESIS_P75_CACHE_REQS` | `10000` | P75: cross-request suffix-tree cache size |
+| `GENESIS_PR25784_TREE_DEPTH` | `24` | PR25784: suffix tree max depth |
+| `GENESIS_PR25784_SPEC_FACTOR` | `2.0` | PR25784: max draft length factor |
+| `GENESIS_PR25784_MIN_PROB` | `0.10` | PR25784: branch probability threshold for emission |
+| `GENESIS_PR25784_CACHE_REQS` | `10000` | PR25784: cross-request suffix-tree cache size |
 
 ### Standard vLLM env (for reference)
 
@@ -584,16 +584,16 @@ Expected: 127 tok/s mean.
 
 ### Scenario 2: Tool-call / agentic-heavy workload
 
-Enable P75 (Suffix Decoding) — best results.
+Enable PR25784 (Suffix Decoding) — best results.
 
 ```yaml
 environment:
-  GENESIS_ENABLE_P75_SUFFIX_DECODING: "1"
+  GENESIS_ENABLE_PR25784: "1"
   # also need arctic-inference installed in container:
   # add `arctic-inference` to pip install line in entrypoint
 command:
   - "... --speculative-config '{\"method\":\"ngram\",\"num_speculative_tokens\":3}' ..."
-  # P75 auto-swaps method=ngram → method=suffix
+  # PR25784 auto-swaps method=ngram → method=suffix
 ```
 
 Expected: 99 tok/s mean, peak 175 on highly repetitive batches.
@@ -655,7 +655,7 @@ Likely OOM. Lower `--gpu-memory-utilization` from current to 0.88.
 Make sure these are enabled:
 - `GENESIS_ENABLE_P67_TQ_MULTI_QUERY_KERNEL=1` (root cause for #40880)
 - `GENESIS_ENABLE_P70_AUTO_STRICT_NGRAM=1` (filter weak ngram drafts)
-- `GENESIS_ENABLE_P64_QWEN3CODER_MTP_STREAMING=1` (streaming early-return fix)
+- `GENESIS_ENABLE_PR39598=1` (streaming early-return fix)
 
 ### Empty `tool_calls` in response
 

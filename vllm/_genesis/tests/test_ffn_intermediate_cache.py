@@ -1,8 +1,8 @@
 # SPDX-License-Identifier: Apache-2.0
 """TDD tests for vllm._genesis.kernels.ffn_intermediate_cache.
 
-PN12 migration target: pool transient SiluAndMul output buffers across layers
-to close Cliff 1 (138 MiB OOM at long-ctx + tool-call on TQ3 path) which PN8
+PR34207 migration target: pool transient SiluAndMul output buffers across layers
+to close Cliff 1 (138 MiB OOM at long-ctx + tool-call on TQ3 path) which PR40849
 empirically does not address (different memory class — transient activation
 peak vs persistent draft footprint).
 
@@ -16,7 +16,7 @@ Design invariants tested here:
   3. Sequential layer execution (no concurrent overlap on same buffer).
   4. Idempotent on size growth (max-shape preallocate, slice on acquire).
   5. Returns IDENTICAL data_ptr across calls for same (key, M).
-  6. Disabled when env GENESIS_ENABLE_PN12_FFN_INTERMEDIATE_POOL is unset.
+  6. Disabled when env GENESIS_ENABLE_PR34207 is unset.
 
 Author: Sandermage(Sander)-Barzov Aleksandr, Ukraine, Odessa
 """
@@ -31,7 +31,7 @@ import torch
 # ═══════════════════════════════════════════════════════════════════════════
 
 class TestEnvGate:
-    """Group 1: should_apply() respects GENESIS_ENABLE_PN12_FFN_INTERMEDIATE_POOL."""
+    """Group 1: should_apply() respects GENESIS_ENABLE_PR34207."""
 
     def test_should_apply_returns_bool(self):
         from vllm._genesis.kernels.ffn_intermediate_cache import (
@@ -41,7 +41,7 @@ class TestEnvGate:
 
     def test_should_apply_false_when_env_unset(self, monkeypatch):
         monkeypatch.delenv(
-            "GENESIS_ENABLE_PN12_FFN_INTERMEDIATE_POOL", raising=False
+            "GENESIS_ENABLE_PR34207", raising=False
         )
         from vllm._genesis.kernels.ffn_intermediate_cache import (
             FFNIntermediateCache,
@@ -49,14 +49,14 @@ class TestEnvGate:
         assert FFNIntermediateCache.should_apply() is False
 
     def test_should_apply_false_when_env_zero(self, monkeypatch):
-        monkeypatch.setenv("GENESIS_ENABLE_PN12_FFN_INTERMEDIATE_POOL", "0")
+        monkeypatch.setenv("GENESIS_ENABLE_PR34207", "0")
         from vllm._genesis.kernels.ffn_intermediate_cache import (
             FFNIntermediateCache,
         )
         assert FFNIntermediateCache.should_apply() is False
 
     def test_should_apply_true_when_env_one(self, monkeypatch):
-        monkeypatch.setenv("GENESIS_ENABLE_PN12_FFN_INTERMEDIATE_POOL", "1")
+        monkeypatch.setenv("GENESIS_ENABLE_PR34207", "1")
         from vllm._genesis.kernels.ffn_intermediate_cache import (
             FFNIntermediateCache,
         )
@@ -268,7 +268,7 @@ class TestMemoryAccounting:
     def test_64_acquires_create_only_one_buffer(self):
         """Lorbus 27B has 64 FFN layers — each forward pass calls
         SiluAndMul once per layer. Old behavior: 64 fresh allocations.
-        New behavior with PN12: ONE shared buffer."""
+        New behavior with PR34207: ONE shared buffer."""
         from vllm._genesis.kernels.ffn_intermediate_cache import (
             FFNIntermediateCache,
         )

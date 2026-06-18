@@ -67,7 +67,7 @@ Compatibility
 - All draft methods (ngram, MTP/EAGLE, suffix) — affects only the
   acceptance comparison, not the draft generation.
 - Cudagraph: unaffected (rejection sampler runs OUTSIDE the captured graph).
-- P71 (block-verify): mutually exclusive in practice — P71 takes the
+- PR40819 (block-verify): mutually exclusive in practice — PR40819 takes the
   block-verify branch BEFORE this point if eligible. P82 fires on the
   per-token fall-through path. Safe to enable both.
 

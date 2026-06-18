@@ -34,7 +34,7 @@ Compatibility
 - **PN54** GDN contiguous dedup — operates on ssm_state read; orthogonal
 - **P103** FLA Cliff2 chunked — operates AT outer-orchestrator level;
   PN59 supersedes when both ON (auto-fallthrough handles)
-- **PN26b** sparse-V — non-GDN attention path; orthogonal
+- **PR41422** sparse-V — non-GDN attention path; orthogonal
 
 Default OFF until live A/B prod-validates on 27B Lorbus.
 

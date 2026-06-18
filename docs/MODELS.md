@@ -35,10 +35,10 @@ A3B = 3B active parameters per forward pass on top of a 35B sparse backbone. On 
 #### 3. Genesis patch lock-in (37 runtime patches)
 Genesis maintains 37 vLLM runtime patches specifically targeting the qwen3_5_moe layer family:
 - **P17/P31/P37** — 256-expert MoE routing fixes
-- **P28/P46/P60/P60b** — GDN+full-attention hybrid (10/30 split) state recovery
-- **P67/P67b/P75** — Triton TurboQuant kernels for spec-decode K+1 verify
+- **P28/P46/PR40738/PR40738b** — GDN+full-attention hybrid (10/30 split) state recovery
+- **P67/P67b/PR25784** — Triton TurboQuant kernels for spec-decode K+1 verify
 - **P22/P26/P38/P40/P44** — TurboQuant continuous prefill / mixed-batch buffer pools
-- **P58/P59/P61/P61b/P62/P64/P68/P69/P70/P71/P77** — Qwen3 tool-call/parser/spec-decode
+- **PR40768/PR39055/P61/P61b/PR36138/PR39598/P68/P69/P70/PR40819/P77** — Qwen3 tool-call/parser/spec-decode
 
 Switching architecture (Gemma 4, DeepSeek V4, GLM 5) would require a new patch port (estimated 2-3 weeks per family). The patches deliver +32% TPS and 96-100% tool-call clean rate — measured in production.
 

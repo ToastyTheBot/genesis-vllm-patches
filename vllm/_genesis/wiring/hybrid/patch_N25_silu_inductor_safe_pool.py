@@ -1,17 +1,17 @@
 # SPDX-License-Identifier: Apache-2.0
 """Wiring for Patch N25 — SiluAndMul.forward_native via opaque custom op.
 
-Sister-patch to PN12. PN12 covers the eager-mode dispatch
+Sister-patch to PR34207. PR34207 covers the eager-mode dispatch
 (`forward_cuda`); PN25 covers the compile-mode dispatch
 (`forward_native`) that Inductor inlines and lowers to
-`empty_strided_cuda(...)`, completely bypassing PN12's pool.
+`empty_strided_cuda(...)`, completely bypassing PR34207's pool.
 
 ================================================================
 WHAT IT FIXES
 ================================================================
 
 club-3090 issue #16 (noonghunna 2026-04-30, VolandBerlioz Reddit
-trace, ampersandru confirmation): PN12-equivalent sidecar applies
+trace, ampersandru confirmation): PR34207-equivalent sidecar applies
 cleanly at boot but is bypassed at runtime when vLLM compiles the
 forward graph. The OOM site is
 
@@ -22,7 +22,7 @@ That's the FFN intermediate buffer for chunked prefill at
 `s18 = max_num_batched_tokens` × `intermediate_size = 17408`
 (Qwen3.6-27B). 137.6 MiB transient on a 24 GB 3090 with ~131 MiB free.
 
-Genesis stack inherits the same flaw — our PN12 patches only
+Genesis stack inherits the same flaw — our PR34207 patches only
 `forward_cuda`. We don't see it in PROD only because our 27B Lorbus
 config doesn't go through Inductor for this kernel. A future config
 or model could expose the leak.
@@ -41,17 +41,17 @@ WHAT THIS PATCH DOES
    (torch<2.4, CPU-only build, etc.).
 
 ================================================================
-COMPOSITION WITH PN12
+COMPOSITION WITH PR34207
 ================================================================
 
-PN12: patches `forward_cuda` (eager dispatch path).
+PR34207: patches `forward_cuda` (eager dispatch path).
 PN25: patches `forward_native` (compile dispatch path via opaque op).
 
 Both can be enabled simultaneously. They patch different methods
 and never collide. Pool is shared — `FFNIntermediateCache` is a
 singleton keyed on `(intermediate_size, dtype, device)`.
 
-If only PN12 enabled: eager workloads pool, compile workloads leak.
+If only PR34207 enabled: eager workloads pool, compile workloads leak.
 If only PN25 enabled: compile workloads pool, eager workloads leak.
 If both enabled: full coverage. Recommended for inductor-heavy configs.
 
@@ -295,8 +295,8 @@ def apply() -> tuple[str, str]:
             "through genesis::silu_and_mul_pooled opaque custom op so "
             "torch.compile/Inductor cannot inline the FFN intermediate "
             "alloc. Closes Cliff 1 mech B on inductor-compiled FFN "
-            "forward (club-3090#16 reproducer class). Sister to PN12 — "
-            "PN12 covers eager forward_cuda, PN25 covers compile "
+            "forward (club-3090#16 reproducer class). Sister to PR34207 — "
+            "PR34207 covers eager forward_cuda, PN25 covers compile "
             "forward_native; both share the same FFNIntermediateCache "
             "pool and can be enabled simultaneously without conflict."
         ),

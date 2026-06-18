@@ -3,7 +3,7 @@
 
 Usage:
   python3 -m vllm._genesis.compat.migrate /path/to/upstream-vllm-clone
-  python3 -m vllm._genesis.compat.migrate /tmp/vllm --patches PN14,PN13,P67
+  python3 -m vllm._genesis.compat.migrate /tmp/vllm --patches PR40074,PR41235,P67
   python3 -m vllm._genesis.compat.migrate /tmp/vllm --json --out runbook.json
 
 Reads each Genesis text-patch's anchor + upstream marker, checks
@@ -78,7 +78,7 @@ def _make_patcher_for_patch(patch_id: str, upstream_root: Path):
     if orig_install_root:
         mod.vllm_install_root = lambda: str(upstream_root)
 
-    # Compute kwargs for parameterized _make_patcher (PN9, P77, etc.)
+    # Compute kwargs for parameterized _make_patcher (PR39930, P77, etc.)
     sig = inspect.signature(make_patcher)
     kwargs: dict[str, Any] = {}
     for pname, p in sig.parameters.items():
@@ -123,7 +123,7 @@ def check_patch_against_upstream(
 
     Returns a verdict dict with shape:
       {
-        "patch_id": "PN14",
+        "patch_id": "PR40074",
         "status": "clean" | "anchor_drift" | "upstream_merged" |
                   "file_missing" | "ambiguous_anchor" | "unknown_patch" |
                   "non_text_patch" | "error",

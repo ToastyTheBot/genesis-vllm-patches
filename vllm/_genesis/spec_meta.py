@@ -8,7 +8,7 @@ architecture, adapt to Genesis vLLM Patches.
 PROBLEM
 ================================================================
 
-Current Genesis approach: each spec-decode-aware patch (P67/P67b/P78/P98/P99)
+Current Genesis approach: each spec-decode-aware patch (P67/P67b/P78/PR40941/PR40941b)
 re-derives "are we in spec-decode? cudagraph? warmup?" from local hints.
 There is NO single source of truth, so v756 regression broke specifically
 because P67 fired on chunked-prefill batches when spec-decode was OFF
@@ -207,7 +207,7 @@ def should_dispatch_p67(
 
 
 def should_use_perlayer_workspace() -> bool:
-    """P98 logic centralized: prefer per-layer cache during cudagraph replay."""
+    """PR40941 logic centralized: prefer per-layer cache during cudagraph replay."""
     m = current()
     m._predicate_calls += 1
     return m.is_cuda_graph_replay
@@ -221,7 +221,7 @@ def should_skip_tolist() -> bool:
 
 
 def should_use_workspace_cache() -> bool:
-    """P99 logic: use memoized WorkspaceManager when not in capture
+    """PR40941b logic: use memoized WorkspaceManager when not in capture
     (capture path takes the no-cache branch for safety)."""
     m = current()
     m._predicate_calls += 1

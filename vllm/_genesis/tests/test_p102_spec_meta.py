@@ -259,7 +259,7 @@ def test_should_skip_tolist():
 
 
 def test_should_use_workspace_cache():
-    """P99 logic: cache when NOT in capture."""
+    """PR40941b logic: cache when NOT in capture."""
     set_step(GenesisSpecMeta(is_cuda_graph_capture=False))
     assert should_use_workspace_cache() is True
 
