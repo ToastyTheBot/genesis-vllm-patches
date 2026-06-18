@@ -19,7 +19,7 @@ package structure that:
 
 - Works on NVIDIA CUDA / AMD ROCm / Intel XPU / CPU with graceful skip
   (philosophy: **МЫ ЧИНИМ, НЕ ЛОМАЕМ** — we fix, we don't break)
-- Follows TDD discipline (tests first, implementation second) — **1858 tests across the package, 73 skipped, 0 failures** (full local sweep, 2026-05-05)
+- Follows TDD discipline (tests first, implementation second) — the package and its full suite run with **no torch installed**: **1489 passed / 215 skipped** (torch-only kernel/numeric tests `importorskip`), no regressions (2026-06)
 - Is upstream-ready — kernels can be submitted as vLLM PRs directly
 - Self-documents via `genesis doctor` and the curated model registry
 
@@ -42,7 +42,7 @@ operator docs.
 ```text
 vllm/_genesis/
 ├── __init__.py              Public API entry
-├── dispatcher.py            PATCH_REGISTRY (123 entries) + A3/D2 validator
+├── dispatcher.py            PATCH_REGISTRY (114 entries — single source of truth) + A3/D2 validator
 ├── guards.py                Canonical vendor/chip/model/dep detection
 ├── prealloc.py              GenesisPreallocBuffer framework
 │
@@ -82,7 +82,7 @@ vllm/_genesis/
 │   ├── fla_kkt_buffer.py           P39a
 │   └── ...
 │
-├── wiring/                  Text-patch wiring (~80 modules in 11 dirs)
+├── wiring/                  Text-patch wiring (~101 modules in 11 dirs; each `apply() -> (status, reason)`)
 │   ├── text_patch.py        TextPatcher framework + result_to_wiring_status helper
 │   │                        + MultiFilePatchTransaction (true rollback as of G-POST-08)
 │   ├── rebind.py            runtime class-method rebind helpers
@@ -105,7 +105,7 @@ vllm/_genesis/
 │   └── response_cache_middleware.py
 │
 ├── patches/                 Orchestration + upstream tracking
-│   ├── apply_all.py         Boot-time orchestrator
+│   ├── apply_all.py         Boot-time orchestrator + metadata-driven wiring executor
 │   └── upstream_compat.py   PR marker registry (auto-retire on merge)
 │
 ├── utils/
@@ -115,7 +115,7 @@ vllm/_genesis/
 │   └── moe_tuning/          Pre-tuned MoE Triton configs (community-contributed,
 │                            see configs/moe_tuning/README.md for honest A5000 caveat)
 │
-└── tests/                   pytest TDD suite — 1858 pass, 73 skipped, 0 failures
+└── tests/                   pytest TDD suite — 1489 pass / 215 skipped (torch-free)
     ├── conftest.py          AST-scans test files for `import torch`,
     │                        auto-applies `requires_torch` skip on CPU-only env
     ├── compat/              CLI / doctor / lifecycle / models / plugins / telemetry
@@ -153,8 +153,13 @@ For each new kernel module:
 3. Refactor keeping GREEN
 ```
 
-Genesis enforces this via `test_apply_all_dispatcher_sync.py` (every
-`apply_patch_*` function must have a corresponding `PATCH_REGISTRY` entry).
+Consistency is structural, not policed by a sync test. `dispatcher.PATCH_REGISTRY`
+is the single registry; a patch's apply step is attached onto its entry — either
+a hand-written `apply_patch_*` function (via `@register_patch`, for the ~22
+outliers that carry real logic) or the generic metadata-driven executor bound
+from the entry's `wiring: "<stem>"` field (the ~85 text-patch/rebind patches).
+A callable can no longer exist without an entry, so the old
+`test_apply_all_dispatcher_sync.py` was removed.
 
 ### 4. Canonical vendor detection
 
@@ -236,7 +241,7 @@ slice_view = GPB.slice_to(buf, 2)  # view, pointer-stable
 # Install test dependencies
 pip install pytest pytest-cov
 
-# Run all tests (1858 expected pass + 73 skipped on CPU-only env)
+# Run all tests (1489 pass / 215 skipped — runs torch-free; torch tests importorskip)
 cd /path/to/genesis-vllm-patches
 python3 -m pytest vllm/_genesis/tests/ --no-header -q
 
@@ -313,10 +318,22 @@ failed annotations.
 ## Migration status
 
 As of v7.65 (2026-05-02) the historical pre-dispatcher patches (P1-P46)
-have been promoted to first-class `PATCH_REGISTRY` entries with
-`lifecycle: legacy` (minimal metadata by design — they predate the
-registry). All `apply_patch_*` functions now have a corresponding registry
-entry — pinned by `tests/test_apply_all_dispatcher_sync.py`.
+were promoted to first-class `PATCH_REGISTRY` entries with `lifecycle:
+legacy` (minimal metadata by design — they predate the registry).
+
+Two structural changes landed 2026-06:
+
+1. **Single registry.** `apply_all`'s old parallel `(name, callable)` list was
+   collapsed into `dispatcher.PATCH_REGISTRY` (the sole source of truth);
+   `apply_all.PATCH_REGISTRY` is now a *derived* `[(name, fn), …]` view, and
+   `test_apply_all_dispatcher_sync.py` is gone.
+2. **Function collapse.** The 85 patches whose apply step was pure
+   text-patch/rebind dispatch lost their near-identical `apply_patch_*`
+   boilerplate; they declare a `wiring: "<stem>"` field and run through one
+   executor (`_apply_wiring_entry`). Boot order is the explicit `_APPLY_ORDER`
+   list. Only the ~22 outliers (kernel installs, rebinds, bundled preallocs,
+   hardcoded skips) keep a hand-written function. `apply_all.py` dropped from
+   ~4,800 to ~1,900 lines.
 
 The skeleton kernel modules listed in earlier README revisions (P22 / P7 /
 P17 / P1 dequant_buffer etc.) all shipped under their `wiring/` text-patches;
