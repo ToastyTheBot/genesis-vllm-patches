@@ -272,8 +272,9 @@ class TestDispatcherRegistry:
         d = importlib.util.module_from_spec(spec)
         sys.modules["dispatcher"] = d  # py3.13 dataclass introspection needs this
         spec.loader.exec_module(d)
-        # All v7.14 + v7.15 patches must be present
-        for pid in ("P64", "P65", "P66", "P68", "P69", "P70"):
+        # All v7.14 + v7.15 patches must be present (P66 removed — upstream
+        # closed vllm#23679; see PLAN.md Phase B)
+        for pid in ("P64", "P65", "P68", "P69", "P70"):
             assert pid in d.PATCH_REGISTRY, (
                 f"{pid} missing from PATCH_REGISTRY"
             )
@@ -334,7 +335,6 @@ class TestApplyAllConsistency:
         for pid, fn_name_part in (
             ("P64", "qwen3coder_mtp_streaming"),
             ("P65", "turboquant_spec_cg_downgrade"),
-            ("P66", "cudagraph_size_filter"),
             ("P68/P69", "long_ctx_tool_adherence"),
             ("P70", "auto_strict_ngram"),
         ):

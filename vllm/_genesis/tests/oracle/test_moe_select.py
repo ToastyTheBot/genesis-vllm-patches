@@ -19,15 +19,16 @@ def test_fp8_high_m_routes_to_standard():
     assert "PN8" in sel.relevant_patches
 
 
-def test_lorbus_27b_int4_g128_marlin_with_p87_p91():
-    """27B Lorbus (AutoRound INT4 g=128) → Marlin path → P87 + P91."""
+def test_lorbus_27b_int4_g128_marlin_stock():
+    """27B Lorbus (AutoRound INT4 g=128) → Marlin path. Genesis Marlin patches
+    P87 (vllm#40361) / P91 (vllm#39660) were removed after upstream closed both
+    PRs, so no Genesis patch applies to this path now."""
     from vllm._genesis.oracle import select_moe_expert_impl
     sel = select_moe_expert_impl(
         "compressed_tensors_int4_marlin", sm_major=8, num_tokens=128, group_size=128,
     )
     assert sel.impl_name == "marlin"
-    assert "P87" in sel.relevant_patches
-    assert "P91" in sel.relevant_patches
+    assert sel.relevant_patches == ()
 
 
 def test_minachist_27b_int8_no_group_allspark_no_marlin_patches():

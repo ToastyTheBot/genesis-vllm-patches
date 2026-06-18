@@ -149,11 +149,12 @@ def test_summary_caps_skip_class_with_overflow_marker(reset_decisions):
     from vllm._genesis.dispatcher import (
         dump_structured_boot_summary, log_decision,
     )
-    # Generate 16 env-disabled decisions to exceed 12 cap
+    # Generate 14 env-disabled decisions to exceed 12 cap
     for pid in ["PN50", "PN54", "PN58", "PN29", "PN30", "PN31", "PN32",
-                "PN34", "PN38", "P83", "P85", "P75", "P77", "P86", "P79b",
+                "PN38", "P83", "P85", "P75", "P77", "P79b",
                 "P79c"]:
         log_decision(pid, False, "opt-in only — set GENESIS_ENABLE_*=1")
     out = dump_structured_boot_summary()
     # Should cap the env_disabled list to 12 entries + show overflow marker
-    assert "and 4 more" in out
+    # (14 decisions fed - 12 cap = 2 more)
+    assert "and 2 more" in out

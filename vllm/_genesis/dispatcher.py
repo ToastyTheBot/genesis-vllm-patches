@@ -137,16 +137,6 @@ PATCH_REGISTRY: dict[str, dict[str, Any]] = {
         "applies_to": {"is_hybrid": [True]},
         "requires_patches": ["P60"],
     },
-    "P61": {
-        "title": "Qwen3 multi-tool first-occurrence (DEPRECATED — superseded by P12 v2)",
-        "env_flag": "GENESIS_ENABLE_P61_QWEN3_MULTI_TOOL",
-        "default_on": False,
-        "deprecated": True,
-        "category": "structured_output",
-        "credit": "ExtReMLapin (vllm#40783) — P61 was supposed to flip P12's LAST-occurrence to FIRST via post-anchor replacement, but its anchor 'tool_call_index = ...' never matched P12-emitted 'idx = ...' form, so it silent-skipped when P12 was active. v7.62.5 (2026-04-28): P12 emit updated to FIRST directly; P61 retired. Setting GENESIS_ENABLE_P61=1 is now a harmless no-op (anchor not found vs already-FIRST P12 output).",
-        "upstream_pr": 40783,
-        "applies_to": {"model_class": ["qwen3", "qwen3_5", "qwen3_moe", "qwen3_next"]},
-    },
     "P62": {
         "title": "Structured-output spec-decode reasoning-end timing fix",
         "env_flag": "GENESIS_ENABLE_P62_STRUCT_OUT_SPEC_TIMING",
@@ -156,15 +146,6 @@ PATCH_REGISTRY: dict[str, dict[str, Any]] = {
         "upstream_pr": 36138,
         "applies_to": {"model_class": ["qwen3", "qwen3_5", "qwen3_6", "qwen3_moe", "qwen3_next"]},
         "conflicts_with": ["PN58"],
-    },
-    "P61b": {
-        "title": "Qwen3 streaming partial-tag overlap guard",
-        "env_flag": "GENESIS_ENABLE_P61B_STREAMING_OVERLAP",
-        "default_on": False,
-        "category": "structured_output",
-        "credit": "ExtReMLapin (vllm#40783)",
-        "upstream_pr": 40783,
-        "applies_to": {"model_class": ["qwen3", "qwen3_5", "qwen3_moe", "qwen3_next"]},
     },
     "P63": {
         "title": "MTP/Eagle drafter GDN state recovery (deprecated — wrong layer)",
@@ -201,14 +182,6 @@ PATCH_REGISTRY: dict[str, dict[str, Any]] = {
         "upstream_pr": None,
         "applies_to": {"is_turboquant": [True]},
         "conflicts_with": ["P56", "P57", "P67", "P67b"],
-    },
-    "P66": {
-        "title": "cudagraph_capture_sizes spec-decode divisibility filter",
-        "env_flag": "GENESIS_ENABLE_P66_CUDAGRAPH_SIZE_FILTER",
-        "default_on": False,
-        "category": "spec_decode",
-        "credit": "Genesis-original (mirrors fhl2000 vllm#23679 closed)",
-        "upstream_pr": 23679,
     },
     "P68": {
         "title": "Auto force tool_choice=required for long-context tool calls",
@@ -334,14 +307,6 @@ PATCH_REGISTRY: dict[str, dict[str, Any]] = {
         "credit": "Backport of vllm#37629 (OPEN, fixes #36906). Cleanup pass after main scheduling loop clears spec_token_ids for unscheduled running requests. Prevents -1 placeholder leak into F.embedding() under budget-exhausted high-concurrency on async + EAGLE/MTP. Genesis prod (max_num_seqs=2, sync ngram) gains nothing direct; protects high-concurrency multimodal users.",
         "upstream_pr": 37629,
     },
-    "P79d": {
-        "title": "Preempt async-discard backport (vllm#38624)",
-        "env_flag": "GENESIS_ENABLE_P79D_PREEMPT_ASYNC_DISCARD",
-        "default_on": False,
-        "category": "spec_decode",
-        "credit": "Backport of vllm#38624 (CodersAcademy006, OPEN). Adds discard_latest_async_tokens=True + num_output_placeholders=0 to _preempt_request() — fixes silent token duplication ('the the', 'of of') after preemption-resume on async + EAGLE/MTP/ngram_gpu paths. Additive (does NOT remove from reset_prefix_cache like upstream does — defensive). Idempotent. Genesis prod (sync ngram) gains nothing direct; protects async users.",
-        "upstream_pr": 38624,
-    },
     "P81": {
         "title": "fp8 block-scaled MM low-M decode tuning (vllm#40925)",
         "env_flag": "GENESIS_ENABLE_P81_FP8_BLOCK_SCALED_M_LE_8",
@@ -388,29 +353,6 @@ PATCH_REGISTRY: dict[str, dict[str, Any]] = {
         "upstream_pr": None,
         "applies_to": {"is_hybrid": [True]},
         "requires_patches": ["P84"],
-    },
-    "P86": {
-        "title": "ngram batch_propose O(N*K) → O(N+K) direct-fill (vllm#40876)",
-        "env_flag": "GENESIS_ENABLE_P86",
-        "default_on": False,
-        "category": "spec_decode",
-        "credit": "Backport of vllm#40876 (aaronagent, OPEN). Replaces O(N*K) `i in valid_ngram_requests` membership scan in NgramProposer.batch_propose with O(N+K) direct-fill loop iterating only the valid ngram requests. Algorithmic improvement, no behavioral change. Negligible at Genesis prod max_num_seqs=2 (~ns); meaningful at high-concurrency multi-user serving (e.g. N=64, K=32 saves ~1952 list-membership ops per batch step).",
-        "upstream_pr": 40876,
-    },
-    "P87": {
-        "title": "Marlin W4A16/W8A16 sub-tile output dim pad-on-load (vllm#40361)",
-        "env_flag": "GENESIS_ENABLE_P87",
-        "default_on": False,
-        "category": "kernel",
-        "credit": "Backport of vllm#40361 (OPEN). MarlinLinearKernel requires per-rank out_features divisible by GPTQ_MARLIN_MIN_THREAD_N=64. Sub-tile shards (e.g. Qwen3.5 GatedDeltaNet.in_proj_ba at TP>=2 with num_v_heads=64, or Intel/Qwen3.6-35B-A3B-int4-AutoRound n=32 shard at TP=2) fail can_implement and force a slow non-Marlin fallback (or refuse to load entirely on Ampere where Machete/CutlassW4A8/AllSpark are unavailable or restricted). P87 wraps three MarlinLinearKernel methods to zero-pad qweight/scales/qzeros/bias along the output dim at load, swap config.partition_weight_shape to padded value so downstream transforms see consistent layout, and slice the extra columns off the output in apply_weights. Runtime cost is zero — padding is one-time at load. PR bench: +24% on 2x RTX 3090 SM 8.6 with Intel/Qwen3.6-35B-A3B-int4-AutoRound TP=2 (137 -> 170 t/s). Closes vllm#35924 generically.",
-        "upstream_pr": 40361,
-        "applies_to": {
-            "quant_format": [
-                "int8_w8a16", "int4_w4a16",
-                "autoround_int8", "autoround_int4",
-                "gptq_int4", "awq_int4", "compressed_tensors",
-            ],
-        },
     },
     "PN8": {
         "title": "MTP/draft online-quant propagation (vllm#40849)",
@@ -668,27 +610,6 @@ PATCH_REGISTRY: dict[str, dict[str, Any]] = {
         "upstream_pr": 41467,
         "applies_to": {},
     },
-    "PN56": {
-        "title": "Qwen3Coder XML parse fallback (vllm#41466 backport)",
-        "env_flag": "GENESIS_ENABLE_PN56_QWEN3CODER_XML_FALLBACK",
-        "default_on": False,
-        "category": "structured_output",
-        "credit": (
-            "Backport of vllm#41466 (ToastyTheBot, OPEN). When "
-            "_parse_xml_function_call returns None or throws inside "
-            "extract_tool_calls_streaming, prev_tool_call_arr keeps the "
-            "header-step \"{}\" placeholder. Serving layer remainder check "
-            "later double-emits {arguments:\"{}\"}. Strict OpenAI clients "
-            "(Vercel AI SDK, OpenAI Node SDK) reject. Fix: track parse "
-            "success, on failure restore prev_tool_call_arr from streamed "
-            "args + closing brace. Composes with our P64 (vllm#39598) — P64 "
-            "modified post-except flow but didn't touch try block. Affects "
-            "ALL Genesis configs with qwen3_coder tool parser. Default OFF "
-            "until live verify against tool-call sweep on 27B PROD."
-        ),
-        "upstream_pr": 41466,
-        "applies_to": {},
-    },
     "PN57": {
         "title": "TurboQuant centroids disk-persistent cache (vllm#41418-inspired)",
         "env_flag": "GENESIS_ENABLE_PN57_TQ_CENTROIDS_DISK_CACHE",
@@ -831,28 +752,6 @@ PATCH_REGISTRY: dict[str, dict[str, Any]] = {
             "vllm#35975 merges upstream."
         ),
         "upstream_pr": 35975,
-    },
-    "PN34": {
-        "title": "WorkspaceManager runtime lock relaxation (PN33 companion for runtime decode)",
-        "env_flag": "GENESIS_ENABLE_PN34_WORKSPACE_LOCK_RELAX",
-        "default_on": False,
-        "category": "perf_hotfix",
-        "credit": (
-            "Companion to PN33 — same root cause class but on the runtime "
-            "decode path. PN33 fixes BOOT-time _dummy_sampler_run "
-            "under-counting; PN34 relaxes the strict "
-            "WorkspaceManager._ensure_workspace_size AssertionError that "
-            "still fires at runtime decode "
-            "(turboquant_attn.py:1350:_decode_attention) on rare paths. "
-            "Direct port of noonghunna's club-3090 setup-time sidecar "
-            "patch_workspace_lock_disable.py. Default OFF — relaxes a "
-            "strict-debug assertion. Engage when PN33 is on AND runtime "
-            "decode still hits workspace_lock crashes. Retires when "
-            "vllm#40706 (TQ scratch dedup + reserve worst-case at warmup) "
-            "merges upstream."
-        ),
-        "upstream_pr": 40706,
-        "requires_patches": ["PN33"],
     },
     "PN33": {
         "title": "Spec-decode warmup K-aware sizing (vllm#37521 extended to MTP/ngram)",
@@ -1104,26 +1003,6 @@ PATCH_REGISTRY: dict[str, dict[str, Any]] = {
             # unchanged.
         },
     },
-    "PN23": {
-        "title": "DFlash combine_hidden_states dtype cast (vllm#40334)",
-        "env_flag": "GENESIS_ENABLE_PN23_DFLASH_DTYPE_FIX",
-        "default_on": False,
-        "category": "spec_decode",
-        "credit": (
-            "Backport of vllm#40334 (ciphernaut, OPEN 2026-05-01). Six-line "
-            "defensive cast in Qwen3DFlashModel.combine_hidden_states to handle "
-            "mixed-precision targets (AWQ + non-quantized layers, FP8 + BF16 mix). "
-            "Casts hidden_states to fc.params_dtype before FC layer call. Fixes "
-            "RuntimeError on mixed-precision DFlash configs."
-        ),
-        "upstream_pr": 40334,
-        "applies_to": {
-            # DFlash-specific; auto-no-op when qwen3_dflash.py absent or anchor
-            # already has params_dtype cast (upstream merge).
-        },
-        "conflicts_with": [],
-        "requires_patches": [],
-    },
     "PN21": {
         "title": "DFlash SWA support partial backport (vllm#40898)",
         "env_flag": "GENESIS_ENABLE_PN21_DFLASH_SWA",
@@ -1271,29 +1150,6 @@ PATCH_REGISTRY: dict[str, dict[str, Any]] = {
             "(fixed) OR GENESIS_PN26_SPARSE_V_SCALE_FACTOR (BLASST adaptive)."
         ),
         "upstream_pr": 41422,
-        "applies_to": {},
-        "conflicts_with": [],
-        "requires_patches": [],
-    },
-    "PN27": {
-        "title": "Revert MoERunnerInterface PluggableLayer (vllm#41440)",
-        "env_flag": "GENESIS_ENABLE_PN27_REVERT_PLUGGABLE_MOE",
-        "default_on": False,
-        "category": "perf_hotfix",
-        "credit": (
-            "Backport of vllm#41440 (auto-generated CI failure analyzer, OPEN "
-            "2026-05-01). Reverts vllm#35178 (b55b2652, merged 2026-04-30) "
-            "which made MoERunnerInterface inherit from PluggableLayer + "
-            "introduced DefaultMoERunner split/recombine. Issue #41306 "
-            "reports +21% TPOT / +59% TTFT / -19% throughput on Mixtral-8x7B "
-            "(8× H200), with bnellnm confirming `--moe-backend=triton` "
-            "restores v0.19 perf. Our pin (0.20.1rc1.dev16+g7a1eb8ac2) "
-            "predates the merge by 2 days — PN27 is a PROACTIVE SCAFFOLD "
-            "for the case when we eventually pin-bump past b55b2652 BEFORE "
-            "#41440 (or equivalent fix-forward) merges. On our current pin, "
-            "all 3 sub-patches SKIP as intended (anchors are pre-#35178)."
-        ),
-        "upstream_pr": 41440,
         "applies_to": {},
         "conflicts_with": [],
         "requires_patches": [],
@@ -1520,21 +1376,6 @@ PATCH_REGISTRY: dict[str, dict[str, Any]] = {
                 "gptq_int4", "gptq_int8", "awq_int4", "awq_int8",
                 "compressed_tensors", "int4_w4a16", "int8_w8a16",
                 "autoround_int4", "autoround_int8",
-            ],
-        },
-    },
-    "P91": {
-        "title": "AutoRound row-parallel group cdiv + start-idx fix (vllm#39460)",
-        "env_flag": "GENESIS_ENABLE_P91",
-        "default_on": False,
-        "category": "quantization",
-        "credit": "Backport of non-MoE-specific portion of vllm#39460 (CLOSED). gptq_marlin.py:402-407 computes scales_and_zp_size = input_size_per_partition // group_size — when input_size_per_partition % group_size != 0 (AutoRound INT4/INT8 checkpoints with awkward shard sizes), this floor-div drops the trailing partial group of scales. Combined with parameter.py:222-225 load_row_parallel_weight using `tp_rank * shard_size` as start_idx (in scale-rows units, but the source tensor is indexed in scales-rows that map to input-element groups), rank-1 scales load from the wrong offset for partial-group shards → silent dequant corruption or fallback to slow non-Marlin path. P91 (a) replaces both floor-divs with cdiv(), (b) tags scales/qzeros with row_group_size + row_input_size_per_partition, (c) makes load_row_parallel_weight compute start_idx as (tp_rank * input_partition_size) // group_size when those tags present. Hypothesized as dominant cause of Lorbus INT4 < INT8 perf gap on our 2x A5000 (87/61/67 vs 93/77/86 t/s) — sister bug #38064 had 2.72x latency improvement when fixed. We do NOT port the MoE/gate_linear/gemma4 changes (those are Gemma4-specific).",
-        "upstream_pr": 39460,
-        "applies_to": {
-            "quant_format": [
-                "autoround_int8", "autoround_int4",
-                "gptq_int4", "int8_w8a16", "int4_w4a16",
-                "compressed_tensors",
             ],
         },
     },
@@ -1932,15 +1773,6 @@ PATCH_REGISTRY: dict[str, dict[str, Any]] = {
         "category": "request_middleware",
         "credit": "Genesis-original 2026-05-05 (Sander request 'по апи лог невзрачный надо тоже проработать'). Replaces uvicorn's bare `INFO: 192.168.1.10:45116 - GET /v1/models 401 Unauthorized` with `[Genesis-API] 200  POST /v1/chat/completions  34ms  prompt=46t  completion=400t  tools=1  client=192.168.1.10`. Suppresses /health polling by default (GENESIS_PN65_LOG_HEALTH=1 to include). Status-aware level (2xx INFO / 4xx WARN / 5xx ERROR + exception type).",
         "upstream_pr": None,
-        "applies_to": {},
-    },
-    "PN66": {
-        "title": "Multiturn </think> leak fix in DelegatingParser (vllm#41696 backport)",
-        "env_flag": "GENESIS_ENABLE_PN66",
-        "default_on": False,
-        "category": "structured_output",
-        "credit": "Backport of vllm#41696 (panpan0000, OPEN as of 2026-05-05). Removes the buggy `prompt_reasoning_checked` short-circuit in `vllm.parser.abstract_parser.DelegatingParser.parse_delta` that walked the FULL prompt looking for `</think>` and prematurely set `reasoning_ended=True` from a previous turn's `</think>`. Defensive backport for multi-turn DSML/Hermes/Qwen3 chat clients sending full history. Original report: DeepSeek V3.2 reasoning users.",
-        "upstream_pr": 41696,
         "applies_to": {},
     },
     "PN67": {

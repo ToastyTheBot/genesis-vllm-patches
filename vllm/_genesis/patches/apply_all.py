@@ -769,37 +769,6 @@ def apply_patch_26_prefill_output() -> PatchResult:
     )
 
 
-@register_patch("P61b Qwen3 streaming partial-tag overlap guard")
-def apply_patch_61b_streaming_overlap() -> PatchResult:
-    """Patch 61b: backport slice of vllm#40783 streaming changes.
-
-    Adds defensive overlap guard against partial `<tool_call>` tag fragments
-    leaking as reasoning when the tag is being assembled across multiple
-    streaming deltas.
-
-    For Qwen3 with proper special-token handling this is a no-op; useful for
-    streaming clients with non-Qwen tokenizers or edge cases where the tag
-    arrives character-fragmented.
-
-    Status: opt-in via GENESIS_ENABLE_P61B_STREAMING_OVERLAP=1.
-
-    Credit: @ExtReMLapin (vllm#40783).
-    """
-    name = "P61b Qwen3 streaming partial-tag overlap guard"
-    if not _APPLY_MODE:
-        return _applied(name, "dry-run: text-patch ready")
-    try:
-        from vllm._genesis.wiring.structured_output import patch_61b_qwen3_streaming_overlap_guard
-    except Exception as e:
-        return _failed(name, f"wiring import failed: {e}")
-    status, reason = patch_61b_qwen3_streaming_overlap_guard.apply()
-    if status == "applied":
-        return _applied(name, reason)
-    if status == "skipped":
-        return _skipped(name, reason)
-    return _failed(name, reason)
-
-
 @register_patch("PN59 streaming-GDN orchestrator (Variant D Phase 2)")
 def apply_patch_N59_streaming_gdn() -> PatchResult:
     """PN59: window-iterative GDN driver — Cliff 2b multi-turn OOM fix.
@@ -861,26 +830,6 @@ def apply_patch_107_mtp_truncation_detector() -> PatchResult:
     except Exception as e:
         return _failed(name, f"wiring import failed: {e}")
     status, reason = patch_107_mtp_truncation_detector.apply()
-    if status == "applied":
-        return _applied(name, reason)
-    if status == "skipped":
-        return _skipped(name, reason)
-    return _failed(name, reason)
-
-
-@register_patch("PN56 Qwen3Coder XML parse fallback (vllm#41466)")
-def apply_patch_N56_qwen3coder_xml_fallback() -> PatchResult:
-    """PN56: backport vllm#41466 — fix \"{}\" placeholder leak on parse failure."""
-    name = "PN56 qwen3coder XML fallback"
-    if not _APPLY_MODE:
-        return _applied(name, "dry-run: text-patch ready")
-    try:
-        from vllm._genesis.wiring.structured_output import (
-            patch_N56_qwen3coder_xml_fallback,
-        )
-    except Exception as e:
-        return _failed(name, f"wiring import failed: {e}")
-    status, reason = patch_N56_qwen3coder_xml_fallback.apply()
     if status == "applied":
         return _applied(name, reason)
     if status == "skipped":
@@ -1082,32 +1031,6 @@ def apply_patch_62_struct_out_spec_timing() -> PatchResult:
     except Exception as e:
         return _failed(name, f"wiring import failed: {e}")
     status, reason = patch_62_structured_output_spec_decode_timing.apply()
-    if status == "applied":
-        return _applied(name, reason)
-    if status == "skipped":
-        return _skipped(name, reason)
-    return _failed(name, reason)
-
-
-@register_patch("P61 Qwen3 multi-tool first-occurrence")
-def apply_patch_61_qwen3_multi_tool() -> PatchResult:
-    """Patch 61: Backport of upstream PR vllm#40783 minimal slice — fixes
-    multi-tool requests where multiple `<tool_call>` blocks were silently
-    dropped (parser found LAST occurrence instead of FIRST).
-
-    Status: opt-in via GENESIS_ENABLE_P61_QWEN3_MULTI_TOOL=1.
-
-    Credit:
-      - Upstream fix: @ExtReMLapin (vllm#40783).
-    """
-    name = "P61 Qwen3 multi-tool first-occurrence"
-    if not _APPLY_MODE:
-        return _applied(name, "dry-run: text-patch ready")
-    try:
-        from vllm._genesis.wiring.structured_output import patch_61_qwen3_multi_tool_first_occurrence
-    except Exception as e:
-        return _failed(name, f"wiring import failed: {e}")
-    status, reason = patch_61_qwen3_multi_tool_first_occurrence.apply()
     if status == "applied":
         return _applied(name, reason)
     if status == "skipped":
@@ -1324,55 +1247,6 @@ def apply_patch_65_turboquant_spec_cg_downgrade() -> PatchResult:
     except Exception as e:
         return _failed(name, f"wiring import failed: {e}")
     status, reason = patch_65_turboquant_spec_cg_downgrade.apply()
-    if status == "applied":
-        return _applied(name, reason)
-    if status == "skipped":
-        return _skipped(name, reason)
-    return _failed(name, reason)
-
-
-@register_patch("P66 cudagraph_capture_sizes spec-decode divisibility filter")
-def apply_patch_66_cudagraph_size_filter() -> PatchResult:
-    """Patch 66 (Genesis-original): cudagraph_capture_sizes divisibility filter.
-
-    Mirrors closed/stale upstream PR vllm-project/vllm#23679 + addresses bug
-    class identified in vllm-project/vllm#28015.
-
-    When `uniform_decode_query_len > 1` (e.g., MTP n=3 → q_len=4), capture
-    sizes NOT divisible by uniform_decode_query_len produce mixed-q_len
-    batches at capture time (e.g., size=10 → [4, 4, 2]). The tail request
-    with q_len=2 gets misclassified as PREFILL during capture, baking a
-    PREFILL branch into the captured "uniform decode" graph. At runtime,
-    real decode batches replay that wrong path → degenerate output OR
-    illegal memory access.
-
-    Filter: keep only capture sizes divisible by uniform_decode_query_len
-    when spec-decode is active. For non-spec-decode setups: no change
-    (filter is a no-op when uniform_q_len == 1).
-
-    Benefits:
-      - Boot 2-4x faster (fewer captures during warmup)
-      - Less peak GPU memory during capture (avoids OOM)
-      - No mixed-q_len batches → no prefill branches baked into uniform
-        decode captures
-      - Reduces blast radius for the bug class
-
-    Status: opt-in via GENESIS_ENABLE_P66_CUDAGRAPH_SIZE_FILTER=1.
-
-    Credit:
-      - Mirror of @fhl2000's PR #23679 (closed, stale, never merged)
-      - Bug class identified by @ConcurrentLanguage in #28015
-      - Brought to attention by Genesis investigation 2026-04-25
-        (noonghunna #40880 cross-engine search)
-    """
-    name = "P66 cudagraph_capture_sizes spec-decode divisibility filter"
-    if not _APPLY_MODE:
-        return _applied(name, "dry-run: text-patch ready")
-    try:
-        from vllm._genesis.wiring.spec_decode import patch_66_cudagraph_size_divisibility_filter
-    except Exception as e:
-        return _failed(name, f"wiring import failed: {e}")
-    status, reason = patch_66_cudagraph_size_divisibility_filter.apply()
     if status == "applied":
         return _applied(name, reason)
     if status == "skipped":
@@ -1742,32 +1616,6 @@ def apply_patch_N61_qwen3_vl_keyerror_guard() -> PatchResult:
     return _failed(name, reason)
 
 
-@register_patch("PN66 Multiturn </think> leak fix in DelegatingParser (vllm#41696)")
-def apply_patch_N66_multiturn_think_leak() -> PatchResult:
-    """Patch PN66: backport of vllm#41696 (panpan0000, OPEN as of 2026-05-05).
-
-    Removes the buggy prompt_reasoning_checked short-circuit in
-    DelegatingParser.parse_delta that walked the FULL prompt looking for
-    </think> and prematurely set reasoning_ended=True from a prior turn's
-    </think>. Defensive backport for multi-turn DSML/Hermes/Qwen3 chat.
-
-    Status: opt-in via GENESIS_ENABLE_PN66=1.
-    """
-    name = "PN66 Multiturn </think> leak fix in DelegatingParser (vllm#41696)"
-    if not _APPLY_MODE:
-        return _applied(name, "dry-run: text-patch ready")
-    try:
-        from vllm._genesis.wiring.structured_output import patch_N66_multiturn_think_leak
-    except Exception as e:
-        return _failed(name, f"wiring import failed: {e}")
-    status, reason = patch_N66_multiturn_think_leak.apply()
-    if status == "applied":
-        return _applied(name, reason)
-    if status == "skipped":
-        return _skipped(name, reason)
-    return _failed(name, reason)
-
-
 @register_patch("PN67 thinking_token_budget inverted bool fix (vllm#41674)")
 def apply_patch_N67_thinking_budget_inverted_bool() -> PatchResult:
     """Patch PN67: 1-line trivial backport of vllm#41674 (JasonKeyiL, OPEN).
@@ -1876,40 +1724,6 @@ def apply_patch_N62_text_only_vit_skip() -> PatchResult:
     except Exception as e:
         return _failed(name, f"wiring import failed: {e}")
     status, reason = patch_N62_text_only_vit_skip.apply()
-    if status == "applied":
-        return _applied(name, reason)
-    if status == "skipped":
-        return _skipped(name, reason)
-    return _failed(name, reason)
-
-
-@register_patch("P79d Preempt async-discard backport (vllm#38624)")
-def apply_patch_79d_preempt_async_discard() -> PatchResult:
-    """Patch 79d: backport of vllm#38624 (CodersAcademy006, OPEN).
-
-    Adds discard_latest_async_tokens=True + num_output_placeholders=0 to
-    Scheduler._preempt_request() so that all preemption paths (not only
-    reset_prefix_cache) clear in-flight async tokens before resume.
-
-    Without this, an async token from before preemption replays after
-    request resume, producing duplicated output ('the the', 'of of').
-    Same bug class as the v7.13 ngram-corruption symptoms on a different
-    code path. Direct value for Genesis prod (sync ngram) is minimal;
-    protects async + EAGLE/MTP/ngram_gpu deployments.
-
-    Genesis variant is additive (does NOT remove the discard from
-    reset_prefix_cache like upstream does — defensive, idempotent).
-
-    Status: opt-in via GENESIS_ENABLE_P79D_PREEMPT_ASYNC_DISCARD=1.
-    """
-    name = "P79d Preempt async-discard backport (vllm#38624)"
-    if not _APPLY_MODE:
-        return _applied(name, "dry-run: text-patch ready")
-    try:
-        from vllm._genesis.wiring.spec_decode import patch_79d_preempt_async_discard
-    except Exception as e:
-        return _failed(name, f"wiring import failed: {e}")
-    status, reason = patch_79d_preempt_async_discard.apply()
     if status == "applied":
         return _applied(name, reason)
     if status == "skipped":
@@ -2273,103 +2087,6 @@ def apply_patch_95_marlin_tp_cudagraph_cap() -> PatchResult:
     )
 
 
-@register_patch(
-    "P91 AutoRound row-parallel group cdiv + start-idx fix (vllm#39460 backport)"
-)
-def apply_patch_91_autoround_row_group_cdiv() -> PatchResult:
-    """Patch 91: backport of vllm#39460 (non-MoE portion only).
-
-    Fixes silent dequant corruption when AutoRound INT4/INT8 checkpoints
-    have row-parallel layers whose input_size_per_partition is not
-    divisible by group_size at TP>=2.
-
-    Two anchored sites in two files:
-      - gptq_marlin.py: replace floor-div with cdiv() in two scale-size
-        computations + tag scales/qzeros with row_group_size and
-        row_input_size_per_partition attrs
-      - parameter.py: RowvLLMParameter.load_row_parallel_weight uses
-        the group-aware start_idx when the new attrs are present, falls
-        back to the original behavior otherwise (no regression for
-        layers without quant grouping)
-
-    Hypothesized to address the dominant cause of Lorbus INT4 perf gap
-    vs Minachist INT8 on our 2x A5000 deployment.
-
-    Status: opt-in via GENESIS_ENABLE_P91=1. Default OFF.
-    """
-    name = (
-        "P91 AutoRound row-parallel group cdiv + start-idx fix "
-        "(vllm#39460 backport)"
-    )
-    if not _APPLY_MODE:
-        return _applied(name, "dry-run: text-patch ready")
-    try:
-        from vllm._genesis.wiring.kernels import patch_91_autoround_row_group_cdiv
-    except Exception as e:
-        return _failed(name, f"wiring import failed: {e}")
-    status, reason = patch_91_autoround_row_group_cdiv.apply()
-    if status == "applied":
-        return _applied(name, reason)
-    if status == "skipped":
-        return _skipped(name, reason)
-    return _failed(name, reason)
-
-
-@register_patch("P87 Marlin sub-tile output dim pad-on-load (vllm#40361 backport)")
-def apply_patch_87_marlin_pad_sub_tile() -> PatchResult:
-    """Patch 87: backport of vllm#40361 — MarlinLinearKernel sub-tile
-    output dim pad-on-load.
-
-    The Marlin GPTQ/AutoRound kernel requires per-rank out_features to
-    be a multiple of GPTQ_MARLIN_MIN_THREAD_N=64. When TP shards a
-    weight whose natural out-dim is not tile-aligned (e.g. Qwen3.5
-    GatedDeltaNet.in_proj_ba with num_v_heads=64 at TP>=2, or Intel
-    Qwen3.6-35B-A3B-int4-AutoRound n=32 shard at TP=2),
-    `can_implement` returns False and load fails / falls back to a
-    much slower kernel.
-
-    P87 wraps three MarlinLinearKernel methods via class-rebind:
-      - can_implement: validates against round_up(n, 64)
-      - process_weights_after_loading: zero-pads qweight/scales/qzeros/
-        bias along output dim BEFORE the original PWA runs, so all
-        downstream repack/permute/zero-point transforms see the padded
-        shape consistently
-      - apply_weights: pads bias if caller-supplied at orig_n, calls
-        the original wrapped method (which now sees padded out-dim
-        through c.partition_weight_shape[1]), and slices the extra
-        padded columns off the output
-
-    The padded weight columns decode to zero, so marlin_gemm produces
-    zero contribution for them — the slice discards both before they
-    reach the caller. Runtime cost is zero (padding happens once at
-    load). VRAM cost is a few KB per affected layer.
-
-    PR bench: +24% on 2x RTX 3090 SM 8.6 with Intel Qwen3.6-35B-A3B-
-    int4-AutoRound TP=2 (137 -> 170 t/s). On our 2x A5000 SM 8.6 the
-    same hardware family applies; expected impact depends on whether
-    our exact checkpoint shards into sub-tile out-dims.
-
-    Idempotent + drift-aware: skips if `_maybe_pad_n` already exists on
-    MarlinLinearKernel (upstream merge detected), or if our wrapper
-    sentinel is set (already applied).
-
-    Status: opt-in via GENESIS_ENABLE_P87=1. Default OFF.
-    """
-    name = "P87 Marlin sub-tile output dim pad-on-load (vllm#40361 backport)"
-    if not _APPLY_MODE:
-        return _applied(name, "dry-run: class-rebind ready")
-    try:
-        from vllm._genesis.wiring.kernels import patch_87_marlin_pad_sub_tile
-    except Exception as e:
-        return _failed(name, f"wiring import failed: {e}")
-    status, reason = patch_87_marlin_pad_sub_tile.apply()
-    if status == "applied":
-        return _applied(name, reason)
-    if status == "skipped":
-        return _skipped(name, reason)
-    return _failed(name, reason)
-
-
 @register_patch("PN8 MTP/draft online-quant propagation (vllm#40849 backport)")
 def apply_patch_N8_mtp_draft_online_quant_propagation() -> PatchResult:
     """Patch N8: backport of vllm#40849 (bhoomit) — propagate online
@@ -2694,51 +2411,6 @@ def apply_patch_N38_dflash_quant_drafter() -> PatchResult:
 # by microbench. Kernel + TDD preserved as research artifact.
 # Removed from PATCH_REGISTRY + apply_all so dispatcher matrix doesn't
 # show graveyard entries.
-
-
-@register_patch(
-    "PN34 WorkspaceManager runtime lock relaxation (PN33 companion)"
-)
-def apply_patch_N34_workspace_lock_runtime_relax() -> PatchResult:
-    """Patch N34: relax strict WorkspaceManager runtime lock to WARN+grow.
-
-    Companion to PN33 — same bug class (workspace under-counted at
-    profile_run, real path needs more) but on the RUNTIME decode path
-    instead of the boot path.
-
-    PN33 closes the boot-time _dummy_sampler_run under-counting (warmup
-    correctly reserves K-token rejection-sampler footprint). But the
-    runtime decode path also has a workspace lock failure mode at
-    `turboquant_attn.py:1350:_decode_attention` on rare paths
-    (continuation-prefill into long context, MTP K=3 + decode mid-stream).
-
-    PN34 ports noonghunna's club-3090 setup-time sidecar
-    `patch_workspace_lock_disable.py` directly into Genesis. Relaxes
-    the strict AssertionError to a one-shot WARN + grow-anyway. Behavior
-    matches the pre-v0.20 path (workspace was just resized as needed;
-    the lock added the assertion at the Python boundary).
-
-    Status: default OFF. Engage when PN33 is on AND runtime decode
-    still hits workspace_lock crashes. Retires when vllm#40706
-    (TQ scratch dedup + reserve worst-case at warmup) merges upstream.
-
-    Credit: noonghunna club-3090 (commit 2b5ab4d).
-    """
-    name = "PN34 workspace lock runtime relaxation"
-    if not _APPLY_MODE:
-        return _applied(name, "dry-run: text-patch ready")
-    try:
-        from vllm._genesis.wiring.perf_hotfix import (
-            patch_N34_workspace_lock_runtime_relax,
-        )
-    except Exception as e:
-        return _failed(name, f"wiring import failed: {e}")
-    status, reason = patch_N34_workspace_lock_runtime_relax.apply()
-    if status == "applied":
-        return _applied(name, reason)
-    if status == "skipped":
-        return _skipped(name, reason)
-    return _failed(name, reason)
 
 
 @register_patch(
@@ -3141,43 +2813,6 @@ def apply_patch_N26b_sparse_v_kernel() -> PatchResult:
 
 
 @register_patch(
-    "PN27 revert MoERunnerInterface PluggableLayer (vllm#41440 backport)"
-)
-def apply_patch_N27_revert_pluggable_moe() -> PatchResult:
-    """Patch N27: backport of vllm#41440 — revert PluggableLayer base.
-
-    PR #41440 (auto-generated CI failure analyzer revert of #35178) is the
-    upstream candidate fix for the v0.20 MoE regression reported in #41306
-    (Mixtral-8x7B: -19% throughput, +59% TTFT). Our pin (g7a1eb8ac2)
-    predates #35178 merge by 2 days, so right now all 3 sub-patches SKIP
-    on this pin. PN27 is a proactive scaffold that engages when we
-    eventually bump past `b55b2652` (2026-04-30) BEFORE #41440 merges.
-
-    Three coordinated sub-patches:
-    - moe_runner_interface.py: MoERunnerInterface(PluggableLayer, ABC) → ABC
-    - moe_runner.py: self._quant_method → self.quant_method (8 occurrences)
-    - layer.py: NON_EXPERT_PREFIXES tuple → inline _-prefix checks
-
-    Status: opt-in via GENESIS_ENABLE_PN27_REVERT_PLUGGABLE_MOE=1.
-    Default OFF. Each sub-patch independently auto-skips when not
-    applicable (pre-#35178 OR post-#41440 reverted upstream).
-    """
-    name = "PN27 revert MoERunnerInterface PluggableLayer (vllm#41440 backport)"
-    if not _APPLY_MODE:
-        return _applied(name, "dry-run: text-patch ready")
-    try:
-        from vllm._genesis.wiring.perf_hotfix import patch_N27_revert_pluggable_moe
-    except Exception as e:
-        return _failed(name, f"wiring import failed: {e}")
-    status, reason = patch_N27_revert_pluggable_moe.apply()
-    if status == "applied":
-        return _applied(name, reason)
-    if status == "skipped":
-        return _skipped(name, reason)
-    return _failed(name, reason)
-
-
-@register_patch(
     "PN26 TQ unified perf pack (centroids prebake + sparse V scaffold)"
 )
 def apply_patch_N26_tq_unified_perf() -> PatchResult:
@@ -3360,24 +2995,6 @@ def apply_patch_N19_scoped_max_split() -> PatchResult:
     )
 
 
-@register_patch("PN23 DFlash combine_hidden_states dtype cast (vllm#40334 backport)")
-def apply_patch_N23_dflash_combine_hidden_dtype() -> PatchResult:
-    """Patch N23: backport of vllm#40334 (ciphernaut, OPEN).
-
-    Six-line defensive cast in Qwen3DFlashModel.combine_hidden_states to
-    handle mixed-precision targets (AWQ + non-quantized layers,
-    FP8 + BF16 mix). Casts hidden_states to fc.params_dtype before the
-    FC layer call. Fixes RuntimeError on mixed-precision DFlash configs.
-
-    Status: opt-in via GENESIS_ENABLE_PN23_DFLASH_DTYPE_FIX=1.
-    Default OFF. Auto-no-op once vllm#40334 merges (drift marker).
-    """
-    return _wiring_text_patch(
-        "PN23 DFlash combine_hidden_states dtype cast (vllm#40334 backport)",
-        "patch_N23_dflash_combine_hidden_dtype",
-    )
-
-
 @register_patch("PN21 DFlash SWA support partial backport (vllm#40898 backport)")
 def apply_patch_N21_dflash_swa_support() -> PatchResult:
     """Patch N21: partial backport of vllm#40898 (jianc99, OPEN).
@@ -3500,52 +3117,6 @@ def apply_patch_N16_lazy_reasoner() -> PatchResult:
     except Exception as e:
         return _failed(name, f"wiring import failed: {e}")
     status, reason = patch_N16_lazy_reasoner.apply()
-    if status == "applied":
-        return _applied(name, reason)
-    if status == "skipped":
-        return _skipped(name, reason)
-    return _failed(name, reason)
-
-
-@register_patch("P86 ngram batch_propose O(N+K) direct-fill (vllm#40876 backport)")
-def apply_patch_86_ngram_batch_propose_linear() -> PatchResult:
-    """Patch 86: backport of vllm#40876 (aaronagent) — replaces the
-    O(N*K) `i in valid_ngram_requests` list-membership scan in
-    NgramProposer.batch_propose with an O(N+K) direct-fill loop.
-
-    Original (O(N*K) due to list-membership scan):
-
-        draft_token_ids: list[list[int]] = []
-        ...
-        for i in range(num_requests):
-            if i in valid_ngram_requests and self.valid_ngram_num_drafts[i] > 0:
-                draft_token_ids.append(...)
-            else:
-                draft_token_ids.append([])
-
-    Patched (O(N+K) direct fill):
-
-        draft_token_ids: list[list[int]] = [[] for _ in range(num_requests)]
-        for i in valid_ngram_requests:
-            num_drafts = self.valid_ngram_num_drafts[i]
-            if num_drafts > 0:
-                draft_token_ids[i] = self.valid_ngram_draft[i, :num_drafts].tolist()
-
-    Genesis prod runs max_num_seqs=2 + prompt_lookup_min=8 — at N=2/K=2
-    the difference is ns-scale. Real wins are at high-concurrency
-    multi-user serving (N=64/K=32 saves ~1952 membership ops/batch).
-    Algorithmic improvement, no behavioral change.
-
-    Status: opt-in via GENESIS_ENABLE_P86=1. Default OFF.
-    """
-    name = "P86 ngram batch_propose O(N+K) direct-fill (vllm#40876 backport)"
-    if not _APPLY_MODE:
-        return _applied(name, "dry-run: text-patch ready")
-    try:
-        from vllm._genesis.wiring.spec_decode import patch_86_ngram_batch_propose_linear
-    except Exception as e:
-        return _failed(name, f"wiring import failed: {e}")
-    status, reason = patch_86_ngram_batch_propose_linear.apply()
     if status == "applied":
         return _applied(name, reason)
     if status == "skipped":
@@ -5175,7 +4746,7 @@ def run_apply_all(verbose: bool = True, apply: bool | None = None) -> PatchStats
     return run(verbose=verbose, apply=_APPLY_MODE if apply is None else apply)
 
 
-# ── Single-registry derived view ───────────────────────────────────
+# ── Single-registry derived view ────────────────────────────────────────────
 # Built once, at import end, after every `@register_patch` has attached its
 # callable + order onto `dispatcher.PATCH_REGISTRY`. Read-only ordered
 # projection — NOT a second registry. `run()` iterates it; a few legacy tests

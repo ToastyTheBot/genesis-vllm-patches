@@ -74,23 +74,24 @@ def select_moe_expert_impl(
         if group_size in (None, 128):
             return MoESelection(
                 impl_name="marlin",
-                relevant_patches=("P87", "P91"),
-                notes="GPTQ Marlin path (27B Lorbus AutoRound g=128). P87 fixes "
-                      "sub-tile shard padding (vllm#40361); P91 fixes row-parallel "
-                      "scales group cdiv (vllm#39660). Both REQUIRED for our model.",
+                relevant_patches=(),
+                notes="GPTQ Marlin path (27B Lorbus AutoRound g=128). Genesis "
+                      "Marlin patches P87 (vllm#40361) / P91 (vllm#39660) were "
+                      "removed once upstream closed both PRs; stock Marlin is used.",
             )
         if group_size == -1:
             return MoESelection(
                 impl_name="allspark_no_group",
                 relevant_patches=(),
-                notes="AllSpark linear kernel for no-group quant. P87/P91 are NO-OP "
-                      "here — Marlin not selected. (Memory feedback_v764_swap_findings)",
+                notes="AllSpark linear kernel for no-group quant — Marlin not "
+                      "selected here. (Memory feedback_v764_swap_findings)",
             )
     if quant_format == "int8_gs128":
         return MoESelection(
             impl_name="marlin_int8",
-            relevant_patches=("P87",),
-            notes="INT8 group=128 → Marlin int8 path. P87 sub-tile padding fires.",
+            relevant_patches=(),
+            notes="INT8 group=128 → Marlin int8 path (stock; Genesis P87 removed "
+                  "after upstream closed vllm#40361).",
         )
     if quant_format == "int8_gs-1":
         return MoESelection(
