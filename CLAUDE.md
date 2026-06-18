@@ -26,20 +26,26 @@ The patch pipeline, boot to apply:
    registered under vLLM's `vllm.general_plugins` entry point, so vLLM calls it once per
    engine/rank process at startup. It must be idempotent and **never raise** (log + return on
    error — never block engine boot). It calls `apply_all.run(apply=True)`.
-2. **Orchestrator** — `vllm/_genesis/patches/apply_all.py` defines the `apply_patch_*()` functions.
-   The `@register_patch` decorator attaches each onto its `dispatcher` metadata entry (as
-   `apply_callable` + `_display_name` + `_apply_order`); `apply_all.PATCH_REGISTRY` is a *derived*,
-   ordered `[(name, fn), …]` view of that single registry, not an independent store. Each function
-   returns a `PatchResult` (`applied`/`skipped`/`failed`); `run()` iterates the view and prints the
-   structured boot summary.
-3. **Wiring** — most `apply_patch_*` functions delegate to a `wiring/<category>/patch_<id>_*.py`
-   module whose `apply()` returns `(status, reason)`. Wiring uses the `TextPatcher` / `TextPatch`
-   framework in `wiring/text_patch.py` (plus `MultiFilePatchTransaction` for atomic multi-file
-   edits with rollback).
+2. **Orchestrator** — `vllm/_genesis/patches/apply_all.py` attaches each patch's apply step onto its
+   `dispatcher` metadata entry (as `apply_callable` + `_display_name` + `_apply_order`), then builds
+   `apply_all.PATCH_REGISTRY` — a *derived*, ordered `[(name, fn), …]` view of the single registry,
+   not an independent store. Two binding paths: the **generic metadata-driven executor**
+   (`_apply_wiring_entry`, bound by `_bind_wiring_patches` from each entry's `wiring` field — the ~85
+   text-patch/rebind patches) and **hand-written `@register_patch apply_patch_*` functions** (the ~22
+   outliers with real apply-time logic). Boot order is the explicit `_APPLY_ORDER` list. Each apply
+   step returns a `PatchResult` (`applied`/`skipped`/`failed`); `run()` iterates the view and prints
+   the structured boot summary.
+3. **Wiring** — each patch's real edits live in a `wiring/<category>/patch_<id>_*.py` module whose
+   `apply()` returns `(status, reason)`. A registry entry names its module via the `wiring: "<stem>"`
+   field (the executor imports + runs it); outlier functions import it directly. Wiring uses the
+   `TextPatcher` / `TextPatch` framework in `wiring/text_patch.py` (plus `MultiFilePatchTransaction`
+   for atomic multi-file edits with rollback).
 4. **The single registry** — `vllm/_genesis/dispatcher.py::PATCH_REGISTRY` (a dict keyed by patch
    ID) is the **sole** source of truth for both metadata (`title`, `env_flag`, `env_flag_aliases`,
    `default_on`, `category`, `credit`, `upstream_pr`, `applies_to`, `conflicts_with`,
-   `requires_patches`) and the apply callable (attached at import by `@register_patch`).
+   `requires_patches`, and `wiring` — the module stem that implements the patch) and the apply
+   callable (attached at import by `_bind_wiring_patches` for `wiring`-declared patches, or
+   `@register_patch` for outliers).
    `should_apply(id)` combines it with `model_detect` / `config_detect` / env flags.
    `python3 -m vllm._genesis.dispatcher` dumps the full decision matrix.
 5. **Guards** — `vllm/_genesis/guards.py` is the *only* place vendor/chip/model/dep detection
@@ -61,6 +67,17 @@ executable (carry an `apply_callable`), **7** are metadata-only diagnostics with
 (`P51`, `P69`, `P102`, `PN60`, `PN63`, `PN64`, `PN40-classifier`). `test_dispatcher_validator.py`
 still validates entry shape + dependency refs.
 
+A second collapse (2026-06) removed the per-patch *function* ceremony. Of the **107** executable
+entries, **85** are now *metadata-driven*: their apply step is a pure text-patch/rebind dispatch
+declared by a `wiring: "<stem>"` field and run by the generic `_apply_wiring_entry` executor (bound
+at import by `_bind_wiring_patches`). The remaining **22** are *outliers* that keep a hand-written
+`@register_patch apply_patch_*` function because they carry real apply-time logic (kernel installs,
+class rebinds, bundled preallocs, hardcoded skips). This deleted ~85 near-identical ~36-line
+functions, taking `apply_all.py` from ~4,800 to ~1,900 lines. Boot order is no longer implicit
+source-line order — it's the explicit `_APPLY_ORDER` list (both paths read their `_apply_order`
+from it). Tests assert the **seam** (`PATCH_REGISTRY["<ID>"]["wiring"]` + a bound `apply_callable`),
+not a scaffolding function name.
+
 ### Patch IDs and lifecycle
 
 - **Three ID schemes**: `PR<prnum>` for a patch backed by an upstream vLLM PR (e.g. `PR40898`;
@@ -70,9 +87,10 @@ still validates entry shape + dependency refs.
 - **Env flags follow the id**: `GENESIS_ENABLE_PR40898` (uppercase suffix even for sub-patches:
   `GENESIS_ENABLE_PR40738B`). Renamed patches keep their old `GENESIS_ENABLE_*` names in an
   `env_flag_aliases` list — `should_apply` still honors them with a one-time deprecation warning.
-- The apply function name encodes the id (`_APPLY_PATCH_ID_RE`): `apply_patch_pr40898_*` → `PR40898`,
-  `apply_patch_N21_*` → `PN21`, `apply_patch_67_*` → `P67`. `register_patch(..., patch_id=...)`
-  can override explicitly.
+- For the ~22 outlier functions the apply function name encodes the id (`_APPLY_PATCH_ID_RE`):
+  `apply_patch_pr40898_*` → `PR40898`, `apply_patch_N21_*` → `PN21`, `apply_patch_67_*` → `P67`
+  (`register_patch(..., patch_id=...)` can override). Metadata-driven patches carry no function —
+  their id is the registry key and their implementation is the `wiring` field's module stem.
 - Patches default **OFF** (`default_on: False`), opt-in via their env flag. Global opt-out:
   `GENESIS_DISABLE=1`.
 - A patch self-retires when `upstream_drift_markers` / `upstream_compat` detect the fix landed
@@ -162,14 +180,21 @@ pre-existing failure, `test_default_dir_under_user_home`, appears in sandboxes w
    `kernels`, `compile_safety`, `perf_hotfix`, `hybrid`, `middleware`, `loader`, `memory`,
    `legacy` (default to `perf_hotfix` if unsure).
 2. Add the metadata entry to `dispatcher.py::PATCH_REGISTRY` (`default_on: False`; set `upstream_pr`
-   + `env_flag = GENESIS_ENABLE_<ID>`). This single entry is the source of truth.
-3. Add the `@register_patch("<display>")` `apply_patch_<id>_*` function to `apply_all.py` that
-   dispatches to the wiring module — it auto-attaches its callable onto the dispatcher entry (no
-   separate registry to keep in sync).
-4. Add `vllm/_genesis/tests/test_<id>_<name>.py` (TDD: write it first). Minimum coverage: anchor
+   + `env_flag = GENESIS_ENABLE_<ID>`). **For the common case — a pure text-patch/rebind dispatch —
+   also set `wiring: "patch_<id>_<name>"` (the module stem) and you're done: the generic
+   `_apply_wiring_entry` executor runs it, no apply function needed.** This single entry is the
+   source of truth.
+3. Add the patch id to `_APPLY_ORDER` in `apply_all.py` at the position it should boot (omit it and
+   it runs last). That list is the explicit boot order.
+4. **Only if the patch needs real apply-time logic** beyond dispatch (kernel install, conditional
+   rebind, multi-module orchestration): skip the `wiring` field and instead write a
+   `@register_patch("<display>") apply_patch_<id>_*` *outlier* function in `apply_all.py` — it
+   auto-attaches its callable onto the dispatcher entry.
+5. Add `vllm/_genesis/tests/test_<id>_<name>.py` (TDD: write it first). Minimum coverage: anchor
    exists in the pinned vLLM source, replacement is well-formed, marker present, `apply()` is
-   idempotent. If it exercises torch, `pytest.importorskip("torch")` at the top.
-5. Run the suite + the three CI gates above.
+   idempotent, and the seam is wired (`PATCH_REGISTRY["<ID>"]["wiring"]` + a bound `apply_callable`).
+   If it exercises torch, `pytest.importorskip("torch")` at the top.
+6. Run the suite + the three CI gates above.
 
 Full contributor guide with PR template: `docs/CONTRIBUTING.md`. Engineering README for the
 package internals: `vllm/_genesis/README.md`. Patch catalog: `docs/PATCHES.md`.
