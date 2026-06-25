@@ -150,7 +150,7 @@ def test_p95_in_PATCH_REGISTRY():
     from vllm._genesis.dispatcher import PATCH_REGISTRY
     assert "PR40385" in PATCH_REGISTRY, "PR40385 must be registered in PATCH_REGISTRY"
     p = PATCH_REGISTRY["PR40385"]
-    assert p["env_flag"] == "GENESIS_ENABLE_PR40385"
+    assert p["env_flag"] == "GENESIS_ENABLE_PR40385_MARLIN_TP_CUDAGRAPH_CAP"
     assert p["default_on"] is False, "PR40385 must be opt-in (default OFF)"
     assert p["upstream_pr"] == 40385
 
@@ -183,7 +183,7 @@ def test_p95_patcher_has_two_required_sub_patches():
 
 
 def test_p95_apply_skipped_when_env_unset(monkeypatch):
-    monkeypatch.delenv("GENESIS_ENABLE_PR40385", raising=False)
+    monkeypatch.delenv("GENESIS_ENABLE_PR40385_MARLIN_TP_CUDAGRAPH_CAP", raising=False)
     status, reason = apply()
     assert status == "skipped"
     assert "PR40385" in reason or "default_on" in reason or "env_flag" in reason

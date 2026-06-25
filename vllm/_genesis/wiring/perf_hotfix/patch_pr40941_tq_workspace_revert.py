@@ -32,7 +32,7 @@ Memory cost: O(num_layers) extra dequant buffers. For Qwen3.6-A3B with
 on 2× A5000 24GB at our PROD config (320K context with TQ k8v4 leaves
 ~3GB headroom).
 
-Status: opt-in via `GENESIS_ENABLE_PR40941=1`. Default OFF — only enable on
+Status: opt-in via `GENESIS_ENABLE_PR40941_TQ_WORKSPACE_REVERT=1`. Default OFF — only enable on
 hardware where Python indirection cost > memory savings (Ampere
 small-batch single-stream). DO NOT enable on H100/H200 high-concurrency
 workloads where WorkspaceManager amortizes better.

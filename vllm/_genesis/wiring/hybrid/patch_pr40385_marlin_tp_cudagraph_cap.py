@@ -46,7 +46,7 @@ batch>8, override with `--compilation-config '{"max_cudagraph_capture_size": 32}
 SAFETY MODEL
 ================================================================
 
-- Default OFF; opt-in via `GENESIS_ENABLE_PR40385=1`
+- Default OFF; opt-in via `GENESIS_ENABLE_PR40385_MARLIN_TP_CUDAGRAPH_CAP=1`
 - Idempotent via marker
 - Drift detection: 2 anchor checks (line before insertion + line after)
 - When inactive (env unset / user override / non-Marlin), behaviour

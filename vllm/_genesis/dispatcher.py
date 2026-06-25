@@ -1375,7 +1375,7 @@ PATCH_REGISTRY: dict[str, dict[str, Any]] = {
     "PR41043": {
         "wiring": "patch_pr41043_spec_decode_zero_alloc",
         "title": "Spec-decode prepare_next_token_ids_padded zero-alloc (vllm#41043)",
-        "env_flag": "GENESIS_ENABLE_PR41043",
+        "env_flag": "GENESIS_ENABLE_PR41043_SPEC_PREPARE_NEXT_IDS_ZERO_ALLOC",
         "env_flag_aliases": ["GENESIS_ENABLE_P94"],
         "default_on": False,
         "category": "spec_decode",
@@ -1389,7 +1389,7 @@ PATCH_REGISTRY: dict[str, dict[str, Any]] = {
     "PR41127": {
         "wiring": "patch_pr41127_flashinfer_full_cg_specdec",
         "title": "FlashInfer FULL CUDA graph for spec-decode (vllm#41127)",
-        "env_flag": "GENESIS_ENABLE_PR41127",
+        "env_flag": "GENESIS_ENABLE_PR41127_FLASHINFER_FULL_CUDAGRAPH",
         "env_flag_aliases": ["GENESIS_ENABLE_P100"],
         "default_on": False,
         "category": "perf_hotfix",
@@ -1416,7 +1416,7 @@ PATCH_REGISTRY: dict[str, dict[str, Any]] = {
     "PR41123": {
         "wiring": "patch_pr41123_tq_continuation_slicing",
         "title": "TQ continuation 64-token slicing (vllm#41123 SELECTIVE)",
-        "env_flag": "GENESIS_ENABLE_PR41123",
+        "env_flag": "GENESIS_ENABLE_PR41123_TQ_CONTINUATION_64TOK_SLICE",
         "env_flag_aliases": ["GENESIS_ENABLE_P101"],
         "default_on": False,
         "category": "perf_hotfix",
@@ -1432,7 +1432,7 @@ PATCH_REGISTRY: dict[str, dict[str, Any]] = {
     "PR40941b": {
         "wiring": "patch_pr40941b_workspace_manager_memoize",
         "title": "WorkspaceManager.get_simultaneous memoization (perf hotfix)",
-        "env_flag": "GENESIS_ENABLE_PR40941B",
+        "env_flag": "GENESIS_ENABLE_PR40941B_WORKSPACE_GET_SIMULTANEOUS_MEMO",
         "env_flag_aliases": ["GENESIS_ENABLE_P99"],
         "default_on": False,
         "category": "perf_hotfix",
@@ -1443,7 +1443,7 @@ PATCH_REGISTRY: dict[str, dict[str, Any]] = {
     "PR40941": {
         "wiring": "patch_pr40941_tq_workspace_revert",
         "title": "TQ WorkspaceManager revert (vllm#40941 perf hotfix)",
-        "env_flag": "GENESIS_ENABLE_PR40941",
+        "env_flag": "GENESIS_ENABLE_PR40941_TQ_WORKSPACE_REVERT",
         "env_flag_aliases": ["GENESIS_ENABLE_P98"],
         "default_on": False,
         "category": "perf_hotfix",
@@ -1459,7 +1459,7 @@ PATCH_REGISTRY: dict[str, dict[str, Any]] = {
     "PR40385": {
         "wiring": "patch_pr40385_marlin_tp_cudagraph_cap",
         "title": "Marlin TP cudagraph cap on Ampere (vllm#40385)",
-        "env_flag": "GENESIS_ENABLE_PR40385",
+        "env_flag": "GENESIS_ENABLE_PR40385_MARLIN_TP_CUDAGRAPH_CAP",
         "env_flag_aliases": ["GENESIS_ENABLE_P95"],
         "default_on": False,
         "category": "stability",
@@ -1889,7 +1889,7 @@ PATCH_REGISTRY: dict[str, dict[str, Any]] = {
     "PR41674": {
         "wiring": "patch_pr41674_thinking_budget_inverted_bool",
         "title": "thinking_token_budget inverted-bool fix (vllm#41674 backport, 1-line)",
-        "env_flag": "GENESIS_ENABLE_PR41674",
+        "env_flag": "GENESIS_ENABLE_PR41674_THINKING_TOKEN_BUDGET_BOOL_FIX",
         "env_flag_aliases": ["GENESIS_ENABLE_PN67"],
         "default_on": False,
         "category": "stability",

@@ -88,11 +88,13 @@ not a scaffolding function name.
   rename happened 2026-06 — older docs/commits still reference the pre-rename `PN21`/`P62` ids.
 - **Env flags carry the id + an intent suffix**: `GENESIS_ENABLE_<ID>_<DESCRIPTION>`, e.g.
   `GENESIS_ENABLE_PR40898_DFLASH_SWA` (uppercase id even for sub-patches:
-  `GENESIS_ENABLE_PR40738B_TRITON_KERNEL`). The handful of PR-backed patches that never had a
-  descriptive name stay bare (`GENESIS_ENABLE_PR40385`). Pre-rename `GENESIS_ENABLE_*` names survive
-  in an `env_flag_aliases` list — `should_apply` still honors them with a one-time deprecation
-  warning — but the bare `GENESIS_ENABLE_PR#####` form is **not** kept as an alias (the 2026-06
-  "restore intent to the suffix" pass put the description back onto the canonical and dropped it).
+  `GENESIS_ENABLE_PR40738B_TRITON_KERNEL`). **No bare `GENESIS_ENABLE_PR#####` canonical remains** —
+  the 7 PR-backed patches that never had a descriptive legacy name got a suffix synthesized from
+  their title in the same pass (e.g. `GENESIS_ENABLE_PR40385_MARLIN_TP_CUDAGRAPH_CAP`). Pre-rename
+  `GENESIS_ENABLE_*` names survive in an `env_flag_aliases` list — `should_apply` still honors them
+  with a one-time deprecation warning — but the bare `GENESIS_ENABLE_PR#####` form is **not** kept
+  as an alias (the 2026-06 "restore intent to the suffix" pass put the description onto the canonical
+  and dropped the bare form).
 - For the ~22 outlier functions the apply function name encodes the id (`_APPLY_PATCH_ID_RE`):
   `apply_patch_pr40898_*` → `PR40898`, `apply_patch_N21_*` → `PN21`, `apply_patch_67_*` → `P67`
   (`register_patch(..., patch_id=...)` can override). Metadata-driven patches carry no function —

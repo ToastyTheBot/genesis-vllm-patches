@@ -70,7 +70,7 @@ applies_to: any backend using FlashInfer + spec-decode + non-DCP.
 SAFETY MODEL
 ================================================================
 
-- Default OFF; opt-in via `GENESIS_ENABLE_PR41127=1`
+- Default OFF; opt-in via `GENESIS_ENABLE_PR41127_FLASHINFER_FULL_CUDAGRAPH=1`
 - Idempotent via marker
 - 7 anchor sites — drift detection on each
 - DCP guard preserved (BatchDCPPrefillWrapper not wired for CG spec-decode)

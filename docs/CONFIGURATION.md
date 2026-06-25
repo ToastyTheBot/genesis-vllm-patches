@@ -111,12 +111,12 @@ unless explicitly engaged.
 | `GENESIS_ENABLE_P86` | P86 | Ngram batch propose linear scan (faster batch ngram proposer) |
 | `GENESIS_ENABLE_P87` | P87 | Marlin sub-tile output-dim pad-on-load (vllm#40361 backport). v7.62.10 text-patch implementation |
 | `GENESIS_ENABLE_P91` | P91 | AutoRound row-group cdiv quant dispatcher fix |
-| `GENESIS_ENABLE_PR41043` | PR41043 | Spec-decode `prepare_next_token_ids_padded` zero-alloc (vllm#41043 backport, PR40941b TPOT -9.3% per author). MERGED upstream 2026-04-29 — superseded-on-pin-bump |
-| `GENESIS_ENABLE_PR40385` | PR40385 | Marlin TP cudagraph cap on Ampere (vllm#40385 backport). Defensive cap of `max_cudagraph_capture_sizes` for TP>=2 + Marlin on SM 8.6. v7.63.x audit fix: hook now wired into apply_all.py |
-| `GENESIS_ENABLE_PR40941` | PR40941 | TurboQuant WorkspaceManager revert (vllm#40941 perf hotfix — DELIBERATE INVERSE of merged upstream behavior; Ampere small-batch single-stream perf fix) |
-| `GENESIS_ENABLE_PR40941B` | PR40941b | WorkspaceManager memoize variant (companion to PR40941 for hybrid TQ) |
-| `GENESIS_ENABLE_PR41127` | PR41127 | FlashInfer FULL CUDA graph for spec-decode (vllm#41127 backport — Ampere SM 8.6 +5-10% TPS estimated) |
-| `GENESIS_ENABLE_PR41123` | PR41123 | TurboQuant continuation 64-token slicing (vllm#41123 SELECTIVE backport — long-prefix continuation OOM mitigation) |
+| `GENESIS_ENABLE_PR41043_SPEC_PREPARE_NEXT_IDS_ZERO_ALLOC` | PR41043 | Spec-decode `prepare_next_token_ids_padded` zero-alloc (vllm#41043 backport, PR40941b TPOT -9.3% per author). MERGED upstream 2026-04-29 — superseded-on-pin-bump |
+| `GENESIS_ENABLE_PR40385_MARLIN_TP_CUDAGRAPH_CAP` | PR40385 | Marlin TP cudagraph cap on Ampere (vllm#40385 backport). Defensive cap of `max_cudagraph_capture_sizes` for TP>=2 + Marlin on SM 8.6. v7.63.x audit fix: hook now wired into apply_all.py |
+| `GENESIS_ENABLE_PR40941_TQ_WORKSPACE_REVERT` | PR40941 | TurboQuant WorkspaceManager revert (vllm#40941 perf hotfix — DELIBERATE INVERSE of merged upstream behavior; Ampere small-batch single-stream perf fix) |
+| `GENESIS_ENABLE_PR40941B_WORKSPACE_GET_SIMULTANEOUS_MEMO` | PR40941b | WorkspaceManager memoize variant (companion to PR40941 for hybrid TQ) |
+| `GENESIS_ENABLE_PR41127_FLASHINFER_FULL_CUDAGRAPH` | PR41127 | FlashInfer FULL CUDA graph for spec-decode (vllm#41127 backport — Ampere SM 8.6 +5-10% TPS estimated) |
+| `GENESIS_ENABLE_PR41123_TQ_CONTINUATION_64TOK_SLICE` | PR41123 | TurboQuant continuation 64-token slicing (vllm#41123 SELECTIVE backport — long-prefix continuation OOM mitigation) |
 | `GENESIS_ENABLE_P102` | P102 | Spec-meta sanity check (live in `spec_meta.py`) |
 | `GENESIS_ENABLE_P103` | P103 | FLA Cliff 2 chunked fwd_h+fwd_o orchestrator. Tunable: `GENESIS_FLA_FWD_H_MAX_T` (default 16384, rounded to FLA_CHUNK_SIZE multiple) |
 | `GENESIS_ENABLE_PR40849_MTP_DRAFT_ONLINE_QUANT` | PR40849 | MTP draft online-quant propagation (~1 GiB VRAM savings per GPU) |

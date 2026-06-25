@@ -34,7 +34,7 @@
 #
 #
 # Hybrid GDN INT4 + TurboQuant k8v4 KV (packed slot layout, hybrid-aware).
-# Requires GENESIS_ENABLE_PR40941=1 (WorkspaceManager revert for vllm#40941 lock
+# Requires GENESIS_ENABLE_PR40941_TQ_WORKSPACE_REVERT=1 (WorkspaceManager revert for vllm#40941 lock
 # semantics — without PR40941 the first decode call hits AssertionError).
 # Tool-call 4/4 verified (Paris/Tokyo/NewYork/London with thinking on/off).
 #
@@ -88,11 +88,11 @@ export GENESIS_ENABLE_P68_AUTO_FORCE_TOOL=1 GENESIS_ENABLE_P69_LONG_CTX_TOOL_REM
 export GENESIS_ENABLE_P72_PROFILE_RUN_CAP=1 GENESIS_PROFILE_RUN_CAP_M=4096
 export GENESIS_ENABLE_P74_CHUNK_CLAMP=1
 export GENESIS_ENABLE_P82=0
-export GENESIS_ENABLE_PR40941=1   # REQUIRED for TQ k8v4 on hybrid (WorkspaceManager fix vs vllm#40941)
+export GENESIS_ENABLE_PR40941_TQ_WORKSPACE_REVERT=1   # REQUIRED for TQ k8v4 on hybrid (WorkspaceManager fix vs vllm#40941)
 export GENESIS_P82_THRESHOLD_SINGLE=0.3
 export GENESIS_ENABLE_P83=1 GENESIS_ENABLE_P85=1   # OK on hybrid GDN (different from 35B)
 export
-export GENESIS_ENABLE_PR40941B=1 GENESIS_ENABLE_PR41127=1 GENESIS_ENABLE_PR41123=1
+export GENESIS_ENABLE_PR40941B_WORKSPACE_GET_SIMULTANEOUS_MEMO=1 GENESIS_ENABLE_PR41127_FLASHINFER_FULL_CUDAGRAPH=1 GENESIS_ENABLE_PR41123_TQ_CONTINUATION_64TOK_SLICE=1
 export GENESIS_ENABLE_PR41142_GDN_AB_CONTIGUOUS=1
 export GENESIS_PREALLOC_TOKEN_BUDGET=4096 GENESIS_BUFFER_MODE=shared
 # v7.72.4 Level 1 — Cliff 2b mitigation stack for single 24 GB card.

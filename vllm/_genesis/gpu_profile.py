@@ -223,7 +223,7 @@ PATCH_RECOMMENDATIONS: dict[str, dict] = {
     # the gate now passes; this rule surfaces PR41127 to the operator on sm_120.
     "PR41127_blackwell_consumer_recommend": {
         "title": "PR41127 FlashInfer FULL CG for spec-decode (recommend on Blackwell consumer)",
-        "env": "GENESIS_ENABLE_PR41127=1 (when using FlashInfer + spec-decode)",
+        "env": "GENESIS_ENABLE_PR41127_FLASHINFER_FULL_CUDAGRAPH=1 (when using FlashInfer + spec-decode)",
         "predicate": lambda gpu: (
             gpu.get("cc") == (12, 0)  # consumer Blackwell only
         ),

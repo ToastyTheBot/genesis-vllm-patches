@@ -51,7 +51,7 @@ SAFETY MODEL
 - Idempotent via marker; drift detection on the original `.tolist()` line
   (if upstream merges this PR, our patch detects the resulting absence
   of that line and skips).
-- Default OFF; opt-in via `GENESIS_ENABLE_PR41043=1`.
+- Default OFF; opt-in via `GENESIS_ENABLE_PR41043_SPEC_PREPARE_NEXT_IDS_ZERO_ALLOC=1`.
 
 Author backport: Sandermage (Sander) Barzov Aleksandr, Ukraine, Odessa.
 Original PR: vllm#41043.

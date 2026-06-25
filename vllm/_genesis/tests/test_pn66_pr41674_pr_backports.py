@@ -21,14 +21,14 @@ class TestPN67Registration:
     def test_metadata(self):
         from vllm._genesis.dispatcher import PATCH_REGISTRY
         meta = PATCH_REGISTRY["PR41674"]
-        assert meta["env_flag"] == "GENESIS_ENABLE_PR41674"
+        assert meta["env_flag"] == "GENESIS_ENABLE_PR41674_THINKING_TOKEN_BUDGET_BOOL_FIX"
         assert meta["default_on"] is False
         assert meta["category"] == "stability"
         assert meta["upstream_pr"] == 41674
 
     def test_apply_skipped_when_env_disabled(self, monkeypatch):
         from vllm._genesis.wiring.perf_hotfix import patch_pr41674_thinking_budget_inverted_bool as p
-        monkeypatch.delenv("GENESIS_ENABLE_PR41674", raising=False)
+        monkeypatch.delenv("GENESIS_ENABLE_PR41674_THINKING_TOKEN_BUDGET_BOOL_FIX", raising=False)
         status, reason = p.apply()
         assert status == "skipped"
 

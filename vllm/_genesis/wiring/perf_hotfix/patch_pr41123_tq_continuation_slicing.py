@@ -31,7 +31,7 @@ COMPOSABILITY:
   `use_decode_continuation = (q_len <= ... or cached_len >= ...)` block
 - TODO next session: update P56 to anchor on the new `use_decode_continuation`
 
-Status: opt-in via `GENESIS_ENABLE_PR41123=1`. Default OFF.
+Status: opt-in via `GENESIS_ENABLE_PR41123_TQ_CONTINUATION_64TOK_SLICE=1`. Default OFF.
 applies_to: turboquant_* KV dtypes only.
 
 Author backport: Sandermage (Sander) Barzov Aleksandr, Ukraine, Odessa.

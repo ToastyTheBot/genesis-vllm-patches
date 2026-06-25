@@ -54,7 +54,7 @@ agentic workflows, RAG pre-roll scoping, or 27B long-ctx context budget).
 ENV
 ================================================================
 
-GENESIS_ENABLE_PR41674=1
+GENESIS_ENABLE_PR41674_THINKING_TOKEN_BUDGET_BOOL_FIX=1
 
 ================================================================
 RISK

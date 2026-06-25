@@ -33,7 +33,7 @@ PR40941 specifically reverts turboquant_attn use-site. With PR40941=1 the
 turboquant_attn doesn't call get_simultaneous, so PR40941b is no-op there
 but helps any other backend / future code that uses WorkspaceManager.
 
-Status: opt-in via `GENESIS_ENABLE_PR40941B=1`. Default OFF.
+Status: opt-in via `GENESIS_ENABLE_PR40941B_WORKSPACE_GET_SIMULTANEOUS_MEMO=1`. Default OFF.
 Drift detection: skip if `_genesis_p99_cache` already in source.
 
 Author: Sandermage (Sander) Barzov Aleksandr, Ukraine, Odessa.
