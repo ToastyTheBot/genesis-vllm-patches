@@ -1897,6 +1897,16 @@ PATCH_REGISTRY: dict[str, dict[str, Any]] = {
         "upstream_pr": 41674,
         "applies_to": {},
     },
+    "PR44283": {
+        "wiring": "patch_pr44283_anthropic_system_role",
+        "title": "Anthropic API: support system-role messages inside the messages array (vllm#44283)",
+        "env_flag": "GENESIS_ENABLE_PR44283_ANTHROPIC_SYSTEM_ROLE",
+        "default_on": False,
+        "category": "middleware",
+        "credit": "chaunceyjiang (vllm#44283, MERGED 2026-06-02, fixes vllm#44000). Genesis backport ToastyTheBot. The Anthropic-compatible endpoint (/v1/messages) now accepts {\"role\": \"system\"} entries inside the messages array — not just the top-level `system` field. `_convert_system_message` concatenates system text from BOTH sources; `_convert_messages` skips system entries so they aren't emitted twice. Widens `AnthropicMessage.role` Literal to include \"system\". Endpoint-layer, model-agnostic. Auto-retires when the pin advances past the merge (per-file upstream_drift_markers).",
+        "upstream_pr": 44283,
+        "applies_to": {},
+    },
     "PN70": {
         "wiring": "patch_N70_tool_schema_subset_filter",
         "title": "Tool schema subset filter (combined `anyOf` xgrammar-clean) — companion to P68 v7.72.1",
