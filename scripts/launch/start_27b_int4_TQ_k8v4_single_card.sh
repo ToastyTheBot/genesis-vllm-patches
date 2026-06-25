@@ -37,7 +37,7 @@
 #   - --gpu-memory-utilization 0.95 → 0.85 (frees ~2.4 GB headroom)
 #   - --max-num-seqs 4 → 2 (halves KV pool footprint)
 #   - --max-num-batched-tokens 8192 → 2048 (smaller chunked-prefill chunks)
-#   + GENESIS_ENABLE_PR40849=1 (verify if PR40849 fires on INT4 AutoRound — it might no-op since AutoRound is offline-quant)
+#   + GENESIS_ENABLE_PR40849_MTP_DRAFT_ONLINE_QUANT=1 (verify if PR40849 fires on INT4 AutoRound — it might no-op since AutoRound is offline-quant)
 #
 # Test plan:
 #   1. Boot, verify GPU memory < 21 GB after load (vs 22.69 GB v771b)
@@ -66,10 +66,10 @@ docker run -d \
   -e OMP_NUM_THREADS=1 -e CUDA_DEVICE_MAX_CONNECTIONS=8 \
   -e VLLM_ALLOW_LONG_MAX_MODEL_LEN=1 -e TRITON_CACHE_DIR=/root/.triton/cache \
   -e VLLM_WORKER_MULTIPROC_METHOD=spawn -e VLLM_MARLIN_USE_ATOMIC_ADD=1 \
-  -e GENESIS_ENABLE_PR40768=1 \
-  -e GENESIS_ENABLE_PR40738=1 -e GENESIS_ENABLE_PR40738B=1 \
+  -e GENESIS_ENABLE_PR40768_ASYNC_PLACEHOLDER_FIX=1 \
+  -e GENESIS_ENABLE_PR40738_GDN_NGRAM_FIX=1 -e GENESIS_ENABLE_PR40738B_TRITON_KERNEL=1 \
   \
-  -e GENESIS_ENABLE_PR36138=1 \
+  -e GENESIS_ENABLE_PR36138_STRUCT_OUT_SPEC_TIMING=1 \
   \
   -e GENESIS_ENABLE_P68_AUTO_FORCE_TOOL=1 -e GENESIS_ENABLE_P69_LONG_CTX_TOOL_REMINDER=1 \
   -e GENESIS_ENABLE_P72_PROFILE_RUN_CAP=1 -e GENESIS_PROFILE_RUN_CAP_M=4096 \
@@ -77,10 +77,10 @@ docker run -d \
   -e GENESIS_ENABLE_P82=0 -e GENESIS_ENABLE_PR40941=1 -e GENESIS_ENABLE_PR40941B=1 -e GENESIS_P82_THRESHOLD_SINGLE=0.3 \
   -e GENESIS_ENABLE_P67_TQ_MULTI_QUERY_KERNEL=1 -e GENESIS_ENABLE_P85=1 -e GENESIS_ENABLE_P83=1 -e GENESIS_ENABLE_PR41123=1 -e GENESIS_ENABLE_PR41127=1 \
   -e GENESIS_ENABLE_P78_TOLIST_CAPTURE_GUARD=0 \
-  -e GENESIS_ENABLE_PR40925=0 \
+  -e GENESIS_ENABLE_PR40925_FP8_BLOCK_SCALED_M_LE_8=0 \
   -e GENESIS_PREALLOC_TOKEN_BUDGET=4096 -e GENESIS_BUFFER_MODE=shared \
-  -e GENESIS_ENABLE_PR40849=1 \
-  -e GENESIS_ENABLE_PR41142=1 \
+  -e GENESIS_ENABLE_PR40849_MTP_DRAFT_ONLINE_QUANT=1 \
+  -e GENESIS_ENABLE_PR41142_GDN_AB_CONTIGUOUS=1 \
   vllm/vllm-openai:nightly -c \
   "set -e; echo === v771b 27B Lorbus INT4 NO-prefix-cache MTP K=3 ===; \
 pip install --quiet --disable-pip-version-check pandas scipy xxhash; \

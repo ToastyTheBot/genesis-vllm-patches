@@ -53,7 +53,7 @@ SAFETY MODEL
 - Idempotent via marker; drift detection on the upstream context
   manager appearing natively (it would mean #41268 merged).
 
-- Default OFF; opt-in via `GENESIS_ENABLE_PR41268=1`.
+- Default OFF; opt-in via `GENESIS_ENABLE_PR41268_SCOPED_MAX_SPLIT=1`.
 
 ================================================================
 ACCEPTANCE BAR — RECOMMENDED OPERATOR PROCEDURE
@@ -65,7 +65,7 @@ permanently:
 1. Capture baseline: boot your config WITHOUT PR41268. Record
    `nvidia-smi --query-gpu=memory.used --format=csv -l 1` peak
    during model load (typically 60-180s after container start).
-2. Restart with `GENESIS_ENABLE_PR41268=1`. Record
+2. Restart with `GENESIS_ENABLE_PR41268_SCOPED_MAX_SPLIT=1`. Record
    peak again.
 3. Compare. If PR41268's peak is ≥ 200 MiB lower, the patch is real
    for your config — try bumping `--gpu-memory-utilization` by
@@ -163,7 +163,7 @@ PR41268_HELPER_NEW = (
     "    # PyTorch 2.10+ fragmentation during model load: temporarily\n"
     "    # set max_split_size_mb=20 (PyTorch minimum) for the load\n"
     "    # section, restore prior on exit. Enabled via\n"
-    "    # GENESIS_ENABLE_PR41268=1.\n"
+    "    # GENESIS_ENABLE_PR41268_SCOPED_MAX_SPLIT=1.\n"
     "    def _genesis_pn19_scoped_allocator_max_split(self, max_split_size_mb: int):\n"
     "        from contextlib import contextmanager\n"
     "        @contextmanager\n"
@@ -261,7 +261,7 @@ def _patcher() -> TextPatcher | None:
 
 def _is_enabled() -> bool:
     return os.environ.get(
-        "GENESIS_ENABLE_PR41268", ""
+        "GENESIS_ENABLE_PR41268_SCOPED_MAX_SPLIT", ""
     ).strip().lower() in ("1", "true", "yes", "on")
 
 
@@ -274,7 +274,7 @@ def apply() -> tuple[str, str]:
     """
     if not _is_enabled():
         return "skipped", (
-            "GENESIS_ENABLE_PR41268 not set; default OFF. "
+            "GENESIS_ENABLE_PR41268_SCOPED_MAX_SPLIT not set; default OFF. "
             "Backport of vllm#41268 (MatthewBonanni, OPEN). PyTorch 2.10+ "
             "introduces load-time fragmentation; this patch sets "
             "max_split_size_mb=20 during model load, restores on exit. "

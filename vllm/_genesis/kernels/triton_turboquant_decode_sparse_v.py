@@ -178,7 +178,7 @@ may invert. **DO NOT enable in any production launch script** until:
 - OR removal of the per-call `.item()` sync (requires upstream API
   change to pass seq_len_max as Python int from caller)
 
-Status: opt-in via GENESIS_ENABLE_PR41422=1. Default OFF, NOT
+Status: opt-in via GENESIS_ENABLE_PR41422_SPARSE_V=1. Default OFF, NOT
 enabled in any launch script. Experimental.
 """
 from __future__ import annotations
@@ -194,7 +194,7 @@ except ModuleNotFoundError:  # torch is a runtime-only dep
 
 log = logging.getLogger("genesis.kernels.tq_decode_sparse_v")
 
-_ENV_ENABLE = "GENESIS_ENABLE_PR41422"
+_ENV_ENABLE = "GENESIS_ENABLE_PR41422_SPARSE_V"
 _ENV_THRESHOLD = "GENESIS_PR41418_SPARSE_V_THRESHOLD"
 _ENV_MIN_CTX = "GENESIS_PR41418_SPARSE_V_MIN_CTX"
 _ENV_SCALE_FACTOR = "GENESIS_PR41418_SPARSE_V_SCALE_FACTOR"

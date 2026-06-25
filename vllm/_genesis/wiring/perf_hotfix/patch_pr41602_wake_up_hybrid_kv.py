@@ -10,7 +10,7 @@ Affects: 27B Lorbus Qwen3.6 hybrid (GDN = MambaSpec). Crash trigger —
 любой `/sleep` + `/wake_up` через mgmt API. У нас в active scripts
 sleep не вызывается, но crash possible через external trigger.
 
-Default OFF (opt-in via GENESIS_ENABLE_PR41602=1) — defensive backport;
+Default OFF (opt-in via GENESIS_ENABLE_PR41602_WAKE_UP_HYBRID_KV=1) — defensive backport;
 включить при необходимости sleep/wake.
 
 Backport: Joachim Studnia / Mistral, vllm#41602 (OPEN as of 2026-05-04).
@@ -35,7 +35,7 @@ GENESIS_PR41602_MARKER = "Genesis PR41602 wake_up hybrid KV (vllm#41602)"
 
 def _is_enabled() -> bool:
     return os.environ.get(
-        "GENESIS_ENABLE_PR41602", ""
+        "GENESIS_ENABLE_PR41602_WAKE_UP_HYBRID_KV", ""
     ).strip().lower() in ("1", "true", "yes", "on")
 
 

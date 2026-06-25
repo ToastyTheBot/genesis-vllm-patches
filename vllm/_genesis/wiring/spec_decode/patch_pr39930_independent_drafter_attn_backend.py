@@ -40,7 +40,7 @@ for our single-operator deployment model.
 SAFETY MODEL
 ================================================================
 
-- Default OFF (opt-in via `GENESIS_ENABLE_PR39930=1`).
+- Default OFF (opt-in via `GENESIS_ENABLE_PR39930_INDEPENDENT_DRAFTER_ATTN=1`).
 - Text-patch on `vllm/v1/spec_decode/llm_base_proposer.py` —
   `LLMBaseProposer._create_draft_vllm_config()` body.
 - Idempotent via marker `Genesis PR39930 ...`.

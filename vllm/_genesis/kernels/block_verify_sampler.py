@@ -50,7 +50,7 @@ ratio < 1. Same target marginal preserved (unbiased).
 GENESIS-SPECIFIC NOTES
 ================================================================
 
-- Default OFF — opt-in via `GENESIS_ENABLE_PR40819=1`
+- Default OFF — opt-in via `GENESIS_ENABLE_PR40819_BLOCK_VERIFY=1`
 - Realistic gain on 35B-A3B + Ampere: +0-3% wall-clock (PR's own Qwen3-32B
   bench shows parity at our model size). Treat as experimental.
 - Safe fallback: any error in this kernel raises and is caught by an outer
@@ -336,7 +336,7 @@ def sample_recovered_tokens_blockwise_pytorch(
 
 # ════════════════════════════════════════════════════════════════════════
 # Triton kernels (with both gemini bug-fixes applied).
-# Used in production path when GENESIS_ENABLE_PR40819=1.
+# Used in production path when GENESIS_ENABLE_PR40819_BLOCK_VERIFY=1.
 # ════════════════════════════════════════════════════════════════════════
 
 if _TRITON_OK:
@@ -645,5 +645,5 @@ def is_active() -> bool:
     """Returns True if PR40819 is enabled via env."""
     import os
     return os.environ.get(
-        "GENESIS_ENABLE_PR40819", ""
+        "GENESIS_ENABLE_PR40819_BLOCK_VERIFY", ""
     ).strip().lower() in ("1", "true", "yes", "on")

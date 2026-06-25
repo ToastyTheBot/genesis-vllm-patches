@@ -18,9 +18,9 @@ def test_collect_known_flags_includes_pn55():
     from vllm._genesis.compat.env_flag_guard import collect_known_flags
     known = collect_known_flags()
     # PR41602 was added in this session — must be picked up
-    assert "GENESIS_ENABLE_PR41602" in known
+    assert "GENESIS_ENABLE_PR41602_WAKE_UP_HYBRID_KV" in known
     # And legacy patches
-    assert "GENESIS_ENABLE_PR41422" in known
+    assert "GENESIS_ENABLE_PR41422_SPARSE_V" in known
 
 
 def test_no_typos_on_clean_environ():
@@ -32,8 +32,8 @@ def test_no_typos_on_clean_environ():
 def test_known_flag_no_finding():
     from vllm._genesis.compat.env_flag_guard import find_typos
     findings = find_typos(environ={
-        "GENESIS_ENABLE_PR41602": "1",
-        "GENESIS_ENABLE_PR41422": "1",
+        "GENESIS_ENABLE_PR41602_WAKE_UP_HYBRID_KV": "1",
+        "GENESIS_ENABLE_PR41422_SPARSE_V": "1",
     })
     assert findings == []
 
@@ -49,9 +49,9 @@ def test_disable_inverse_no_finding():
 
 def test_typo_detected_close_match():
     from vllm._genesis.compat.env_flag_guard import find_typos
-    # Typo: a dropped digit vs the real flag GENESIS_ENABLE_PR41602
+    # Typo: a dropped digit vs the real flag GENESIS_ENABLE_PR41602_WAKE_UP_HYBRID_KV
     findings = find_typos(environ={
-        "GENESIS_ENABLE_PR4162": "1",  # missing one digit
+        "GENESIS_ENABLE_PR4162_WAKE_UP_HYBRID_KV": "1",  # missing one digit
     })
     assert len(findings) == 1
     assert "PR4162" in findings[0].env_var
@@ -82,8 +82,8 @@ def test_assert_no_typos_default_warn(caplog):
 
 def test_assert_no_typos_strict_raises(monkeypatch):
     from vllm._genesis.compat.env_flag_guard import assert_no_typos
-    # Use a close-typo (dropped digit) of the real flag GENESIS_ENABLE_PR41602
-    monkeypatch.setenv("GENESIS_ENABLE_PR4162", "1")
+    # Use a close-typo (dropped digit) of the real flag GENESIS_ENABLE_PR41602_WAKE_UP_HYBRID_KV
+    monkeypatch.setenv("GENESIS_ENABLE_PR4162_WAKE_UP_HYBRID_KV", "1")
     with pytest.raises(RuntimeError, match="suspicious GENESIS_ENABLE"):
         assert_no_typos(strict=True)
 

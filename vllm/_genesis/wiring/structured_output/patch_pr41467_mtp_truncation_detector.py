@@ -38,7 +38,7 @@ GENESIS_PR41467_MARKER = "Genesis PR41467 MTP truncation detector (vllm#41467)"
 
 def _is_enabled() -> bool:
     return os.environ.get(
-        "GENESIS_ENABLE_PR41467", ""
+        "GENESIS_ENABLE_PR41467_MTP_TRUNCATION_DETECTOR", ""
     ).strip().lower() in ("1", "true", "yes", "on")
 
 

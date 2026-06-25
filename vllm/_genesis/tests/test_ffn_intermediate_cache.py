@@ -16,7 +16,7 @@ Design invariants tested here:
   3. Sequential layer execution (no concurrent overlap on same buffer).
   4. Idempotent on size growth (max-shape preallocate, slice on acquire).
   5. Returns IDENTICAL data_ptr across calls for same (key, M).
-  6. Disabled when env GENESIS_ENABLE_PR34207 is unset.
+  6. Disabled when env GENESIS_ENABLE_PR34207_FFN_INTERMEDIATE_POOL is unset.
 
 Author: Sandermage(Sander)-Barzov Aleksandr, Ukraine, Odessa
 """
@@ -33,7 +33,7 @@ import torch
 # ═══════════════════════════════════════════════════════════════════════════
 
 class TestEnvGate:
-    """Group 1: should_apply() respects GENESIS_ENABLE_PR34207."""
+    """Group 1: should_apply() respects GENESIS_ENABLE_PR34207_FFN_INTERMEDIATE_POOL."""
 
     def test_should_apply_returns_bool(self):
         from vllm._genesis.kernels.ffn_intermediate_cache import (
@@ -43,7 +43,7 @@ class TestEnvGate:
 
     def test_should_apply_false_when_env_unset(self, monkeypatch):
         monkeypatch.delenv(
-            "GENESIS_ENABLE_PR34207", raising=False
+            "GENESIS_ENABLE_PR34207_FFN_INTERMEDIATE_POOL", raising=False
         )
         from vllm._genesis.kernels.ffn_intermediate_cache import (
             FFNIntermediateCache,
@@ -51,14 +51,14 @@ class TestEnvGate:
         assert FFNIntermediateCache.should_apply() is False
 
     def test_should_apply_false_when_env_zero(self, monkeypatch):
-        monkeypatch.setenv("GENESIS_ENABLE_PR34207", "0")
+        monkeypatch.setenv("GENESIS_ENABLE_PR34207_FFN_INTERMEDIATE_POOL", "0")
         from vllm._genesis.kernels.ffn_intermediate_cache import (
             FFNIntermediateCache,
         )
         assert FFNIntermediateCache.should_apply() is False
 
     def test_should_apply_true_when_env_one(self, monkeypatch):
-        monkeypatch.setenv("GENESIS_ENABLE_PR34207", "1")
+        monkeypatch.setenv("GENESIS_ENABLE_PR34207_FFN_INTERMEDIATE_POOL", "1")
         from vllm._genesis.kernels.ffn_intermediate_cache import (
             FFNIntermediateCache,
         )

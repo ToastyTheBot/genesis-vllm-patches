@@ -44,7 +44,7 @@ The PR is pure plumbing — wiring model classes through to that method.
 SAFETY MODEL
 ================================================================
 
-- env: `GENESIS_ENABLE_PR39419=1`
+- env: `GENESIS_ENABLE_PR39419_LOCAL_ARGMAX_TP=1`
 - default OFF; opt-in.
 - Idempotent (marker check)
 - Falls through cleanly if anchor missed (SKIPPED, not crash).

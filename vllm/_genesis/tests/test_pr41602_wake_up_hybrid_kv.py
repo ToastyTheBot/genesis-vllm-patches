@@ -49,14 +49,14 @@ def test_idempotent_on_synthetic(tmp_path):
 
 def test_env_flag_default_off(monkeypatch):
     from vllm._genesis.dispatcher import should_apply
-    monkeypatch.delenv("GENESIS_ENABLE_PR41602", raising=False)
+    monkeypatch.delenv("GENESIS_ENABLE_PR41602_WAKE_UP_HYBRID_KV", raising=False)
     decision, _ = should_apply("PR41602")
     assert decision is False
 
 
 def test_env_flag_engages(monkeypatch):
     from vllm._genesis.dispatcher import should_apply
-    monkeypatch.setenv("GENESIS_ENABLE_PR41602", "1")
+    monkeypatch.setenv("GENESIS_ENABLE_PR41602_WAKE_UP_HYBRID_KV", "1")
     decision, _ = should_apply("PR41602")
     assert decision is True
 

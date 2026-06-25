@@ -42,7 +42,7 @@ def test_pn35_in_dispatcher_registry():
 
     assert "PR35975" in PATCH_REGISTRY
     e = PATCH_REGISTRY["PR35975"]
-    assert e["env_flag"] == "GENESIS_ENABLE_PR35975"
+    assert e["env_flag"] == "GENESIS_ENABLE_PR35975_INPUTS_EMBEDS_OPTIONAL"
     # Default ON — strict savings, no regression possible
     assert e["default_on"] is True, (
         "PR35975 must default ON — text-only is the common case + the "
@@ -204,8 +204,8 @@ def test_pn35_drift_markers_specific_no_generic_collision_risk():
 
 
 def test_pn35_apply_skips_when_env_disabled(monkeypatch):
-    """Operators can opt-out via GENESIS_ENABLE_PR35975=0."""
-    monkeypatch.setenv("GENESIS_ENABLE_PR35975", "0")
+    """Operators can opt-out via GENESIS_ENABLE_PR35975_INPUTS_EMBEDS_OPTIONAL=0."""
+    monkeypatch.setenv("GENESIS_ENABLE_PR35975_INPUTS_EMBEDS_OPTIONAL", "0")
     from vllm._genesis.wiring.perf_hotfix.patch_pr35975_inputs_embeds_optional import (
         apply,
     )
@@ -215,7 +215,7 @@ def test_pn35_apply_skips_when_env_disabled(monkeypatch):
 
 def test_pn35_apply_skips_when_vllm_install_missing(monkeypatch):
     """If vllm install root not resolvable, soft-skip cleanly."""
-    monkeypatch.setenv("GENESIS_ENABLE_PR35975", "1")
+    monkeypatch.setenv("GENESIS_ENABLE_PR35975_INPUTS_EMBEDS_OPTIONAL", "1")
     import vllm._genesis.wiring.perf_hotfix.patch_pr35975_inputs_embeds_optional as mod
 
     # Force vllm_install_root to return None

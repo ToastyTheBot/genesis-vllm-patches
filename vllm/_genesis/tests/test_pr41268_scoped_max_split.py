@@ -106,19 +106,19 @@ class TestPN19TorchVersionFallback:
 
 class TestPN19EnvGate:
     def test_apply_skipped_when_env_unset(self, monkeypatch):
-        monkeypatch.delenv("GENESIS_ENABLE_PR41268", raising=False)
+        monkeypatch.delenv("GENESIS_ENABLE_PR41268_SCOPED_MAX_SPLIT", raising=False)
         from vllm._genesis.wiring.perf_hotfix.patch_pr41268_scoped_max_split import (
             apply,
         )
         status, reason = apply()
         assert status == "skipped"
-        assert "GENESIS_ENABLE_PR41268" in reason
+        assert "GENESIS_ENABLE_PR41268_SCOPED_MAX_SPLIT" in reason
 
     def test_apply_skipped_explains_pr_and_acceptance_bar(self, monkeypatch):
         """The skip reason must reference PR #41268 + acknowledge the
         unverified-on-Ampere status so operators see the institutional
         rationale."""
-        monkeypatch.delenv("GENESIS_ENABLE_PR41268", raising=False)
+        monkeypatch.delenv("GENESIS_ENABLE_PR41268_SCOPED_MAX_SPLIT", raising=False)
         from vllm._genesis.wiring.perf_hotfix.patch_pr41268_scoped_max_split import (
             apply,
         )
@@ -131,10 +131,10 @@ class TestPN19EnvGate:
             _is_enabled,
         )
         for val in ("1", "true", "TRUE", "Yes", "on", "ON"):
-            monkeypatch.setenv("GENESIS_ENABLE_PR41268", val)
+            monkeypatch.setenv("GENESIS_ENABLE_PR41268_SCOPED_MAX_SPLIT", val)
             assert _is_enabled() is True
         for val in ("", "0", "false", "off", "garbage"):
-            monkeypatch.setenv("GENESIS_ENABLE_PR41268", val)
+            monkeypatch.setenv("GENESIS_ENABLE_PR41268_SCOPED_MAX_SPLIT", val)
             assert _is_enabled() is False
 
 
@@ -143,7 +143,7 @@ class TestPN19DispatcherIntegration:
         from vllm._genesis.dispatcher import PATCH_REGISTRY
         assert "PR41268" in PATCH_REGISTRY
         meta = PATCH_REGISTRY["PR41268"]
-        assert meta["env_flag"] == "GENESIS_ENABLE_PR41268"
+        assert meta["env_flag"] == "GENESIS_ENABLE_PR41268_SCOPED_MAX_SPLIT"
         assert meta["default_on"] is False
         assert meta["upstream_pr"] == 41268
 
@@ -163,7 +163,7 @@ class TestPN19DispatcherIntegration:
         repo_root = Path(__file__).resolve().parents[3]
         patches_md = (repo_root / "docs" / "PATCHES.md").read_text()
         assert "PR41268" in patches_md
-        assert "GENESIS_ENABLE_PR41268" in patches_md
+        assert "GENESIS_ENABLE_PR41268_SCOPED_MAX_SPLIT" in patches_md
         assert "#41268" in patches_md
 
 

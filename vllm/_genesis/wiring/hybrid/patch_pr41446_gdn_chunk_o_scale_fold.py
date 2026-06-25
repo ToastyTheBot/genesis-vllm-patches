@@ -56,7 +56,7 @@ Expected gain: +1-2% on GDN-heavy workloads (prefill-dominated).
 SAFETY MODEL
 ================================================================
 
-- Default OFF (opt-in via `GENESIS_ENABLE_PR41446=1`).
+- Default OFF (opt-in via `GENESIS_ENABLE_PR41446_GDN_SCALE_FOLD=1`).
 - Pure text-patch, idempotent via marker.
 - Drift-aware: if upstream merges PR #41446, our anchor won't match → no-op.
 - Anchor missing → SKIPPED, source stays vanilla. Zero regression risk.

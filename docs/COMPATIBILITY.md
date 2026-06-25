@@ -205,9 +205,9 @@ Numbers in "noise" parentheses are from `tools/genesis_bench_suite.py
 # workload needs them (and you want to opt into the empirical caveat
 # above):
 
--e GENESIS_ENABLE_PR34207=1 \
--e GENESIS_ENABLE_PR41235=1 \
--e GENESIS_ENABLE_PR40074=1 \
+-e GENESIS_ENABLE_PR34207_FFN_INTERMEDIATE_POOL=1 \
+-e GENESIS_ENABLE_PR41235_CUDA_GRAPH_LAMBDA_ARITY=1 \
+-e GENESIS_ENABLE_PR40074_TQ_DECODE_OOB_CLAMP=1 \
 
 # DO NOT enable these without reading the regression note:
 # -e GENESIS_ENABLE_P83=1

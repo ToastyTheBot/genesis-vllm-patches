@@ -3,7 +3,7 @@
 
 Activates upstream PR #25784 (Suffix Decoding, MERGED 2025-11-03, present in
 our pin `07351e088`). Auto-rewrites `speculative_config.method` from "ngram"
-to "suffix" when `GENESIS_ENABLE_PR25784=1`. Operator convenience
+to "suffix" when `GENESIS_ENABLE_PR25784_SUFFIX_DECODING=1`. Operator convenience
 patch — equivalent to manually setting `--speculative-config '{"method":"suffix",...}'`.
 
 ================================================================
@@ -44,7 +44,7 @@ SAFETY MODEL
 TUNABLE ENV
 ================================================================
 
-GENESIS_ENABLE_PR25784=1                    # master switch
+GENESIS_ENABLE_PR25784_SUFFIX_DECODING=1                    # master switch
 GENESIS_PR25784_TREE_DEPTH=24                               # suffix tree max depth
 GENESIS_PR25784_SPEC_FACTOR=2.0                             # max draft length factor
 GENESIS_PR25784_MIN_PROB=0.10                               # branch prob threshold
@@ -104,7 +104,7 @@ PR25784_NEW = (
     "        # ════════════════════════════════════════════════════════════\n"
     "        import os as _genesis_p75_os\n"
     "        if (\n"
-    "            _genesis_p75_os.environ.get(\"GENESIS_ENABLE_PR25784\", \"\").strip().lower()\n"
+    "            _genesis_p75_os.environ.get(\"GENESIS_ENABLE_PR25784_SUFFIX_DECODING\", \"\").strip().lower()\n"
     "            in (\"1\", \"true\", \"yes\", \"on\")\n"
     "            and self.method == \"ngram\"\n"
     "        ):\n"
@@ -129,7 +129,7 @@ PR25784_NEW = (
     "                logger.warning(\n"
     "                    \"[Genesis PR25784] Auto-swapped speculative method '%s' -> 'suffix' \"\n"
     "                    \"(tree_depth=%d, spec_factor=%.2f, min_prob=%.3f, cache_reqs=%d). \"\n"
-    "                    \"Disable via GENESIS_ENABLE_PR25784=0.\",\n"
+    "                    \"Disable via GENESIS_ENABLE_PR25784_SUFFIX_DECODING=0.\",\n"
     "                    _genesis_p75_orig, self.suffix_decoding_max_tree_depth,\n"
     "                    self.suffix_decoding_max_spec_factor,\n"
     "                    self.suffix_decoding_min_token_prob,\n"
@@ -163,7 +163,7 @@ def _make_patcher() -> TextPatcher | None:
         ],
         upstream_drift_markers=[
             "[Genesis PR25784",
-            "GENESIS_ENABLE_PR25784",
+            "GENESIS_ENABLE_PR25784_SUFFIX_DECODING",
         ],
     )
 
@@ -212,7 +212,7 @@ def apply() -> tuple[str, str]:
             f"({failure.detail if failure else ''})"
         )
     return "applied", (
-        "PR25784 applied: when GENESIS_ENABLE_PR25784=1 AND user "
+        "PR25784 applied: when GENESIS_ENABLE_PR25784_SUFFIX_DECODING=1 AND user "
         "config sets method=ngram, automatically swap to method=suffix "
         "(Arctic Inference suffix tree, dynamic K). Per arxiv 2411.04975 "
         "expected +30-50% TPS on agentic workloads."

@@ -66,7 +66,7 @@ Three coordinated changes:
      so no `-1` reaches the worker. Also clear the counter on preemption
      and on `update_draft_token_ids`.
 
-Status: opt-in (`GENESIS_ENABLE_PR40768=1`).
+Status: opt-in (`GENESIS_ENABLE_PR40768_ASYNC_PLACEHOLDER_FIX=1`).
 
 This is the ROOT-CAUSE fix; the earlier P56 (routing-layer workaround,
 deprecated) and P57 v2 (buffer-shape workaround) become redundant once
@@ -113,10 +113,10 @@ GENESIS_PR40768_MARKER = "Genesis PR40768 async-scheduler -1 placeholder fix v7.
 
 def _is_enabled() -> bool:
     """Env-gate. Off by default — opt-in via:
-    GENESIS_ENABLE_PR40768=1
+    GENESIS_ENABLE_PR40768_ASYNC_PLACEHOLDER_FIX=1
     """
     return os.environ.get(
-        "GENESIS_ENABLE_PR40768", ""
+        "GENESIS_ENABLE_PR40768_ASYNC_PLACEHOLDER_FIX", ""
     ).strip().lower() in ("1", "true", "yes", "on")
 
 

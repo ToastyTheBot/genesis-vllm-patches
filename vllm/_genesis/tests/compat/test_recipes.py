@@ -50,8 +50,8 @@ _VALID_RECIPE = {
         "memory": "64g",
     },
     "envs": {
-        "GENESIS_ENABLE_PR40074": "1",
-        "GENESIS_ENABLE_PR34207": "1",
+        "GENESIS_ENABLE_PR40074_TQ_DECODE_OOB_CLAMP": "1",
+        "GENESIS_ENABLE_PR34207_FFN_INTERMEDIATE_POOL": "1",
     },
     "vllm_serve": {
         "model": "/models/Qwen3.6-27B-int4-AutoRound",
@@ -175,7 +175,7 @@ class TestFromContainer:
             "Config": {
                 "Image": "vllm/vllm-openai:nightly",
                 "Env": [
-                    "GENESIS_ENABLE_PR40074=1",
+                    "GENESIS_ENABLE_PR40074_TQ_DECODE_OOB_CLAMP=1",
                     "VLLM_NO_USAGE_STATS=1",
                 ],
                 "Cmd": ["-c", "exec vllm serve --model /models/X "
@@ -195,7 +195,7 @@ class TestFromContainer:
         rec = recipes.from_container("test-vllm")
         assert rec is not None
         assert "envs" in rec
-        assert rec["envs"].get("GENESIS_ENABLE_PR40074") == "1"
+        assert rec["envs"].get("GENESIS_ENABLE_PR40074_TQ_DECODE_OOB_CLAMP") == "1"
 
     def test_from_container_extracts_vllm_serve_args(self, monkeypatch, tmp_recipes_dir):
         fake_inspect = json.dumps([{
@@ -246,8 +246,8 @@ class TestToLaunchScript:
     def test_includes_genesis_envs(self, tmp_recipes_dir):
         from vllm._genesis.compat.recipes import to_launch_script
         script = to_launch_script(_VALID_RECIPE)
-        assert "GENESIS_ENABLE_PR40074=1" in script
-        assert "GENESIS_ENABLE_PR34207=1" in script
+        assert "GENESIS_ENABLE_PR40074_TQ_DECODE_OOB_CLAMP=1" in script
+        assert "GENESIS_ENABLE_PR34207_FFN_INTERMEDIATE_POOL=1" in script
 
     def test_includes_vllm_serve_args(self, tmp_recipes_dir):
         from vllm._genesis.compat.recipes import to_launch_script
@@ -316,7 +316,7 @@ class TestCLI:
         assert out_script.is_file()
         content = out_script.read_text()
         assert "docker run" in content
-        assert "GENESIS_ENABLE_PR40074=1" in content
+        assert "GENESIS_ENABLE_PR40074_TQ_DECODE_OOB_CLAMP=1" in content
 
 
 # ─── Diff (community A/B compare) ───────────────────────────────────────

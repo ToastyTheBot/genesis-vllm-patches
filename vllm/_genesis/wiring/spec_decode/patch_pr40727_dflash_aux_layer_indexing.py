@@ -34,7 +34,7 @@ WHEN IT FIRES
 SAFETY MODEL
 ================================================================
 
-- env: `GENESIS_ENABLE_PR40727=1`
+- env: `GENESIS_ENABLE_PR40727_DFLASH_AUX_LAYER_FIX=1`
 - default OFF; opt-in
 - Idempotent (marker check)
 - Falls through cleanly if upstream renamed the function or shifted lines

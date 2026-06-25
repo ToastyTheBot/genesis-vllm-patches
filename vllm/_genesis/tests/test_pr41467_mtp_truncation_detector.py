@@ -60,14 +60,14 @@ def test_idempotent_on_synthetic(tmp_path):
 
 def test_env_flag_default_off(monkeypatch):
     from vllm._genesis.dispatcher import should_apply
-    monkeypatch.delenv("GENESIS_ENABLE_PR41467", raising=False)
+    monkeypatch.delenv("GENESIS_ENABLE_PR41467_MTP_TRUNCATION_DETECTOR", raising=False)
     decision, _ = should_apply("PR41467")
     assert decision is False
 
 
 def test_env_flag_engages(monkeypatch):
     from vllm._genesis.dispatcher import should_apply
-    monkeypatch.setenv("GENESIS_ENABLE_PR41467", "1")
+    monkeypatch.setenv("GENESIS_ENABLE_PR41467_MTP_TRUNCATION_DETECTOR", "1")
     decision, _ = should_apply("PR41467")
     assert decision is True
 

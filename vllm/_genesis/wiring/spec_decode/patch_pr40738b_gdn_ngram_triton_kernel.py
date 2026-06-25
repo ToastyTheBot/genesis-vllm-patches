@@ -48,8 +48,8 @@ Risk acknowledged
    `num_accepted_tokens=None` defaults to no-op behavior. Callers that
    don't pass it continue working as before.
 
-Status: opt-in via `GENESIS_ENABLE_PR40738B=1`. Should be enabled
-together with `GENESIS_ENABLE_PR40738=1` (PR40738 Phase 1).
+Status: opt-in via `GENESIS_ENABLE_PR40738B_TRITON_KERNEL=1`. Should be enabled
+together with `GENESIS_ENABLE_PR40738_GDN_NGRAM_FIX=1` (PR40738 Phase 1).
 
 Author: Sandermage (Sander) Barzov Aleksandr, Ukraine, Odessa.
 """
@@ -72,7 +72,7 @@ GENESIS_P60B_MARKER = "Genesis PR40738b GDN+ngram Triton kernel offset v7.13"
 
 def _is_enabled() -> bool:
     return os.environ.get(
-        "GENESIS_ENABLE_PR40738B", ""
+        "GENESIS_ENABLE_PR40738B_TRITON_KERNEL", ""
     ).strip().lower() in ("1", "true", "yes", "on")
 
 

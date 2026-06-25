@@ -24,7 +24,7 @@ def test_pn33_dispatcher_registry():
     from vllm._genesis.dispatcher import PATCH_REGISTRY
     assert "PR37521" in PATCH_REGISTRY
     e = PATCH_REGISTRY["PR37521"]
-    assert e["env_flag"] == "GENESIS_ENABLE_PR37521"
+    assert e["env_flag"] == "GENESIS_ENABLE_PR37521_SPEC_DECODE_WARMUP_K"
     # Default ON when spec-decode is active — this is a real correctness
     # fix, not experimental. Operators can disable via the DISABLE env.
     assert e["default_on"] is True
@@ -94,12 +94,12 @@ def test_pn33_replacement_honors_disable_env():
 
 def test_pn33_skips_when_env_off(monkeypatch):
     monkeypatch.delenv(
-        "GENESIS_ENABLE_PR37521", raising=False
+        "GENESIS_ENABLE_PR37521_SPEC_DECODE_WARMUP_K", raising=False
     )
     # Force-skip: dispatcher's should_apply is the gate. When the
     # ENABLE env is unset AND default_on=True, it still applies.
     # When the env is explicitly set to "0", it should skip.
-    monkeypatch.setenv("GENESIS_ENABLE_PR37521", "0")
+    monkeypatch.setenv("GENESIS_ENABLE_PR37521_SPEC_DECODE_WARMUP_K", "0")
     from vllm._genesis.wiring.spec_decode.patch_pr37521_spec_decode_warmup_k import apply
     status, _reason = apply()
     assert status == "skipped"

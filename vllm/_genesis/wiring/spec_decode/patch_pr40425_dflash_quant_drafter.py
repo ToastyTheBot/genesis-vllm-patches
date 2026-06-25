@@ -37,7 +37,7 @@ Anchors (validated against vllm pin 0.20.2rc1.dev9+g01d4d1ad3):
   Site C (~lines 295-318): `_build_fused_kv_buffers` becomes conditional
   Site D (~lines 381-422): `precompute_and_store_context_kv` adds quantized fallback
 
-Default OFF (`GENESIS_ENABLE_PR40425=1`) until a
+Default OFF (`GENESIS_ENABLE_PR40425_DFLASH_QUANT_DRAFTER=1`) until a
 quantized DFlash drafter checkpoint exists in the deployment. Strict
 no-regression: when `quant_config is None` (BF16 drafter), the new
 fallback path is gated and original dense fast-path runs unchanged.

@@ -35,7 +35,7 @@ an FP8 target — frees ~600 MiB of KV cache headroom on the worker.
 SAFETY MODEL
 ================================================================
 
-- Default OFF (opt-in via `GENESIS_ENABLE_PR40849=1`).
+- Default OFF (opt-in via `GENESIS_ENABLE_PR40849_MTP_DRAFT_ONLINE_QUANT=1`).
 - Text-patch on `vllm/model_executor/models/utils.py` —
   `get_draft_quant_config()` body.
 - Idempotent via marker `Genesis PR40849 ...`.
@@ -47,7 +47,7 @@ SAFETY MODEL
   when the new fallback doesn't fire.
 - Worst-case regression: if the inherited `OnlineQuantizationConfig`
   somehow rejects the draft model's tensor shapes at load time, the
-  draft load will raise. To recover: set `GENESIS_ENABLE_PR40849...=0` and
+  draft load will raise. To recover: set `GENESIS_ENABLE_PR40849_MTP_DRAFT_ONLINE_QUANT...=0` and
   restart — vanilla path resumes.
 
 Predicates / activation

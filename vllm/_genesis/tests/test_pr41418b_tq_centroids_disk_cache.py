@@ -95,14 +95,14 @@ def test_a02_replacement_no_module_level_os_calls():
 
 def test_env_flag_default_off(monkeypatch):
     from vllm._genesis.dispatcher import should_apply
-    monkeypatch.delenv("GENESIS_ENABLE_PR41418B", raising=False)
+    monkeypatch.delenv("GENESIS_ENABLE_PR41418B_TQ_CENTROIDS_DISK_CACHE", raising=False)
     decision, _ = should_apply("PR41418b")
     assert decision is False
 
 
 def test_env_flag_engages(monkeypatch):
     from vllm._genesis.dispatcher import should_apply
-    monkeypatch.setenv("GENESIS_ENABLE_PR41418B", "1")
+    monkeypatch.setenv("GENESIS_ENABLE_PR41418B_TQ_CENTROIDS_DISK_CACHE", "1")
     decision, _ = should_apply("PR41418b")
     assert decision is True
 

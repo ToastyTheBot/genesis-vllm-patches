@@ -76,7 +76,7 @@ edits (7+ sub-patches; high anchor-drift risk for text-patch).
 SAFETY MODEL
 ================================================================
 
-- env: `GENESIS_ENABLE_PR40898=1`
+- env: `GENESIS_ENABLE_PR40898_DFLASH_SWA=1`
 - default OFF; opt-in.
 - empirical regression on 35B (5-6/7 vs 7/7 baseline) → DO NOT enable
   in production launch scripts until model class also patched.

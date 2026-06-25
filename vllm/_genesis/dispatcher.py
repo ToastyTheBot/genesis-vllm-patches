@@ -104,7 +104,7 @@ PATCH_REGISTRY: dict[str, dict[str, Any]] = {
     "PR40768": {
         "wiring": "patch_pr40768_async_scheduler_placeholder_fix",
         "title": "Async-scheduler -1 placeholder fix",
-        "env_flag": "GENESIS_ENABLE_PR40768",
+        "env_flag": "GENESIS_ENABLE_PR40768_ASYNC_PLACEHOLDER_FIX",
         "env_flag_aliases": ["GENESIS_ENABLE_P58_ASYNC_PLACEHOLDER_FIX"],
         "default_on": False,
         "category": "spec_decode",
@@ -114,7 +114,7 @@ PATCH_REGISTRY: dict[str, dict[str, Any]] = {
     "PR39055": {
         "wiring": "patch_pr39055_qwen3_reasoning_tool_call_recovery",
         "title": "Qwen3 reasoning embedded tool_call recovery",
-        "env_flag": "GENESIS_ENABLE_PR39055",
+        "env_flag": "GENESIS_ENABLE_PR39055_QWEN3_TOOL_RECOVERY",
         "env_flag_aliases": ["GENESIS_ENABLE_P59_QWEN3_TOOL_RECOVERY"],
         "default_on": False,
         "category": "structured_output",
@@ -125,7 +125,7 @@ PATCH_REGISTRY: dict[str, dict[str, Any]] = {
     "PR40738": {
         "wiring": "patch_pr40738_gdn_ngram_state_recovery",
         "title": "GDN+ngram state recovery (Phase 1: SSM pre-copy)",
-        "env_flag": "GENESIS_ENABLE_PR40738",
+        "env_flag": "GENESIS_ENABLE_PR40738_GDN_NGRAM_FIX",
         "env_flag_aliases": ["GENESIS_ENABLE_P60_GDN_NGRAM_FIX"],
         "default_on": False,
         "category": "spec_decode",
@@ -136,7 +136,7 @@ PATCH_REGISTRY: dict[str, dict[str, Any]] = {
     "PR40738b": {
         "wiring": "patch_pr40738b_gdn_ngram_triton_kernel",
         "title": "GDN+ngram Triton kernel offset (Phase 2)",
-        "env_flag": "GENESIS_ENABLE_PR40738B",
+        "env_flag": "GENESIS_ENABLE_PR40738B_TRITON_KERNEL",
         "env_flag_aliases": ["GENESIS_ENABLE_P60B_TRITON_KERNEL"],
         "default_on": False,
         "category": "spec_decode",
@@ -148,7 +148,7 @@ PATCH_REGISTRY: dict[str, dict[str, Any]] = {
     "PR36138": {
         "wiring": "patch_pr36138_structured_output_spec_decode_timing",
         "title": "Structured-output spec-decode reasoning-end timing fix",
-        "env_flag": "GENESIS_ENABLE_PR36138",
+        "env_flag": "GENESIS_ENABLE_PR36138_STRUCT_OUT_SPEC_TIMING",
         "env_flag_aliases": ["GENESIS_ENABLE_P62_STRUCT_OUT_SPEC_TIMING"],
         "default_on": False,
         "category": "structured_output",
@@ -256,7 +256,7 @@ PATCH_REGISTRY: dict[str, dict[str, Any]] = {
     "PR40819": {
         "wiring": "patch_pr40819_block_verify",
         "title": "Block-verify rejection sampler (Sun 2024 ICLR)",
-        "env_flag": "GENESIS_ENABLE_PR40819",
+        "env_flag": "GENESIS_ENABLE_PR40819_BLOCK_VERIFY",
         "env_flag_aliases": ["GENESIS_ENABLE_P71_BLOCK_VERIFY"],
         "default_on": False,
         "category": "spec_decode",
@@ -277,7 +277,7 @@ PATCH_REGISTRY: dict[str, dict[str, Any]] = {
     "PR25784": {
         "wiring": "patch_pr25784_suffix_decoding_enable",
         "title": "Auto-enable Suffix Decoding (Arctic Inference, vllm#25784)",
-        "env_flag": "GENESIS_ENABLE_PR25784",
+        "env_flag": "GENESIS_ENABLE_PR25784_SUFFIX_DECODING",
         "env_flag_aliases": ["GENESIS_ENABLE_P75_SUFFIX_DECODING"],
         "default_on": False,
         "category": "spec_decode",
@@ -309,7 +309,7 @@ PATCH_REGISTRY: dict[str, dict[str, Any]] = {
     "PR40610": {
         "wiring": "patch_pr40610_async_proposer_sync",
         "title": "Async × spec-decode proposer-sync backport (vllm#40610)",
-        "env_flag": "GENESIS_ENABLE_PR40610",
+        "env_flag": "GENESIS_ENABLE_PR40610_ASYNC_PROPOSER_SYNC",
         "env_flag_aliases": ["GENESIS_ENABLE_P79B_ASYNC_PROPOSER_SYNC"],
         "default_on": False,
         "category": "spec_decode",
@@ -319,7 +319,7 @@ PATCH_REGISTRY: dict[str, dict[str, Any]] = {
     "PR37629": {
         "wiring": "patch_pr37629_stale_spec_token_cleanup",
         "title": "Stale spec_token_ids cleanup for unscheduled requests (vllm#37629)",
-        "env_flag": "GENESIS_ENABLE_PR37629",
+        "env_flag": "GENESIS_ENABLE_PR37629_STALE_SPEC_TOKEN_CLEANUP",
         "env_flag_aliases": ["GENESIS_ENABLE_P79C_STALE_SPEC_TOKEN_CLEANUP"],
         "default_on": False,
         "category": "spec_decode",
@@ -329,7 +329,7 @@ PATCH_REGISTRY: dict[str, dict[str, Any]] = {
     "PR40925": {
         "wiring": "patch_pr40925_fp8_block_scaled_m_le_8",
         "title": "fp8 block-scaled MM low-M decode tuning (vllm#40925)",
-        "env_flag": "GENESIS_ENABLE_PR40925",
+        "env_flag": "GENESIS_ENABLE_PR40925_FP8_BLOCK_SCALED_M_LE_8",
         "env_flag_aliases": ["GENESIS_ENABLE_P81_FP8_BLOCK_SCALED_M_LE_8"],
         "default_on": False,
         "category": "kernel_perf",
@@ -382,7 +382,7 @@ PATCH_REGISTRY: dict[str, dict[str, Any]] = {
     "PR40849": {
         "wiring": "patch_pr40849_mtp_draft_online_quant_propagation",
         "title": "MTP/draft online-quant propagation (vllm#40849)",
-        "env_flag": "GENESIS_ENABLE_PR40849",
+        "env_flag": "GENESIS_ENABLE_PR40849_MTP_DRAFT_ONLINE_QUANT",
         "env_flag_aliases": ["GENESIS_ENABLE_PN8_MTP_DRAFT_ONLINE_QUANT"],
         "default_on": False,
         "category": "spec_decode",
@@ -410,7 +410,7 @@ PATCH_REGISTRY: dict[str, dict[str, Any]] = {
     "PR39930": {
         "wiring": "patch_pr39930_independent_drafter_attn_backend",
         "title": "Independent drafter attention backend (vllm#39930)",
-        "env_flag": "GENESIS_ENABLE_PR39930",
+        "env_flag": "GENESIS_ENABLE_PR39930_INDEPENDENT_DRAFTER_ATTN",
         "env_flag_aliases": ["GENESIS_ENABLE_PN9_INDEPENDENT_DRAFTER_ATTN"],
         "default_on": False,
         "category": "spec_decode",
@@ -440,7 +440,7 @@ PATCH_REGISTRY: dict[str, dict[str, Any]] = {
     "PR40425": {
         "wiring": "patch_pr40425_dflash_quant_drafter",
         "title": "DFlash drafter quantization support (PR #40425 backport)",
-        "env_flag": "GENESIS_ENABLE_PR40425",
+        "env_flag": "GENESIS_ENABLE_PR40425_DFLASH_QUANT_DRAFTER",
         "env_flag_aliases": ["GENESIS_ENABLE_PN38_DFLASH_QUANT_DRAFTER"],
         "default_on": False,
         "category": "spec_decode",
@@ -599,7 +599,7 @@ PATCH_REGISTRY: dict[str, dict[str, Any]] = {
     "PR40962": {
         "wiring": "patch_pr40962_spec_reasoning_boundary",
         "title": "Spec-decode reasoning boundary validation — narrower alt to PR36138 (vllm#40962)",
-        "env_flag": "GENESIS_ENABLE_PR40962",
+        "env_flag": "GENESIS_ENABLE_PR40962_SPEC_REASONING_BOUNDARY",
         "env_flag_aliases": ["GENESIS_ENABLE_PN58_SPEC_REASONING_BOUNDARY"],
         "default_on": False,
         "category": "structured_output",
@@ -628,7 +628,7 @@ PATCH_REGISTRY: dict[str, dict[str, Any]] = {
     "PR41467": {
         "wiring": "patch_pr41467_mtp_truncation_detector",
         "title": "MTP truncation detector at reasoning→tool_call boundary (vllm#41467)",
-        "env_flag": "GENESIS_ENABLE_PR41467",
+        "env_flag": "GENESIS_ENABLE_PR41467_MTP_TRUNCATION_DETECTOR",
         "env_flag_aliases": ["GENESIS_ENABLE_P107_MTP_TRUNCATION_DETECTOR"],
         "default_on": False,
         "category": "structured_output",
@@ -651,7 +651,7 @@ PATCH_REGISTRY: dict[str, dict[str, Any]] = {
     "PR41418b": {
         "wiring": "patch_pr41418b_tq_centroids_disk_cache",
         "title": "TurboQuant centroids disk-persistent cache (vllm#41418-inspired)",
-        "env_flag": "GENESIS_ENABLE_PR41418B",
+        "env_flag": "GENESIS_ENABLE_PR41418B_TQ_CENTROIDS_DISK_CACHE",
         "env_flag_aliases": ["GENESIS_ENABLE_PN57_TQ_CENTROIDS_DISK_CACHE"],
         "default_on": False,
         "category": "perf_hotfix",
@@ -674,7 +674,7 @@ PATCH_REGISTRY: dict[str, dict[str, Any]] = {
     "PR41602": {
         "wiring": "patch_pr41602_wake_up_hybrid_kv",
         "title": "wake_up crash fix on hybrid (Mamba/DeltaNet) models — vllm#41602 backport",
-        "env_flag": "GENESIS_ENABLE_PR41602",
+        "env_flag": "GENESIS_ENABLE_PR41602_WAKE_UP_HYBRID_KV",
         "env_flag_aliases": ["GENESIS_ENABLE_PN55_WAKE_UP_HYBRID_KV"],
         "default_on": False,
         "category": "perf_hotfix",
@@ -726,7 +726,7 @@ PATCH_REGISTRY: dict[str, dict[str, Any]] = {
     "PR41411": {
         "wiring": "patch_pr41411_prompt_logprobs_eviction",
         "title": "prompt_logprobs eviction fix during chunked prefill (vllm#41411 backport)",
-        "env_flag": "GENESIS_ENABLE_PR41411",
+        "env_flag": "GENESIS_ENABLE_PR41411_PROMPT_LOGPROBS_EVICTION",
         "env_flag_aliases": ["GENESIS_ENABLE_PN52_PROMPT_LOGPROBS_EVICTION"],
         "default_on": False,
         "category": "perf_hotfix",
@@ -776,7 +776,7 @@ PATCH_REGISTRY: dict[str, dict[str, Any]] = {
     "PR35975": {
         "wiring": "patch_pr35975_inputs_embeds_optional",
         "title": "Skip inputs_embeds buffer for text-only models (vllm#35975 backport)",
-        "env_flag": "GENESIS_ENABLE_PR35975",
+        "env_flag": "GENESIS_ENABLE_PR35975_INPUTS_EMBEDS_OPTIONAL",
         "env_flag_aliases": ["GENESIS_ENABLE_PN35_INPUTS_EMBEDS_OPTIONAL"],
         "default_on": True,
         "category": "perf_hotfix",
@@ -804,7 +804,7 @@ PATCH_REGISTRY: dict[str, dict[str, Any]] = {
     "PR37521": {
         "wiring": "patch_pr37521_spec_decode_warmup_k",
         "title": "Spec-decode warmup K-aware sizing (vllm#37521 extended to MTP/ngram)",
-        "env_flag": "GENESIS_ENABLE_PR37521",
+        "env_flag": "GENESIS_ENABLE_PR37521_SPEC_DECODE_WARMUP_K",
         "env_flag_aliases": ["GENESIS_ENABLE_PN33_SPEC_DECODE_WARMUP_K"],
         "default_on": True,
         "category": "spec_decode",
@@ -957,7 +957,7 @@ PATCH_REGISTRY: dict[str, dict[str, Any]] = {
     "PR41446": {
         "wiring": "patch_pr41446_gdn_chunk_o_scale_fold",
         "title": "GDN chunk_o scale-fold (vllm#41446 pattern (c))",
-        "env_flag": "GENESIS_ENABLE_PR41446",
+        "env_flag": "GENESIS_ENABLE_PR41446_GDN_SCALE_FOLD",
         "env_flag_aliases": ["GENESIS_ENABLE_PN29_GDN_SCALE_FOLD"],
         "default_on": False,
         "category": "perf_hotfix",
@@ -984,7 +984,7 @@ PATCH_REGISTRY: dict[str, dict[str, Any]] = {
     "PR41142": {
         "wiring": "patch_pr41142_gdn_a_b_contiguous",
         "title": "GDN a/b contiguity in fix_query_key_value_ordering (vllm#41142)",
-        "env_flag": "GENESIS_ENABLE_PR41142",
+        "env_flag": "GENESIS_ENABLE_PR41142_GDN_AB_CONTIGUOUS",
         "env_flag_aliases": ["GENESIS_ENABLE_PN11_GDN_AB_CONTIGUOUS"],
         "default_on": False,
         "category": "model_correctness",
@@ -1010,7 +1010,7 @@ PATCH_REGISTRY: dict[str, dict[str, Any]] = {
     "PR34207": {
         "wiring": "patch_pr34207_ffn_intermediate_pool",
         "title": "FFN intermediate scratch pool — Cliff 1 fix on TQ3 path",
-        "env_flag": "GENESIS_ENABLE_PR34207",
+        "env_flag": "GENESIS_ENABLE_PR34207_FFN_INTERMEDIATE_POOL",
         "env_flag_aliases": ["GENESIS_ENABLE_PN12_FFN_INTERMEDIATE_POOL"],
         "default_on": False,
         "category": "memory_savings",
@@ -1039,7 +1039,7 @@ PATCH_REGISTRY: dict[str, dict[str, Any]] = {
     "PR41268": {
         "wiring": "patch_pr41268_scoped_max_split",
         "title": "Scoped max_split_size_mb during model load (vllm#41268)",
-        "env_flag": "GENESIS_ENABLE_PR41268",
+        "env_flag": "GENESIS_ENABLE_PR41268_SCOPED_MAX_SPLIT",
         "env_flag_aliases": ["GENESIS_ENABLE_PN19_SCOPED_MAX_SPLIT"],
         "default_on": False,
         "category": "memory_savings",
@@ -1068,7 +1068,7 @@ PATCH_REGISTRY: dict[str, dict[str, Any]] = {
     "PR40898": {
         "wiring": "patch_pr40898_dflash_swa_support",
         "title": "DFlash SWA support partial backport (vllm#40898)",
-        "env_flag": "GENESIS_ENABLE_PR40898",
+        "env_flag": "GENESIS_ENABLE_PR40898_DFLASH_SWA",
         "env_flag_aliases": ["GENESIS_ENABLE_PN21_DFLASH_SWA"],
         "default_on": False,
         "category": "spec_decode",
@@ -1092,7 +1092,7 @@ PATCH_REGISTRY: dict[str, dict[str, Any]] = {
     "PR39419": {
         "wiring": "patch_pr39419_local_argmax_tp",
         "title": "Local argmax for TP draft (vllm#39419 backport)",
-        "env_flag": "GENESIS_ENABLE_PR39419",
+        "env_flag": "GENESIS_ENABLE_PR39419_LOCAL_ARGMAX_TP",
         "env_flag_aliases": ["GENESIS_ENABLE_PN22_LOCAL_ARGMAX_TP"],
         "default_on": False,
         "category": "spec_decode",
@@ -1114,7 +1114,7 @@ PATCH_REGISTRY: dict[str, dict[str, Any]] = {
     "PR40727": {
         "wiring": "patch_pr40727_dflash_aux_layer_indexing",
         "title": "DFlash aux layer +1 indexing fix (vllm#40727)",
-        "env_flag": "GENESIS_ENABLE_PR40727",
+        "env_flag": "GENESIS_ENABLE_PR40727_DFLASH_AUX_LAYER_FIX",
         "env_flag_aliases": ["GENESIS_ENABLE_PN24_DFLASH_AUX_LAYER_FIX"],
         "default_on": False,
         "category": "spec_decode",
@@ -1133,7 +1133,7 @@ PATCH_REGISTRY: dict[str, dict[str, Any]] = {
     "PR39148": {
         "wiring": "patch_pr39148_merge_attn_states_nan_guard",
         "title": "merge_attn_states NaN guard (vllm#39148 backport)",
-        "env_flag": "GENESIS_ENABLE_PR39148",
+        "env_flag": "GENESIS_ENABLE_PR39148_MERGE_ATTN_NAN_GUARD",
         "env_flag_aliases": ["GENESIS_ENABLE_PN28_MERGE_ATTN_NAN_GUARD"],
         "default_on": False,
         "category": "perf_hotfix",
@@ -1202,7 +1202,7 @@ PATCH_REGISTRY: dict[str, dict[str, Any]] = {
     "PR41422": {
         "wiring": "patch_pr41418_sparse_v_kernel",
         "title": "Sparse-V tile-skip Genesis kernel (BLASST λ=a/L for SM86)",
-        "env_flag": "GENESIS_ENABLE_PR41422",
+        "env_flag": "GENESIS_ENABLE_PR41422_SPARSE_V",
         "env_flag_aliases": ["GENESIS_ENABLE_PN26_SPARSE_V"],
         "default_on": False,
         "category": "perf_hotfix",
@@ -1220,7 +1220,7 @@ PATCH_REGISTRY: dict[str, dict[str, Any]] = {
             "for non-skipped tiles. Composes with PR41418 main (centroids "
             "prebake) + PR40941 (workspace revert) + P67 (multi-query — separate "
             "code path, not affected). Default OFF; opt-in via "
-            "GENESIS_ENABLE_PR41422=1 + GENESIS_PR41418_SPARSE_V_THRESHOLD "
+            "GENESIS_ENABLE_PR41422_SPARSE_V=1 + GENESIS_PR41418_SPARSE_V_THRESHOLD "
             "(fixed) OR GENESIS_PR41418_SPARSE_V_SCALE_FACTOR (BLASST adaptive)."
         ),
         "upstream_pr": 41422,
@@ -1231,7 +1231,7 @@ PATCH_REGISTRY: dict[str, dict[str, Any]] = {
     "PR41418": {
         "wiring": "patch_pr41418_tq_unified_perf",
         "title": "TQ unified perf pack (centroids prebake + sparse V scaffold)",
-        "env_flag": "GENESIS_ENABLE_PR41418",
+        "env_flag": "GENESIS_ENABLE_PR41418_TQ_UNIFIED",
         "env_flag_aliases": ["GENESIS_ENABLE_PN26_TQ_UNIFIED"],
         "default_on": False,
         "category": "perf_hotfix",
@@ -1342,7 +1342,7 @@ PATCH_REGISTRY: dict[str, dict[str, Any]] = {
     "PR40074": {
         "wiring": "patch_pr40074_tq_decode_oob_clamp",
         "title": "TQ decode IOOB safe_page_idx clamp (vllm#40074)",
-        "env_flag": "GENESIS_ENABLE_PR40074",
+        "env_flag": "GENESIS_ENABLE_PR40074_TQ_DECODE_OOB_CLAMP",
         "env_flag_aliases": ["GENESIS_ENABLE_PN14_TQ_DECODE_OOB_CLAMP"],
         "default_on": False,
         "category": "kernel_safety",
@@ -1573,7 +1573,7 @@ PATCH_REGISTRY: dict[str, dict[str, Any]] = {
     "PR41235": {
         "wiring": "patch_pr41235_cuda_graph_lambda_arity",
         "title": "CUDAGraphWrapper lambda arity (vllm#41235 backport) — RETIRED 2026-05-04",
-        "env_flag": "GENESIS_ENABLE_PR41235",
+        "env_flag": "GENESIS_ENABLE_PR41235_CUDA_GRAPH_LAMBDA_ARITY",
         "env_flag_aliases": ["GENESIS_ENABLE_PN13_CUDA_GRAPH_LAMBDA_ARITY"],
         "default_on": False,
         "lifecycle": "retired",

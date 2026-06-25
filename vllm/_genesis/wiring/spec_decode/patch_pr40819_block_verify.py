@@ -6,7 +6,7 @@ the Sun et al. 2024 ICLR block verification rule (arXiv 2403.10444). Adds
 opt-in branch in `rejection_sample()` that routes through our Genesis kernel
 (`vllm/_genesis/kernels/block_verify_sampler.py`) when:
 
-  - GENESIS_ENABLE_PR40819=1 (env opt-in)
+  - GENESIS_ENABLE_PR40819_BLOCK_VERIFY=1 (env opt-in)
   - max_spec_len >= 3 (Sun 2024 algorithm requires γ >= 3 for advantage)
   - draft_probs is not None (per-token probabilities required)
   - not synthetic_mode (synthetic-acceptance overrides verification rule)
@@ -37,11 +37,11 @@ on any exception (kernel failure, shape mismatch, NaN, missing field), we
 silently fall through to the upstream per-token path. Worst case: PR40819 is
 silently no-op for that step. NO engine impact, NO output corruption.
 
-Status: opt-in via `GENESIS_ENABLE_PR40819=1`. Default OFF.
+Status: opt-in via `GENESIS_ENABLE_PR40819_BLOCK_VERIFY=1`. Default OFF.
 
 Tunable knobs
 -------------
-- `GENESIS_ENABLE_PR40819` (default unset/0): master switch
+- `GENESIS_ENABLE_PR40819_BLOCK_VERIFY` (default unset/0): master switch
 - `GENESIS_PR40819_USE_PYTORCH` (default 0): force PyTorch reference (debug only)
 
 Compatibility
@@ -109,7 +109,7 @@ PR40819_NEW = (
     "    try:\n"
     "        import os as _genesis_p71_os\n"
     "        _genesis_p71_active = _genesis_p71_os.environ.get(\n"
-    "            'GENESIS_ENABLE_PR40819', '').strip().lower() in ('1', 'true', 'yes', 'on')\n"
+    "            'GENESIS_ENABLE_PR40819_BLOCK_VERIFY', '').strip().lower() in ('1', 'true', 'yes', 'on')\n"
     "        _genesis_p71_eligible = (\n"
     "            _genesis_p71_active\n"
     "            and max_spec_len >= 3\n"
@@ -223,7 +223,7 @@ def apply() -> tuple[str, str]:
         )
     return "applied", (
         "PR40819 applied: block-verify rejection sampling branch installed. "
-        "Activates when GENESIS_ENABLE_PR40819=1 + max_spec_len>=3 + "
+        "Activates when GENESIS_ENABLE_PR40819_BLOCK_VERIFY=1 + max_spec_len>=3 + "
         "draft_probs available + not synthetic_mode. "
         "Bug-fixes from gemini review: shared u per request, denom==0 → 1.0."
     )

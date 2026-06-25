@@ -3,7 +3,7 @@
 
 Backport of upstream PR vllm-project/vllm#41411 (MERGED 2026-05-04 18:46
 UTC by Joachim Studnia, Mistral). NOT in our pin (01d4d1ad3, ahead by 10
-commits). Bug-fix; opt-in via `GENESIS_ENABLE_PR41411=1`, default OFF
+commits). Bug-fix; opt-in via `GENESIS_ENABLE_PR41411_PROMPT_LOGPROBS_EVICTION=1`, default OFF
 until live PROD verifies prompt_logprobs + chunked-prefill workload
 doesn't regress.
 
@@ -77,7 +77,7 @@ GENESIS_PR41411_MARKER = "Genesis PR41411 prompt_logprobs eviction fix v7.66 (vl
 
 def _is_enabled() -> bool:
     return os.environ.get(
-        "GENESIS_ENABLE_PR41411", ""
+        "GENESIS_ENABLE_PR41411_PROMPT_LOGPROBS_EVICTION", ""
     ).strip().lower() in ("1", "true", "yes", "on")
 
 

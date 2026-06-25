@@ -56,7 +56,7 @@ Branchless arithmetic guard inside the kernel:
 SAFETY MODEL
 ================================================================
 
-- Default OFF (opt-in via `GENESIS_ENABLE_PR39148=1`).
+- Default OFF (opt-in via `GENESIS_ENABLE_PR39148_MERGE_ATTN_NAN_GUARD=1`).
 - Two-line text-patch on
   `vllm/v1/attention/ops/triton_merge_attn_states.py`.
 - Idempotent (marker-checked).

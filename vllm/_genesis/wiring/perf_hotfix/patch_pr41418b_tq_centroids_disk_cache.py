@@ -68,7 +68,7 @@ GENESIS_PR41418b_MARKER = "Genesis PR41418b TQ centroids disk cache (vllm#41418 
 
 def _is_enabled() -> bool:
     return os.environ.get(
-        "GENESIS_ENABLE_PR41418B", ""
+        "GENESIS_ENABLE_PR41418B_TQ_CENTROIDS_DISK_CACHE", ""
     ).strip().lower() in ("1", "true", "yes", "on")
 
 

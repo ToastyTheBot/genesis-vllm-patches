@@ -36,7 +36,7 @@ solver) with a WARNING. This addresses the third bullet in the upstream
 issue: #41418's tables become stale if the solver changes.
 
 **Taken from #41422** — Sparse V tile-skip kernel modification, but
-**OFF by default**, gated by `GENESIS_ENABLE_PR41422=1` sub-flag.
+**OFF by default**, gated by `GENESIS_ENABLE_PR41422_SPARSE_V=1` sub-flag.
 Author validated on AMD MI300X only — NVIDIA Ampere correctness needs
 empirical confirmation before promoting to default-on. Scaffolded so it's
 ready to flip when validation passes. The sub-flag acknowledges operator
@@ -52,10 +52,10 @@ similar non-pow-2 model, revisit.
 ENV INTERFACE
 ================================================================
 
-- `GENESIS_ENABLE_PR41418=1` — master flag. When ON, applies
+- `GENESIS_ENABLE_PR41418_TQ_UNIFIED=1` — master flag. When ON, applies
   the centroids prebake (with self-check). Default OFF.
 
-- `GENESIS_ENABLE_PR41422=1` — sub-flag. Only takes effect when
+- `GENESIS_ENABLE_PR41422_SPARSE_V=1` — sub-flag. Only takes effect when
   master flag is ON. Wires the SPARSE_V tile-skip in the decode kernel.
   Default OFF until NVIDIA Ampere correctness validation.
 
@@ -323,7 +323,7 @@ def apply() -> tuple[str, str]:
 
     Centroids prebake: ALWAYS applied when PR41418 master flag is ON.
     Sparse V kernel modification: scaffolded but ONLY engaged when
-    `GENESIS_ENABLE_PR41422=1` sub-flag is also set. Default OFF
+    `GENESIS_ENABLE_PR41422_SPARSE_V=1` sub-flag is also set. Default OFF
     pending NVIDIA Ampere correctness validation.
 
     Self-check defense: if upstream Lloyd-Max algorithm changes after
@@ -346,7 +346,7 @@ def apply() -> tuple[str, str]:
 
     # Sub-patch 2: sparse V kernel scaffold (deferred until NVIDIA validation).
     sparse_v_enabled = os.environ.get(
-        "GENESIS_ENABLE_PR41422", "0"
+        "GENESIS_ENABLE_PR41422_SPARSE_V", "0"
     ).strip().lower() in ("1", "true", "yes", "on")
     sparse_v_status = "scaffold-only"
     if sparse_v_enabled:
@@ -360,7 +360,7 @@ def apply() -> tuple[str, str]:
         # validation.
         sparse_v_status = "deferred"
         log.warning(
-            "[PR41418:sparse_v] GENESIS_ENABLE_PR41422=1 set, but kernel "
+            "[PR41418:sparse_v] GENESIS_ENABLE_PR41422_SPARSE_V=1 set, but kernel "
             "scaffold pending NVIDIA Ampere correctness validation. "
             "Centroids prebake still active. Sparse V tile-skip will be "
             "wired in next iteration."

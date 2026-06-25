@@ -64,7 +64,7 @@ tweaks can't quietly degrade quality. Cost: zero.
 SAFETY MODEL
 ================================================================
 
-- Default OFF (opt-in via `GENESIS_ENABLE_PR41142=1`).
+- Default OFF (opt-in via `GENESIS_ENABLE_PR41142_GDN_AB_CONTIGUOUS=1`).
 - Pure text-patch, idempotent via marker.
 - Drift-aware: if upstream merges PR #41142 (or equivalent), the
   marker `.contiguous()` on those exact lines triggers self-retirement.

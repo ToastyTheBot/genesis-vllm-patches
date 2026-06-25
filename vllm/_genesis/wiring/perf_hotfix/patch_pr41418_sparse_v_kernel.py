@@ -40,7 +40,7 @@ When env-disabled, this is a single Python function call indirection on
 the upstream path — negligible overhead. When env-enabled + ctx ≥ min_ctx,
 we route to our forked kernel.
 
-Opt-in via `GENESIS_ENABLE_PR41422=1` (default OFF). Threshold via
+Opt-in via `GENESIS_ENABLE_PR41422_SPARSE_V=1` (default OFF). Threshold via
 `GENESIS_PR41418_SPARSE_V_THRESHOLD` (fixed) OR
 `GENESIS_PR41418_SPARSE_V_SCALE_FACTOR` (BLASST λ=a/L adaptive); minimum
 context to engage via `GENESIS_PR41418_SPARSE_V_MIN_CTX` (default 8192).
@@ -127,7 +127,7 @@ def apply() -> tuple[str, str]:
 
     if not is_pn26_sparse_v_enabled():
         return "skipped", (
-            "opt-in: set GENESIS_ENABLE_PR41422=1 to enable sparse-V "
+            "opt-in: set GENESIS_ENABLE_PR41422_SPARSE_V=1 to enable sparse-V "
             "tile-skip kernel (BLASST λ=a/L formula by default)"
         )
 

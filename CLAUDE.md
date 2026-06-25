@@ -86,9 +86,13 @@ not a scaffolding function name.
   same-PR collisions get a lowercase suffix, `PR40738`/`PR40738b`); `PN<NN>` for Genesis-original
   "new series" patches with no upstream PR; `P<NN>` for legacy pre-dispatcher patches. The `PR####`
   rename happened 2026-06 — older docs/commits still reference the pre-rename `PN21`/`P62` ids.
-- **Env flags follow the id**: `GENESIS_ENABLE_PR40898` (uppercase suffix even for sub-patches:
-  `GENESIS_ENABLE_PR40738B`). Renamed patches keep their old `GENESIS_ENABLE_*` names in an
-  `env_flag_aliases` list — `should_apply` still honors them with a one-time deprecation warning.
+- **Env flags carry the id + an intent suffix**: `GENESIS_ENABLE_<ID>_<DESCRIPTION>`, e.g.
+  `GENESIS_ENABLE_PR40898_DFLASH_SWA` (uppercase id even for sub-patches:
+  `GENESIS_ENABLE_PR40738B_TRITON_KERNEL`). The handful of PR-backed patches that never had a
+  descriptive name stay bare (`GENESIS_ENABLE_PR40385`). Pre-rename `GENESIS_ENABLE_*` names survive
+  in an `env_flag_aliases` list — `should_apply` still honors them with a one-time deprecation
+  warning — but the bare `GENESIS_ENABLE_PR#####` form is **not** kept as an alias (the 2026-06
+  "restore intent to the suffix" pass put the description back onto the canonical and dropped it).
 - For the ~22 outlier functions the apply function name encodes the id (`_APPLY_PATCH_ID_RE`):
   `apply_patch_pr40898_*` → `PR40898`, `apply_patch_N21_*` → `PN21`, `apply_patch_67_*` → `P67`
   (`register_patch(..., patch_id=...)` can override). Metadata-driven patches carry no function —
@@ -183,7 +187,7 @@ pre-existing failure, `test_default_dir_under_user_home`, appears in sandboxes w
    `kernels`, `compile_safety`, `perf_hotfix`, `hybrid`, `middleware`, `loader`, `memory`,
    `legacy` (default to `perf_hotfix` if unsure).
 2. Add the metadata entry to `dispatcher.py::PATCH_REGISTRY` (`default_on: False`; set `upstream_pr`
-   + `env_flag = GENESIS_ENABLE_<ID>`). **For the common case — a pure text-patch/rebind dispatch —
+   + `env_flag = GENESIS_ENABLE_<ID>_<DESCRIPTION>`). **For the common case — a pure text-patch/rebind dispatch —
    also set `wiring: "patch_<id>_<name>"` (the module stem) and you're done: the generic
    `_apply_wiring_entry` executor runs it, no apply function needed.** This single entry is the
    source of truth.

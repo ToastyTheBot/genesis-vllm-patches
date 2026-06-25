@@ -56,7 +56,7 @@ Defensive patch — costs nothing.
 SAFETY MODEL
 ================================================================
 
-- Default OFF (opt-in via `GENESIS_ENABLE_PR41235=1`).
+- Default OFF (opt-in via `GENESIS_ENABLE_PR41235_CUDA_GRAPH_LAMBDA_ARITY=1`).
 - Pure text-patch, idempotent via marker.
 - Drift-aware: when upstream PR #41235 merges, the new lambdas with `*args,
   **kwargs` will already exist. Our marker detects and self-retires.

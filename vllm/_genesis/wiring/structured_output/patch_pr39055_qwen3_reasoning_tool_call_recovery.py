@@ -62,7 +62,7 @@ Community confirmations on PR #39055
 - @epheien: "encountered with both 27b and 397b in streaming"
 - @jogoossens: "very hard to get qwen stable on vllm"
 
-Status: opt-in (`GENESIS_ENABLE_PR39055=1`).
+Status: opt-in (`GENESIS_ENABLE_PR39055_QWEN3_TOOL_RECOVERY=1`).
 
 Compatibility
 -------------
@@ -112,10 +112,10 @@ GENESIS_PR39055_MARKER = "Genesis PR39055 Qwen3 reasoning embedded tool_call rec
 
 def _is_enabled() -> bool:
     """Env-gate. Off by default — opt-in via:
-    GENESIS_ENABLE_PR39055=1
+    GENESIS_ENABLE_PR39055_QWEN3_TOOL_RECOVERY=1
     """
     return os.environ.get(
-        "GENESIS_ENABLE_PR39055", ""
+        "GENESIS_ENABLE_PR39055_QWEN3_TOOL_RECOVERY", ""
     ).strip().lower() in ("1", "true", "yes", "on")
 
 

@@ -52,7 +52,7 @@ Compatibility classes patched (all share identical forward_cuda body):
 SAFETY MODEL
 ================================================================
 
-- **Default OFF** (opt-in via `GENESIS_ENABLE_PR34207=1`).
+- **Default OFF** (opt-in via `GENESIS_ENABLE_PR34207_FFN_INTERMEDIATE_POOL=1`).
 - Pure text-patch with idempotent marker.
 - Drift-aware: if upstream lands `silu_and_mul.out(input, *, out=out)`
   variant (vllm#34207) the anchor body changes and our marker self-retires.

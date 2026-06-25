@@ -195,7 +195,7 @@ class TestP59UpstreamDriftDetection:
 
 class TestP59OptIn:
     def test_apply_skips_without_env_flag(self, monkeypatch):
-        monkeypatch.delenv("GENESIS_ENABLE_PR39055", raising=False)
+        monkeypatch.delenv("GENESIS_ENABLE_PR39055_QWEN3_TOOL_RECOVERY", raising=False)
         from vllm._genesis.wiring.structured_output.patch_pr39055_qwen3_reasoning_tool_call_recovery import (
             apply,
         )
@@ -204,7 +204,7 @@ class TestP59OptIn:
         assert "opt-in" in reason
 
     def test_env_flag_truthy_returns_true(self, monkeypatch):
-        monkeypatch.setenv("GENESIS_ENABLE_PR39055", "1")
+        monkeypatch.setenv("GENESIS_ENABLE_PR39055_QWEN3_TOOL_RECOVERY", "1")
         from vllm._genesis.wiring.structured_output.patch_pr39055_qwen3_reasoning_tool_call_recovery import (
             _is_enabled,
         )

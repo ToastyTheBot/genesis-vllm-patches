@@ -105,8 +105,8 @@ def test_idempotent_sched_validate_block(tmp_path):
 
 def test_mutex_with_p62_skips_when_p62_active(monkeypatch):
     """Apply check must SKIP cleanly when PR36138 active."""
-    monkeypatch.setenv("GENESIS_ENABLE_PR40962", "1")
-    monkeypatch.setenv("GENESIS_ENABLE_PR36138", "1")
+    monkeypatch.setenv("GENESIS_ENABLE_PR40962_SPEC_REASONING_BOUNDARY", "1")
+    monkeypatch.setenv("GENESIS_ENABLE_PR36138_STRUCT_OUT_SPEC_TIMING", "1")
     from vllm._genesis.wiring.structured_output import (
         patch_pr40962_spec_reasoning_boundary as M,
     )
@@ -118,14 +118,14 @@ def test_mutex_with_p62_skips_when_p62_active(monkeypatch):
 
 def test_env_flag_default_off(monkeypatch):
     from vllm._genesis.dispatcher import should_apply
-    monkeypatch.delenv("GENESIS_ENABLE_PR40962", raising=False)
+    monkeypatch.delenv("GENESIS_ENABLE_PR40962_SPEC_REASONING_BOUNDARY", raising=False)
     decision, _ = should_apply("PR40962")
     assert decision is False
 
 
 def test_env_flag_engages(monkeypatch):
     from vllm._genesis.dispatcher import should_apply
-    monkeypatch.setenv("GENESIS_ENABLE_PR40962", "1")
+    monkeypatch.setenv("GENESIS_ENABLE_PR40962_SPEC_REASONING_BOUNDARY", "1")
     decision, _ = should_apply("PR40962")
     assert decision is True
 

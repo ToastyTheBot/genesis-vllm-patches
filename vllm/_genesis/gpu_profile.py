@@ -180,7 +180,7 @@ PATCH_RECOMMENDATIONS: dict[str, dict] = {
     },
     "PR40849": {
         "title": "MTP/draft online-quant propagation (vllm#40849)",
-        "env": "GENESIS_ENABLE_PR40849",
+        "env": "GENESIS_ENABLE_PR40849_MTP_DRAFT_ONLINE_QUANT",
         "predicate": lambda gpu: True,  # VRAM savings useful everywhere
         "evidence": "Verified ~1 GiB VRAM saved per GPU on 35B-A3B-FP8 + MTP K=3. "
                     "Use freed VRAM for higher gpu-mem-util or longer ctx.",

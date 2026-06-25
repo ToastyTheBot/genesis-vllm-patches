@@ -54,7 +54,7 @@ causes Prompt 0 to fail"). Phase 1 may partially relieve the bug; if
 empirical test shows 5/5+ clean, Phase 2 not needed; if still some
 broken, Phase 2 (Triton signature change) is the next step.
 
-Status: opt-in (`GENESIS_ENABLE_PR40738=1`).
+Status: opt-in (`GENESIS_ENABLE_PR40738_GDN_NGRAM_FIX=1`).
 
 Compatibility
 -------------
@@ -94,7 +94,7 @@ GENESIS_PR40738_MARKER = "Genesis PR40738 GDN+ngram state recovery v7.13"
 
 def _is_enabled() -> bool:
     return os.environ.get(
-        "GENESIS_ENABLE_PR40738", ""
+        "GENESIS_ENABLE_PR40738_GDN_NGRAM_FIX", ""
     ).strip().lower() in ("1", "true", "yes", "on")
 
 

@@ -337,9 +337,9 @@ class TestP58UpstreamDriftDetection:
 
 class TestP58ApplyIsOptInOnly:
     def test_apply_skips_without_env_flag(self, monkeypatch):
-        """Without GENESIS_ENABLE_PR40768=1, apply() returns
+        """Without GENESIS_ENABLE_PR40768_ASYNC_PLACEHOLDER_FIX=1, apply() returns
         skipped status — never modifies anything."""
-        monkeypatch.delenv("GENESIS_ENABLE_PR40768", raising=False)
+        monkeypatch.delenv("GENESIS_ENABLE_PR40768_ASYNC_PLACEHOLDER_FIX", raising=False)
         from vllm._genesis.wiring.spec_decode.patch_pr40768_async_scheduler_placeholder_fix import (
             apply,
         )
@@ -348,14 +348,14 @@ class TestP58ApplyIsOptInOnly:
         assert "opt-in" in reason
 
     def test_env_flag_recognized_when_set(self, monkeypatch):
-        monkeypatch.setenv("GENESIS_ENABLE_PR40768", "1")
+        monkeypatch.setenv("GENESIS_ENABLE_PR40768_ASYNC_PLACEHOLDER_FIX", "1")
         from vllm._genesis.wiring.spec_decode.patch_pr40768_async_scheduler_placeholder_fix import (
             _is_enabled,
         )
         assert _is_enabled() is True
 
     def test_env_flag_unset_returns_false(self, monkeypatch):
-        monkeypatch.delenv("GENESIS_ENABLE_PR40768", raising=False)
+        monkeypatch.delenv("GENESIS_ENABLE_PR40768_ASYNC_PLACEHOLDER_FIX", raising=False)
         from vllm._genesis.wiring.spec_decode.patch_pr40768_async_scheduler_placeholder_fix import (
             _is_enabled,
         )

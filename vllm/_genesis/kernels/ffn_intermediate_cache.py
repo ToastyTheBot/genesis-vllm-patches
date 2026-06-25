@@ -51,7 +51,7 @@ How to use
 ----------
 Operator opt-in via env:
 
-    GENESIS_ENABLE_PR34207=1
+    GENESIS_ENABLE_PR34207_FFN_INTERMEDIATE_POOL=1
 
 Genesis text-patch (PR34207) rewrites `SiluAndMul.forward_cuda` to:
 
@@ -95,7 +95,7 @@ from vllm._genesis.guards import is_nvidia_cuda
 log = logging.getLogger("genesis.kernels.ffn_intermediate_cache")
 
 
-_ENV_FLAG = "GENESIS_ENABLE_PR34207"
+_ENV_FLAG = "GENESIS_ENABLE_PR34207_FFN_INTERMEDIATE_POOL"
 
 
 class FFNIntermediateCache:

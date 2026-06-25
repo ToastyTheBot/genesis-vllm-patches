@@ -37,14 +37,14 @@ def test_pn29_dispatcher_registry():
     from vllm._genesis.dispatcher import PATCH_REGISTRY
     assert "PR41446" in PATCH_REGISTRY
     e = PATCH_REGISTRY["PR41446"]
-    assert e["env_flag"] == "GENESIS_ENABLE_PR41446"
+    assert e["env_flag"] == "GENESIS_ENABLE_PR41446_GDN_SCALE_FOLD"
     assert e["default_on"] is False
     assert e["upstream_pr"] == 41446
 
 
 def test_pn29_skips_when_env_off(monkeypatch):
     """When env is OFF, apply() returns 'skipped' with opt-in reason."""
-    monkeypatch.delenv("GENESIS_ENABLE_PR41446", raising=False)
+    monkeypatch.delenv("GENESIS_ENABLE_PR41446_GDN_SCALE_FOLD", raising=False)
     from vllm._genesis.wiring.hybrid.patch_pr41446_gdn_chunk_o_scale_fold import apply
     status, reason = apply()
     assert status == "skipped"

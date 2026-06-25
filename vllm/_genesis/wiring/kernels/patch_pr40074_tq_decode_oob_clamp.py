@@ -85,7 +85,7 @@ So we DO hit this code path in production despite running spec-decode.
 SAFETY MODEL
 ================================================================
 
-- Default OFF (opt-in via `GENESIS_ENABLE_PR40074=1`).
+- Default OFF (opt-in via `GENESIS_ENABLE_PR40074_TQ_DECODE_OOB_CLAMP=1`).
 - Pure text-patch, idempotent via marker.
 - Drift-aware: when upstream PR #40074 merges, the new `safe_page_idx`
   string appears in vanilla source and our anchor (the original 4-line

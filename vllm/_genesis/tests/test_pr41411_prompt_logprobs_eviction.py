@@ -100,7 +100,7 @@ def test_idempotent_on_synthetic_each_file(tmp_path):
 
 def test_env_flag_default_off(monkeypatch):
     from vllm._genesis.dispatcher import should_apply
-    monkeypatch.delenv("GENESIS_ENABLE_PR41411", raising=False)
+    monkeypatch.delenv("GENESIS_ENABLE_PR41411_PROMPT_LOGPROBS_EVICTION", raising=False)
     decision, reason = should_apply("PR41411")
     assert decision is False
     assert "opt-in" in reason.lower() or "off" in reason.lower()
@@ -108,7 +108,7 @@ def test_env_flag_default_off(monkeypatch):
 
 def test_env_flag_engages(monkeypatch):
     from vllm._genesis.dispatcher import should_apply
-    monkeypatch.setenv("GENESIS_ENABLE_PR41411", "1")
+    monkeypatch.setenv("GENESIS_ENABLE_PR41411_PROMPT_LOGPROBS_EVICTION", "1")
     decision, _ = should_apply("PR41411")
     assert decision is True
 
@@ -117,7 +117,7 @@ def test_registry_entry_complete():
     from vllm._genesis.dispatcher import PATCH_REGISTRY
     assert "PR41411" in PATCH_REGISTRY
     meta = PATCH_REGISTRY["PR41411"]
-    assert meta["env_flag"] == "GENESIS_ENABLE_PR41411"
+    assert meta["env_flag"] == "GENESIS_ENABLE_PR41411_PROMPT_LOGPROBS_EVICTION"
     assert meta["default_on"] is False
     assert meta["upstream_pr"] == 41411
     assert "prompt_logprobs" in meta["title"].lower()

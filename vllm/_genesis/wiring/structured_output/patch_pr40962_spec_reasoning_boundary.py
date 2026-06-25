@@ -10,7 +10,7 @@ PR36138 (vllm#36138 sfbemerk) — наш existing **broader** pipeline-level fix
 Modifies `update_from_output()`, `update_draft_token_ids()`,
 `update_draft_token_ids_in_output()`, `grammar_bitmask()`. Splits draft
 batches unconstrained/constrained. Per-position bitmasks. Default OFF
-in registry but **ENABLED in our PROD scripts** (`GENESIS_ENABLE_PR36138=1`).
+in registry but **ENABLED in our PROD scripts** (`GENESIS_ENABLE_PR36138_STRUCT_OUT_SPEC_TIMING=1`).
 
 PR40962 (vllm#40962) — alternative **narrower** fix. Modifies ONLY scheduler
 commit-time validation. Doesn't touch bitmask generation. **Author
@@ -58,8 +58,8 @@ backport SKIPS. Self-healing.
    validation block in update_from_output
 
 Default OFF. Requires:
-- GENESIS_ENABLE_PR40962=1
-- GENESIS_ENABLE_PR36138=0 (mutual exclusion)
+- GENESIS_ENABLE_PR40962_SPEC_REASONING_BOUNDARY=1
+- GENESIS_ENABLE_PR36138_STRUCT_OUT_SPEC_TIMING=0 (mutual exclusion)
 - VLLM_SPEC_REASONING_BOUNDARY_VALIDATION=1 (upstream native flag)
 
 Author: Sandermage backport (ToastyTheBot/Claude-assisted, vllm#40962).
@@ -83,14 +83,14 @@ GENESIS_PR40962_MARKER = "Genesis PR40962 spec-decode reasoning boundary (vllm#4
 
 def _is_enabled() -> bool:
     return os.environ.get(
-        "GENESIS_ENABLE_PR40962", ""
+        "GENESIS_ENABLE_PR40962_SPEC_REASONING_BOUNDARY", ""
     ).strip().lower() in ("1", "true", "yes", "on")
 
 
 def _is_p62_active() -> bool:
     """PR36138 (vllm#36138 broader) — mutually exclusive with PR40962."""
     return os.environ.get(
-        "GENESIS_ENABLE_PR36138", ""
+        "GENESIS_ENABLE_PR36138_STRUCT_OUT_SPEC_TIMING", ""
     ).strip().lower() in ("1", "true", "yes", "on")
 
 
@@ -393,7 +393,7 @@ def apply() -> tuple[str, str]:
             "PR40962 SKIPPED — PR36138 (vllm#36138 broader equivalent) is active. "
             "Mutually exclusive: both patch the same `should_advance` block. "
             "To use PR40962 narrower variant: set "
-            "GENESIS_ENABLE_PR36138=0 first. See PR40962 "
+            "GENESIS_ENABLE_PR36138_STRUCT_OUT_SPEC_TIMING=0 first. See PR40962 "
             "docstring for tradeoff details."
         )
 

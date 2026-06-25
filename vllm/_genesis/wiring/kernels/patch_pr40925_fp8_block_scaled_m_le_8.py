@@ -43,7 +43,7 @@ literal that follows it (verified single occurrence in our pin).
 ENV
 ================================================================
 
-GENESIS_ENABLE_PR40925=1
+GENESIS_ENABLE_PR40925_FP8_BLOCK_SCALED_M_LE_8=1
 
 ================================================================
 RISK

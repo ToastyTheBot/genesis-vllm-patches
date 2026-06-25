@@ -51,7 +51,7 @@ requires_cuda = pytest.mark.skipif(
 @pytest.fixture
 def sparse_v_module(monkeypatch):
     """Import the kernel module with sparse-V enabled."""
-    monkeypatch.setenv("GENESIS_ENABLE_PR41422", "1")
+    monkeypatch.setenv("GENESIS_ENABLE_PR41422_SPARSE_V", "1")
     from vllm._genesis.kernels import triton_turboquant_decode_sparse_v
     yield triton_turboquant_decode_sparse_v
 
@@ -176,8 +176,8 @@ def test_wiring_patch_imports():
 
 
 def test_wiring_skips_when_env_disabled(monkeypatch):
-    """When GENESIS_ENABLE_PR41422 is not set, wiring skips cleanly."""
-    monkeypatch.delenv("GENESIS_ENABLE_PR41422", raising=False)
+    """When GENESIS_ENABLE_PR41422_SPARSE_V is not set, wiring skips cleanly."""
+    monkeypatch.delenv("GENESIS_ENABLE_PR41422_SPARSE_V", raising=False)
     from vllm._genesis.wiring.perf_hotfix.patch_pr41418_sparse_v_kernel import apply
     status, reason = apply()
     assert status == "skipped"
@@ -194,7 +194,7 @@ def test_dispatcher_registry_entry():
     from vllm._genesis.dispatcher import PATCH_REGISTRY
     assert "PR41422" in PATCH_REGISTRY
     entry = PATCH_REGISTRY["PR41422"]
-    assert entry["env_flag"] == "GENESIS_ENABLE_PR41422"
+    assert entry["env_flag"] == "GENESIS_ENABLE_PR41422_SPARSE_V"
     assert entry["default_on"] is False
     assert entry["category"] == "perf_hotfix"
     assert entry["upstream_pr"] == 41422

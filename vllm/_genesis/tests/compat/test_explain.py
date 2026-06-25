@@ -214,7 +214,7 @@ class TestRealRegistry:
         r = explain_patch("PR40074")
         assert r["patch_id"] == "PR40074"
         assert "PR40074" in r["title"] or "TQ decode" in r["title"]
-        assert r["env_flag"] == "GENESIS_ENABLE_PR40074"
+        assert r["env_flag"] == "GENESIS_ENABLE_PR40074_TQ_DECODE_OOB_CLAMP"
         assert r["upstream"]["pr_number"] == 40074
 
     def test_P67_explain_includes_conflicts(self):

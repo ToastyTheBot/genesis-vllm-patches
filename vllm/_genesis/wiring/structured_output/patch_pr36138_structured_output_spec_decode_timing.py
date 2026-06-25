@@ -73,7 +73,7 @@ Risks
   for `[PR36138 ...] applied N sub-patches` to verify all expected anchors
   matched.
 
-Status: opt-in (`GENESIS_ENABLE_PR36138=1`).
+Status: opt-in (`GENESIS_ENABLE_PR36138_STRUCT_OUT_SPEC_TIMING=1`).
 
 Author: Sandermage (Sander) Barzov Aleksandr, Ukraine, Odessa.
 """
@@ -94,7 +94,7 @@ GENESIS_PR36138_MARKER = "Genesis PR36138 structured-output spec-decode timing v
 
 def _is_enabled() -> bool:
     return os.environ.get(
-        "GENESIS_ENABLE_PR36138", ""
+        "GENESIS_ENABLE_PR36138_STRUCT_OUT_SPEC_TIMING", ""
     ).strip().lower() in ("1", "true", "yes", "on")
 
 

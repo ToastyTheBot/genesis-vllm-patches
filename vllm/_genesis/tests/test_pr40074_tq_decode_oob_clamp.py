@@ -114,7 +114,7 @@ def fake_tq_decode_already_upstream(tmp_path, monkeypatch):
 @pytest.fixture
 def env_pn14_on(monkeypatch):
     """Enable PR40074 via env flag for these tests."""
-    monkeypatch.setenv("GENESIS_ENABLE_PR40074", "1")
+    monkeypatch.setenv("GENESIS_ENABLE_PR40074_TQ_DECODE_OOB_CLAMP", "1")
     yield
 
 
@@ -252,7 +252,7 @@ class TestPn14DispatcherIntegration:
         from vllm._genesis.dispatcher import PATCH_REGISTRY
         assert "PR40074" in PATCH_REGISTRY
         meta = PATCH_REGISTRY["PR40074"]
-        assert meta.get("env_flag") == "GENESIS_ENABLE_PR40074"
+        assert meta.get("env_flag") == "GENESIS_ENABLE_PR40074_TQ_DECODE_OOB_CLAMP"
         assert meta.get("default_on") is False
         assert meta.get("upstream_pr") == 40074
         # Should declare it applies only on TurboQuant configs
@@ -262,7 +262,7 @@ class TestPn14DispatcherIntegration:
     def test_pn14_should_apply_default_off(self, monkeypatch):
         """With env unset, dispatcher returns False."""
         monkeypatch.delenv(
-            "GENESIS_ENABLE_PR40074", raising=False,
+            "GENESIS_ENABLE_PR40074_TQ_DECODE_OOB_CLAMP", raising=False,
         )
         from vllm._genesis.dispatcher import should_apply
         decision, _reason = should_apply("PR40074")
@@ -270,7 +270,7 @@ class TestPn14DispatcherIntegration:
 
     def test_pn14_should_apply_env_on(self, monkeypatch):
         """With env=1, dispatcher returns True."""
-        monkeypatch.setenv("GENESIS_ENABLE_PR40074", "1")
+        monkeypatch.setenv("GENESIS_ENABLE_PR40074_TQ_DECODE_OOB_CLAMP", "1")
         from vllm._genesis.dispatcher import should_apply
         decision, _reason = should_apply("PR40074")
         assert decision is True
