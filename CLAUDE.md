@@ -30,7 +30,7 @@ The patch pipeline, boot to apply:
    `dispatcher` metadata entry (as `apply_callable` + `_display_name` + `_apply_order`), then builds
    `apply_all.PATCH_REGISTRY` — a *derived*, ordered `[(name, fn), …]` view of the single registry,
    not an independent store. Two binding paths: the **generic metadata-driven executor**
-   (`_apply_wiring_entry`, bound by `_bind_wiring_patches` from each entry's `wiring` field — the ~85
+   (`_apply_wiring_entry`, bound by `_bind_wiring_patches` from each entry's `wiring` field — the ~84
    text-patch/rebind patches) and **hand-written `@register_patch apply_patch_*` functions** (the ~22
    outliers with real apply-time logic). Boot order is the explicit `_APPLY_ORDER` list. Each apply
    step returns a `PatchResult` (`applied`/`skipped`/`failed`); `run()` iterates the view and prints
@@ -62,13 +62,15 @@ Triton kernels), `middleware/` (request-level pre-engine logic).
 There used to be *two* registries (an `apply_all` list + the `dispatcher` dict) kept in sync by
 `test_apply_all_dispatcher_sync.py`. They were collapsed: `dispatcher.PATCH_REGISTRY` is now the
 only store, `@register_patch` writes the callable into it, and that sync test is gone (consistency
-is structural — a callable can't exist without an entry). **114** entries today; **107** are
+is structural — a callable can't exist without an entry). **113** entries today; **106** are
 executable (carry an `apply_callable`), **7** are metadata-only diagnostics with no apply function
 (`P51`, `P69`, `P102`, `PN60`, `PN63`, `PN64`, `PN40-classifier`). `test_dispatcher_validator.py`
-still validates entry shape + dependency refs.
+still validates entry shape + dependency refs. (Exact counts drift as patches are added/pruned —
+`python3 -m vllm._genesis.dispatcher` and the `docs/PATCHES.md` header are the live source; the
+latter's total is gated by `test_patches_md_sync.py`.)
 
-A second collapse (2026-06) removed the per-patch *function* ceremony. Of the **107** executable
-entries, **85** are now *metadata-driven*: their apply step is a pure text-patch/rebind dispatch
+A second collapse (2026-06) removed the per-patch *function* ceremony. Of the **106** executable
+entries, **84** are now *metadata-driven*: their apply step is a pure text-patch/rebind dispatch
 declared by a `wiring: "<stem>"` field and run by the generic `_apply_wiring_entry` executor (bound
 at import by `_bind_wiring_patches`). The remaining **22** are *outliers* that keep a hand-written
 `@register_patch apply_patch_*` function because they carry real apply-time logic (kernel installs,
@@ -95,7 +97,8 @@ not a scaffolding function name.
   `GENESIS_DISABLE=1`.
 - A patch self-retires when `upstream_drift_markers` / `upstream_compat` detect the fix landed
   upstream. **Curation policy:** patches whose upstream PR is *closed-unmerged* are removed
-  outright (12 were pruned 2026-06); ones whose PR has *merged* are retirement candidates.
+  outright (13 pruned in 2026-06: a batch of 12 + `PR39598`); ones whose PR has *merged* are
+  retirement candidates.
 
 ## Common commands
 
