@@ -100,7 +100,6 @@ Tool-call quality and reasoning parsing.
 |---|---|---|---|
 | **P61b** Streaming partial-tag overlap guard | 🟢 SAFE on PROD | streaming tool-call | Stops `<tool_call` partial fragment from being closed prematurely |
 | **PR36138** Structured-output spec-decode reasoning-end timing fix | 🟢 SAFE on PROD | spec-decode + grammar | Reasoning-aware grammar acceptance + spec-token validation |
-| **PR39598** Qwen3coder MTP streaming early-return fix | 🟢 SAFE on PROD | streaming + MTP | Removes early `return` that drops parameters when MTP bundles last param + `</function>` |
 | **P68** Auto force `tool_choice=required` for long-context tool calls | 🟢 SAFE on PROD | long-context (≥50K chars) | Threshold via `GENESIS_P68_P69_LONG_CTX_THRESHOLD_CHARS` |
 | **P69** Long-context tool-format reminder injection | 🟢 SAFE on PROD | long-context | Companion to P68 |
 

@@ -35,7 +35,7 @@ A: Not actively tested. vLLM's LoRA system should work because Genesis patches a
 A: Yes. Patch P61b adds a streaming overlap guard that fixes a slice bug in upstream Qwen3 streaming output. Enable `GENESIS_ENABLE_P61B=1` together with the rest of the tool-call family if you stream tool calls.
 
 ### Q: Does tool-call work reliably?
-A: Yes — this is one of Genesis's main focus areas. The PR39055 / P61 / PR36138 / PR39598 / P68 / P69 patch family fixes upstream regressions in Qwen3 tool-call generation, especially around `<think>` tags, multi-tool prompts, and streaming. Enable them together via the `tool_call_safe` recipe.
+A: Yes — this is one of Genesis's main focus areas. The PR39055 / P61 / PR36138 / P68 / P69 patch family fixes upstream regressions in Qwen3 tool-call generation, especially around `<think>` tags, multi-tool prompts, and streaming. Enable them together via the `tool_call_safe` recipe.
 
 ### Q: How do I download the DFlash draft model?
 A: It's a gated HuggingFace repo (`z-lab/Qwen3.6-27B-DFlash`, `z-lab/Qwen3.6-35B-A3B-DFlash`). Accept the license on the model page, then `huggingface-cli login` with a token that has read access. Genesis will not auto-download it for you.

@@ -100,24 +100,6 @@ def _load_wiring_module(name: str):
 class TestNewPatchAnchors:
     """Each new patch's OLD anchor must be present in pinned vLLM source."""
 
-    def test_p64_qwen3coder_anchors(self):
-        m = _load_wiring_module("patch_pr39598_qwen3coder_mtp_streaming")
-        parser_path = _pinned_file("tool_parsers/qwen3coder_tool_parser.py")
-        serving_path = _pinned_file(
-            "entrypoints/openai/chat_completion/serving.py"
-        )
-        parser_content = parser_path.read_text()
-        serving_content = serving_path.read_text()
-        assert m.QWEN3CODER_OLD in parser_content, (
-            "PR39598 sub-patch A anchor missing in qwen3coder_tool_parser.py"
-        )
-        assert m.QWEN3COD_FNEND_OLD in parser_content, (
-            "PR39598 sub-patch B anchor missing in qwen3coder_tool_parser.py"
-        )
-        assert m.SERVING_SHOULD_OLD in serving_content, (
-            "PR39598 sub-patch C anchor missing in serving.py"
-        )
-
     def test_p65_v2_turboquant_anchor(self):
         m = _load_wiring_module("patch_65_turboquant_spec_cg_downgrade")
         path = _pinned_file("v1/attention/backends/turboquant_attn.py")
@@ -274,7 +256,7 @@ class TestDispatcherRegistry:
         spec.loader.exec_module(d)
         # All v7.14 + v7.15 patches must be present (P66 removed — upstream
         # closed vllm#23679; see PLAN.md Phase B)
-        for pid in ("PR39598", "P65", "P68", "P69", "P70"):
+        for pid in ("P65", "P68", "P69", "P70"):
             assert pid in d.PATCH_REGISTRY, (
                 f"{pid} missing from PATCH_REGISTRY"
             )
@@ -333,7 +315,6 @@ class TestApplyAllConsistency:
         import vllm._genesis.patches.apply_all  # noqa: F401  (triggers wiring-bind)
         from vllm._genesis.dispatcher import PATCH_REGISTRY
         for pid, fn_name_part in (
-            ("PR39598", "qwen3coder_mtp_streaming"),
             ("P65", "turboquant_spec_cg_downgrade"),
             ("P68", "long_ctx_tool_adherence"),
             ("P70", "auto_strict_ngram"),

@@ -117,7 +117,7 @@ SUPPORTED_MODELS: dict[str, ModelEntry] = {
                 speculative_config={"method": "mtp", "num_speculative_tokens": 3},
                 enable_prefix_caching=False,
                 recommended_genesis_patches=(
-                    "PR40768", "PR40738", "PR40738b", "P61", "P61b", "PR36138", "PR39598",
+                    "PR40768", "PR40738", "PR40738b", "P61", "P61b", "PR36138",
                     "P66", "P67", "P68", "P69", "P72", "P74",
                     "P85", "P87", "P91", "PR40941", "PR40941b", "PR41127", "PR41123",
                     "PR40849", "PR41142", "PR34207", "PR41235", "PR40074",
@@ -179,7 +179,7 @@ SUPPORTED_MODELS: dict[str, ModelEntry] = {
                 enable_prefix_caching=False,
                 recommended_genesis_patches=(
                     "P3", "P5", "P6", "P15", "P22", "P26",
-                    "PR40768", "PR40738", "PR40738b", "P61", "P61b", "PR36138", "PR39598",
+                    "PR40768", "PR40738", "PR40738b", "P61", "P61b", "PR36138",
                     "P66", "P67", "P68", "P69", "P72", "P74",
                     "PR40925", "P87", "P91", "PR41127", "PR41123",
                     "PR40849", "PR41142", "PR34207", "PR41235",

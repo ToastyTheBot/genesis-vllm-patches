@@ -72,7 +72,6 @@ unless explicitly engaged.
 | `GENESIS_ENABLE_P61_QWEN3_MULTI_TOOL=1` | P61 | Qwen3 multi-tool first-occurrence (vs LAST in upstream) |
 | `GENESIS_ENABLE_P61B_STREAMING_OVERLAP=1` | P61b | Streaming partial-tag overlap guard (ExtReMLapin vllm#40783) |
 | `GENESIS_ENABLE_PR36138=1` | PR36138 | Reasoning-aware grammar acceptance + spec-token validation |
-| `GENESIS_ENABLE_PR39598=1` | PR39598 | qwen3coder streaming early-return fix (kotori-yan vllm#39598 backport) |
 | `GENESIS_ENABLE_P66_CUDAGRAPH_SIZE_FILTER=1` | P66 | cudagraph_capture_sizes spec-decode divisibility filter |
 | `GENESIS_ENABLE_P67_TQ_MULTI_QUERY_KERNEL=1` | P67 | TurboQuant multi-query Triton kernel for K+1 spec-verify (Genesis-original) |
 | `GENESIS_P67_USE_UPSTREAM=1` | P67 | route to upstream `triton_turboquant_decode` instead of our v7.22 (drift-free) |

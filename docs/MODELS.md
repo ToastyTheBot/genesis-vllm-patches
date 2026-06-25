@@ -38,7 +38,7 @@ Genesis maintains 37 vLLM runtime patches specifically targeting the qwen3_5_moe
 - **P28/P46/PR40738/PR40738b** — GDN+full-attention hybrid (10/30 split) state recovery
 - **P67/P67b/PR25784** — Triton TurboQuant kernels for spec-decode K+1 verify
 - **P22/P26/P38/P40/P44** — TurboQuant continuous prefill / mixed-batch buffer pools
-- **PR40768/PR39055/P61/P61b/PR36138/PR39598/P68/P69/P70/PR40819/P77** — Qwen3 tool-call/parser/spec-decode
+- **PR40768/PR39055/P61/P61b/PR36138/P68/P69/P70/PR40819/P77** — Qwen3 tool-call/parser/spec-decode
 
 Switching architecture (Gemma 4, DeepSeek V4, GLM 5) would require a new patch port (estimated 2-3 weeks per family). The patches deliver +32% TPS and 96-100% tool-call clean rate — measured in production.
 

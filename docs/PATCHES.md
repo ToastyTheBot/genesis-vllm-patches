@@ -4,9 +4,9 @@ This file is the **single source of truth** for every Genesis runtime patch.
 For each patch you get: ID, title, what it does, status (ON / opt-in / deprecated),
 env flag to toggle, upstream PR (if backported), and credit.
 
-**Total PATCH_REGISTRY entries:** 114 (range P1–PR41467 + PR40849–PR41674 + PN70 + sub-patches P5b/P7b/P15B/P18b/P38B/P39a/P67b/P67c/PR41422/PN40-classifier + library/diagnostic P51/P102). The dispatcher's `PATCH_REGISTRY` is the schema-validated, lifecycle-tracked, opt-in surface — `genesis self-test` and the schema validator gate this set on every commit. 12 patches whose upstream PR was **closed-unmerged** were removed in the 2026-06 prune (P61/P61b/P66/P79d/P86/P87/P91/PN23/PN27/PN34/PN56/PN66).
+**Total PATCH_REGISTRY entries:** 113 (range P1–PR41467 + PR40849–PR41674 + PN70 + sub-patches P5b/P7b/P15B/P18b/P38B/P39a/P67b/P67c/PR41422/PN40-classifier + library/diagnostic P51/P102). The dispatcher's `PATCH_REGISTRY` is the schema-validated, lifecycle-tracked, opt-in surface — `genesis self-test` and the schema validator gate this set on every commit. 13 patches whose upstream PR was **closed-unmerged** were removed in the 2026-06 prune (P61/P61b/P66/P79d/P86/P87/P91/PN23/PN27/PN34/PN56/PN66, plus PR39598 once vllm#39598 was closed-unmerged).
 
-**Total apply_all `@register_patch`:** 107 entries (each attaches its `apply_callable` onto the single `PATCH_REGISTRY` — the dispatcher dict is now the sole source of truth). The 7-entry delta vs the 114 registry total is the metadata-only set (P51/P69/P102/PN60/PN63/PN64/PN40-classifier) — diagnostic/advisory entries with no runtime apply function. As of v7.65 (2026-05-02) all legacy P1–P46 patches are first-class registry entries with `lifecycle: legacy`.
+**Total executable patches:** 106 (each carries an `apply_callable` on the single `PATCH_REGISTRY` — the dispatcher dict is the sole source of truth). 84 are **metadata-driven** — a `wiring: "<stem>"` field run by the generic `_apply_wiring_entry` executor — and 22 are hand-written `@register_patch apply_patch_*` outliers with real apply-time logic (kernel installs, rebinds, bundled preallocs). The 7-entry delta vs the 113 registry total is the metadata-only set (P51/P69/P102/PN60/PN63/PN64/PN40-classifier) — diagnostic/advisory entries with no runtime apply function. As of v7.65 (2026-05-02) all legacy P1–P46 patches are first-class registry entries with `lifecycle: legacy`.
 
 - **Source of truth:** `vllm/_genesis/dispatcher.py` `PATCH_REGISTRY` (range: P56-P103 + PR40849-PN31, rich metadata) + `vllm/_genesis/patches/apply_all.py` `@register_patch` decorators (legacy P1-P55, dry-run diagnostic only).
 - **All patches default OFF unless explicitly noted.** Production launch script enables a curated set via env flags.
@@ -98,7 +98,6 @@ docker run -e GENESIS_ENABLE_P67_TQ_MULTI_QUERY_KERNEL=0 ... vllm/vllm-openai:ni
 | **PR40738b** | GDN+ngram Triton kernel offset | opt-in | `GENESIS_ENABLE_PR40738B` | [#40738](https://github.com/vllm-project/vllm/pull/40738) | tdoublep (vllm#40738) |
 | **PR40738** | GDN+ngram state recovery | opt-in | `GENESIS_ENABLE_PR40738` | [#40738](https://github.com/vllm-project/vllm/pull/40738) | tdoublep (vllm#40738), bhaktatejas922 (#39273) |
 | **P63** | MTP/Eagle drafter GDN state recovery | deprecated | `GENESIS_ENABLE_P63_MTP_GDN_STATE_RECOVERY` | — | Genesis-original (hypothesis disproven 2026-04-25) |
-| **PR39598** | qwen3coder MTP streaming early-return fix | opt-in | `GENESIS_ENABLE_PR39598` | [#39598](https://github.com/vllm-project/vllm/pull/39598) | kotori-yan (vllm#39598) |
 | **P65** | TurboQuant spec-decode cudagraph downgrade | opt-in | `GENESIS_ENABLE_P65_TURBOQUANT_SPEC_CG_DOWNGRADE` | — | Genesis-original (root cause for noonghunna #40880) |
 | **P70** | Auto-strict-ngram (force prompt_lookup_min>=8) | opt-in | `GENESIS_ENABLE_P70_AUTO_STRICT_NGRAM` | — | Genesis-original (vllm#40875 enforcement) |
 | **P67** | TurboQuant multi-query kernel for spec-decode K+1 | opt-in | `GENESIS_ENABLE_P67_TQ_MULTI_QUERY_KERNEL` | — | Genesis-original (proper fix for noonghunna #40880; replaces P65 workaround) |
@@ -196,7 +195,7 @@ Speculative decoding fixes and acceptance heuristics: GDN+ngram state recovery (
 
 ### Structured-output / Qwen3 parser
 
-Qwen3 thinking + tool-call output handling: reasoning-end timing (PR36138), multi-tool first-occurrence (P61), streaming overlap (P61b), embedded tool_call recovery (PR39055), MTP streaming early-return (PR39598), long-context tool-format reminder (P68/P69).
+Qwen3 thinking + tool-call output handling: reasoning-end timing (PR36138), multi-tool first-occurrence (P61), streaming overlap (P61b), embedded tool_call recovery (PR39055), long-context tool-format reminder (P68/P69).
 
 ### Hybrid / GDN / Mamba
 

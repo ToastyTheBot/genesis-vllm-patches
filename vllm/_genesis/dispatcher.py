@@ -175,17 +175,6 @@ PATCH_REGISTRY: dict[str, dict[str, Any]] = {
             "drafter model with hybrid layers, but no such configuration is verified yet."
         ),
     },
-    "PR39598": {
-        "wiring": "patch_pr39598_qwen3coder_mtp_streaming",
-        "title": "qwen3coder MTP streaming early-return fix",
-        "env_flag": "GENESIS_ENABLE_PR39598",
-        "env_flag_aliases": ["GENESIS_ENABLE_P64_QWEN3CODER_MTP_STREAMING"],
-        "default_on": False,
-        "category": "structured_output",
-        "credit": "kotori-yan (vllm#39598)",
-        "upstream_pr": 39598,
-        "applies_to": {"model_class": ["qwen3", "qwen3_5", "qwen3_moe", "qwen3_next"]},
-    },
     "P65": {
         "wiring": "patch_65_turboquant_spec_cg_downgrade",
         "title": "TurboQuant spec-decode cudagraph downgrade",

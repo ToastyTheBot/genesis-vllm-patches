@@ -508,7 +508,6 @@ All Genesis patches are opt-in by default. Set the matching env var to `1` to en
 | `GENESIS_ENABLE_P61B_STREAMING_OVERLAP` | P61b | Streaming partial-tag overlap guard |
 | `GENESIS_ENABLE_PR36138` | PR36138 | Reasoning-aware grammar acceptance + spec-token validation |
 | `GENESIS_ENABLE_P63_MTP_GDN_STATE_RECOVERY` | P63 | **DEPRECATED** — kept only for archival diagnostics |
-| `GENESIS_ENABLE_PR39598` | PR39598 | qwen3coder streaming early-return fix (vllm#39598 backport) |
 | `GENESIS_ENABLE_P65_TURBOQUANT_SPEC_CG_DOWNGRADE` | P65 | Cudagraph downgrade for spec-decode (workaround; replaced by P67/P67b) |
 | `GENESIS_ENABLE_P66_CUDAGRAPH_SIZE_FILTER` | P66 | Filter cudagraph_capture_sizes by spec-decode divisibility |
 | `GENESIS_ENABLE_P67_TQ_MULTI_QUERY_KERNEL` | P67/P67b | TurboQuant multi-query kernel for spec-decode K+1 verify (proper fix for #40880, replaces P65) |
@@ -655,7 +654,6 @@ Likely OOM. Lower `--gpu-memory-utilization` from current to 0.88.
 Make sure these are enabled:
 - `GENESIS_ENABLE_P67_TQ_MULTI_QUERY_KERNEL=1` (root cause for #40880)
 - `GENESIS_ENABLE_P70_AUTO_STRICT_NGRAM=1` (filter weak ngram drafts)
-- `GENESIS_ENABLE_PR39598=1` (streaming early-return fix)
 
 ### Empty `tool_calls` in response
 

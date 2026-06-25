@@ -116,7 +116,7 @@ A short, stable string in upstream vLLM source that a text-patch uses as an inse
 When upstream vLLM changes the code surrounding an anchor, the patch can fail to find it (visible drift) or — worse — patch the wrong place (silent drift). Genesis runs anchor-presence checks on every boot.
 
 ### Sub-Patch
-A logical patch implemented as several smaller atomic edits (e.g. PR39598 has sub-patches A through F). Useful when a single bug touches multiple files.
+A logical patch implemented as several smaller atomic edits (e.g. PR40738 has sub-patches A through F). Useful when a single bug touches multiple files.
 
 ### Dispatcher
 The boot-time loader (`vllm/_genesis/dispatcher.py`) that consults the `PATCH_REGISTRY`, evaluates env flags, runs `applies_to` and `conflicts_with` checks, and prints `[APPLY] / [SKIP] / [REC] / [OFF]` for every patch.

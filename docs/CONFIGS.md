@@ -117,7 +117,6 @@ services:
       GENESIS_ENABLE_P61_QWEN3_MULTI_TOOL: "1"
       GENESIS_ENABLE_P61B_STREAMING_OVERLAP: "1"
       GENESIS_ENABLE_PR36138: "1"
-      GENESIS_ENABLE_PR39598: "1"
       GENESIS_ENABLE_P66_CUDAGRAPH_SIZE_FILTER: "1"
       GENESIS_ENABLE_P68_AUTO_FORCE_TOOL: "1"
       GENESIS_ENABLE_P69_LONG_CTX_TOOL_REMINDER: "1"
@@ -216,7 +215,7 @@ If your model is Qwen3 / Qwen3.5 / Qwen3.6 / Qwen3-Next:
 
 - PR39055, PR40738, PR40738b — reasoning parser tool-call extraction (Qwen3 puts tool calls inside `<think>` blocks).
 - P61, P61b, PR36138 — multi-tool first-occurrence, streaming overlap guard, reasoning-aware grammar.
-- PR39598, P68, P69 — qwen3coder MTP streaming, long-ctx tool-call hardening.
+- P68, P69 — long-ctx tool-call hardening.
 
 ### Hybrid GDN models only
 
@@ -278,7 +277,6 @@ export GENESIS_ENABLE_PR40738B=1
 export GENESIS_ENABLE_P61_QWEN3_MULTI_TOOL=1
 export GENESIS_ENABLE_P61B_STREAMING_OVERLAP=1
 export GENESIS_ENABLE_PR36138=1
-export GENESIS_ENABLE_PR39598=1
 export GENESIS_ENABLE_P66_CUDAGRAPH_SIZE_FILTER=1
 export GENESIS_ENABLE_P68_AUTO_FORCE_TOOL=1
 export GENESIS_ENABLE_P69_LONG_CTX_TOOL_REMINDER=1
