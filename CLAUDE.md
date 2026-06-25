@@ -171,9 +171,13 @@ pre-existing failure, `test_default_dir_under_user_home`, appears in sandboxes w
 
 ## Repository workflow (from git history)
 
-- **Branching:** feature/fix work lands on the **`dev`** branch; a release then merges `dev` →
-  `main` with a `release(vX.Y.Z): merge dev into main — <summary>` commit. `main` is the released,
-  tagged line — base new work on `dev` unless a change is itself a release/hotfix to `main`.
+- **THIS FORK: commit straight to `master`. Do NOT create a feature branch.** `master` is the
+  default branch here (renamed from `main`; `dev` was removed). Maintainer preference is to commit
+  work — including multi-file changes — directly onto `master` and push, no branch/PR ceremony.
+  This overrides the global "if on the default branch, branch first" default for this repo.
+- **Branching (historical, pre-fork):** upstream used a **`dev`** branch that a release merged into
+  `main` with a `release(vX.Y.Z): merge dev into main — <summary>` commit. Kept for context only —
+  the fork no longer uses `dev`.
 - **Versioning:** `v7.NN[.x]` (currently `v7.72.5`); frequent point releases. Stable tags may
   carry a date suffix (`v7.51-stable-2026-04-27`). Two changelogs are maintained: `CHANGELOG.md`
   (public, per-release) and `vllm/_genesis/CHANGELOG.md` (engineering, per-commit/per-A·B).
